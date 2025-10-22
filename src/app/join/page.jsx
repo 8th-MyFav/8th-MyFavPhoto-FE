@@ -67,6 +67,8 @@ const JoinPage = () => {
         <form onSubmit={handleJoin}>
           <div>
             <label htmlFor="email">이메일:</label>
+          </div>
+          <div>
             <input
               type="email"
               id="email"
@@ -79,6 +81,8 @@ const JoinPage = () => {
           </div>
           <div>
             <label htmlFor="nickname">닉네임:</label>
+          </div>
+          <div>
             <input
               type="text"
               id="nickname"
@@ -91,6 +95,8 @@ const JoinPage = () => {
           </div>
           <div>
             <label htmlFor="password">비밀번호:</label>
+          </div>
+          <div>
             <input
               type="password"
               id="password"
@@ -103,6 +109,8 @@ const JoinPage = () => {
           </div>
           <div>
             <label htmlFor="passwordConfirmation">비밀번호 확인:</label>
+          </div>
+          <div>
             <input
               type="password"
               id="passwordConfirmation"
