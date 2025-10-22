@@ -1,38 +1,26 @@
 "use client";
+
+import { useAuth } from "@/contexts/AuthContext";
 import Link from "next/link";
-import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import React, { useState, useEffect } from "react";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { login, isAuthenticated, loading: authLoading } = useAuth();
+  const router = useRouter();
 
   const handleLogin = async function (e) {
     e.preventDefault();
-    try {
-      const response = await fetch(
-        `https://panda-market-api.vercel.app/auth/SignIn`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email,
-            password,
-          }),
-        }
-      );
-      const data = await response.json();
-
-      console.log("data", data);
-      console.log(response);
-      if (response.ok === false) {
-        throw new Error(`회원가입중 오류가 발생했습니다.${data.message}`);
-      }
-    } catch (error) {
-      alert(error);
-    }
+    const response = await login(email, password);
     console.log(response);
+    if (response.success === false) {
+      alert(response.message);
+    } else {
+      console.log("here");
+      router.push(`/`);
+    }
   };
 
   const handleEmailChange = function (e) {
@@ -41,6 +29,17 @@ const LoginPage = () => {
   const handlePasswordChange = function (e) {
     setPassword(e.target.value);
   };
+
+  // 로그인 되어있으면 메인페이지로 리다이렉트
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      router.push("/");
+    }
+  }, [isAuthenticated, authLoading, router]);
+
+  if (authLoading) {
+    return <div></div>;
+  }
 
   return (
     <div>
