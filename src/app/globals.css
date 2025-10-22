@@ -1,26 +1,82 @@
 @import "tailwindcss";
 
+/* ────────────────────────────── */
+/* 색상 변수 정의 */
+/* ────────────────────────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-black: #0F0F0F;
+  --color-gray-500: #161616;
+  --color-gray-400: #5A5A5A;
+  --color-gray-300: #A4A4A4;
+  --color-gray-200: #DDDDDD;
+  --color-gray-100: #EEEEEE;
+  --color-white: #FFFFFF;
+  --color-red: #FF483D;
+  --color-blue: #29C9F9;
+  --color-purple: #A77EFF;
+  --color-pink: #FF2A6A;
+  --color-main: #EFFF04;
+
+  --background: var(--color-white);
+  --foreground: var(--color-black);
+
+  /* 폰트 변수 */
+  --font-br-62: "BR B", sans-serif;
+  --font-br-48: "BR B", sans-serif;
+  --font-br-46: "BR B", sans-serif;
+  --font-br-40: "BR B", sans-serif;
+  --font-br-24: "BR B", sans-serif;
+  --font-br-18: "BR B", sans-serif;
+
+  --font-noto-bold-40: "Noto Sans KR", sans-serif;
+  --font-noto-bold-32: "Noto Sans KR", sans-serif;
+  --font-noto-bold-28: "Noto Sans KR", sans-serif;
+  --font-noto-bold-24: "Noto Sans KR", sans-serif;
+  --font-noto-regular-24: "Noto Sans KR", sans-serif;
+  --font-noto-bold-22: "Noto Sans KR", sans-serif;
+  --font-noto-bold-20: "Noto Sans KR", sans-serif;
+  --font-noto-regular-20: "Noto Sans KR", sans-serif;
+  --font-noto-bold-18: "Noto Sans KR", sans-serif;
+  --font-noto-regular-18: "Noto Sans KR", sans-serif;
+  --font-noto-light-18: "Noto Sans KR", sans-serif;
+  --font-noto-bold-16: "Noto Sans KR", sans-serif;
+  --font-noto-regular-16: "Noto Sans KR", sans-serif;
+  --font-noto-light-16: "Noto Sans KR", sans-serif;
+  --font-noto-bold-14: "Noto Sans KR", sans-serif;
+  --font-noto-regular-14: "Noto Sans KR", sans-serif;
+  --font-noto-light-14: "Noto Sans KR", sans-serif;
+  --font-noto-bold-12: "Noto Sans KR", sans-serif;
+  --font-noto-regular-12: "Noto Sans KR", sans-serif;
+  --font-noto-light-12: "Noto Sans KR", sans-serif;
+  --font-noto-regular-10: "Noto Sans KR", sans-serif;
+  --font-noto-light-10: "Noto Sans KR", sans-serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
+/* ────────────────────────────── */
+/* 다크 모드 지원 */
+/* ────────────────────────────── */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: var(--color-black);
+    --foreground: var(--color-white);
   }
 }
 
+/* ────────────────────────────── */
+/* 기본 body 스타일 */
+/* ────────────────────────────── */
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-noto-regular-16);
+}
+
+/* ────────────────────────────── */
+/* Tailwind용 커스텀 속성 (theme inline) */
+/* ────────────────────────────── */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-noto-regular-16);
+  --font-mono: monospace;
 }
