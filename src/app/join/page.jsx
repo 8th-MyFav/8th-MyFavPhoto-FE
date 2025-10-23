@@ -48,10 +48,12 @@ const JoinPage = () => {
   return (
     <div className="bg-black min-h-screen px-[80px] flex justify-center">
       <div className="border-[var(--color-gray-200)]">
-        <img
-          src="/images/favorite.svg"
-          className="flex justify-center px-[95px] mt-[151px] mb-[80px] h-[60px]"
-        />
+        <Link href="/">
+          <img
+            src="/images/favorite.svg"
+            className="flex justify-center px-[95px] mt-[151px] mb-[80px] h-[60px]"
+          />
+        </Link>
         <form onSubmit={handleJoin} className="text-white">
           <FormGroup
             label="이메일"
