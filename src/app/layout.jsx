@@ -1,7 +1,16 @@
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { Geist, Geist_Mono, Noto_Sans_KR } from "next/font/google";
 
+//  Noto Sans KR (Google Fonts)
+const notoSansKR = Noto_Sans_KR({
+  variable: "--font-noto-sans-kr",
+  subsets: ["latin"], // ["latin", "korean"] 가능
+  weight: ["100", "300", "400", "500", "700", "900"],
+  display: "swap",
+});
+
+//  Geist Sans / Mono
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -19,9 +28,14 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="ko">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`
+          ${geistSans.variable}
+          ${geistMono.variable}
+          ${notoSansKR.variable}
+          antialiased
+        `}
       >
         <AuthProvider>{children}</AuthProvider>
       </body>
