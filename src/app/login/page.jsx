@@ -4,6 +4,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
+import Button from "../components/atoms/button";
+import FormGroup from "../components/molecules/formGroup";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -48,47 +50,36 @@ const LoginPage = () => {
           src="/images/favorite.svg"
           className="flex justify-center px-[95px] mt-[277px] mb-[80px] h-[60px]"
         />
-        <form onSubmit={handleLogin} className="text-white">
-          <div className="pb-[32px]">
-            <div className="pb-[10px]">
-              <label htmlFor="email" className="text-[18px]">
-                이메일
-              </label>
-            </div>
-            <div>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                required
-                className="border w-[520px] h-[60px] rounded-xs py-[18px] px-[20px] text-[var(--color-gray-200)] text-[16px]"
-                placeholder="이메일을 입력해주세요"
-                value={email}
-                onChange={handleEmailChange}
-              />
-            </div>
-          </div>
-          <div>
-            <div className="pb-[10px]">
-              <label htmlFor="password">비밀번호</label>
-            </div>
-            <div>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                required
-                className="border w-[520px] h-[60px] rounded-xs py-[18px] px-[20px] text-[var(--color-gray-200)] text-[16px]"
-                placeholder="비밀번호를 입력해주세요"
-                value={password}
-                onChange={handlePasswordChange}
-              />
-            </div>
-          </div>
-          <div>
-            <button className="bg-[var(--color-main)] px-[235px] py-[17px] rounded-xs mt-[42px] mb-[40px] text-black text-center font-bold text-[18px]">
-              로그인
-            </button>
+        <form onSubmit={handleLogin}>
+          <FormGroup
+            label="이메일"
+            id="email"
+            type="email"
+            required
+            placeholder="이메일을 입력해주세요"
+            value={email}
+            onChange={handleEmailChange}
+          />
+
+          <FormGroup
+            label="비밀번호"
+            id="password"
+            type="password"
+            required
+            placeholder="비밀번호를 입력해주세요"
+            value={password}
+            onChange={handlePasswordChange}
+          />
+
+          <div className="text-[18px] pb-[40px]">
+            <Button
+              text="로그인"
+              width="520px"
+              height="60px"
+              backgroundColor="var(--color-main)"
+              color="var(--color-black)"
+              fontSize="18px"
+            />
           </div>
         </form>
         <div className="flex justify-center gap-4 text-white text-[16px]">

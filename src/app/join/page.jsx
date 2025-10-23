@@ -3,6 +3,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useReducer, useState } from "react";
+import FormGroup from "../components/molecules/formGroup";
+import Button from "../components/atoms/button";
 
 const JoinPage = () => {
   const router = useRouter();
@@ -51,78 +53,54 @@ const JoinPage = () => {
           className="flex justify-center px-[95px] mt-[151px] mb-[80px] h-[60px]"
         />
         <form onSubmit={handleJoin} className="text-white">
-          <div className="pb-[34px]">
-            <div className="pb-[10px]">
-              <label htmlFor="email">이메일:</label>
-            </div>
-            <div>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                required
-                className="border w-[520px] h-[60px] rounded-xs py-[18px] px-[20px] text-[var(--color-gray-200)] text-[16px]"
-                placeholder="이메일을 입력해주세요"
-                value={email}
-                onChange={handleEmailChange}
-              />
-            </div>
-          </div>
-          <div className="pb-[34px]">
-            <div className="pb-[10px]">
-              <label htmlFor="nickname">닉네임:</label>
-            </div>
-            <div>
-              <input
-                type="text"
-                id="nickname"
-                name="nickname"
-                required
-                className="border w-[520px] h-[60px] rounded-xs py-[18px] px-[20px] text-[var(--color-gray-200)] text-[16px]"
-                placeholder="닉네임을 입력해 주세요"
-                value={nickname}
-                onChange={handleNicknameChange}
-              />
-            </div>
-          </div>
-          <div className="pb-[34px]">
-            <div className="pb-[10px]">
-              <label htmlFor="password">비밀번호:</label>
-            </div>
-            <div>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                required
-                className="border w-[520px] h-[60px] rounded-xs py-[18px] px-[20px] text-[var(--color-gray-200)] text-[16px]"
-                placeholder="8자 이상 입력해 주세요"
-                value={password}
-                onChange={handlePasswordChange}
-              />
-            </div>
-          </div>
-          <div className="pb-[34px]">
-            <div className="pb-[10px]">
-              <label htmlFor="passwordConfirmation">비밀번호 확인:</label>
-            </div>
-            <div>
-              <input
-                type="password"
-                id="passwordConfirmation"
-                name="passwordConfirmation"
-                required
-                className="border w-[520px] h-[60px] rounded-xs py-[18px] px-[20px] text-[var(--color-gray-200)] text-[16px]"
-                placeholder="비밀번호를 한번 더 입력해 주세요"
-                value={passwordConfirmation}
-                onChange={handlePasswordConfirmationChange}
-              />
-            </div>
-          </div>
-          <div>
-            <button className="bg-[var(--color-main)] px-[235px] py-[17px] rounded-xs mt-[42px] mb-[40px] text-black text-center font-bold text-[18px]">
-              가입하기
-            </button>
+          <FormGroup
+            label="이메일"
+            id="email"
+            type="email"
+            required
+            placeholder="이메일을 입력해주세요"
+            value={email}
+            onChange={handleEmailChange}
+          />
+
+          <FormGroup
+            label="닉네임"
+            id="nickname"
+            type="nickname"
+            required
+            placeholder="닉네임을 입력해 주세요"
+            value={nickname}
+            onChange={handleNicknameChange}
+          />
+
+          <FormGroup
+            label="비밀번호"
+            id="password"
+            type="password"
+            required
+            placeholder="8자 이상 입력해 주세요"
+            value={password}
+            onChange={handlePasswordChange}
+          />
+
+          <FormGroup
+            label="비밀번호 확인"
+            id="passwordConfirmation"
+            type="passwordConfirmation"
+            required
+            placeholder="비밀번호를 한번 더 입력해 주세요"
+            value={passwordConfirmation}
+            onChange={handlePasswordConfirmationChange}
+          />
+          <div className="text-[18px] pb-[40px]">
+            <Button
+              text="가입하기"
+              width="520px"
+              height="60px"
+              backgroundColor="var(--color-main)"
+              color="var(--color-black)"
+              fontSize="18px"
+            />
           </div>
         </form>
         <div className="flex justify-center gap-4 text-white text-[16px]">
