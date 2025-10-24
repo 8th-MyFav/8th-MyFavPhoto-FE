@@ -8,10 +8,11 @@ const Card = ({
   rarityIcon = "LEGENDARY",
   category = "풍경",
   author = "글쓴이",
-  price = 40,        
+  price = 40,
   remaining = 2,
   total = 5,
   favoriteImg = "/images/favorite.svg",
+  quantity = null, // Sell 모달 전용
 }) => {
   // 레어도 텍스트 스타일 결정
   let rarityText = rarityIcon.toUpperCase();
@@ -66,14 +67,11 @@ const Card = ({
 
       {/* 레어도 영역 */}
       <div className="w-[360px] flex justify-between items-center mt-[10px] h-[23px]">
-        {/* 왼쪽: rarity + 구분선 + category */}
         <div className="flex items-center gap-[10px] h-[23px]">
           <span style={rarityStyle}>{rarityText}</span>
           <span className="text-gray-400 text-[16px] flex items-center h-[23px]">|</span>
           <span className="text-gray-300 text-[16px] flex items-center h-[23px]">{category}</span>
         </div>
-
-        {/* 오른쪽 글쓴이 */}
         <span
           className="underline text-[16px]"
           style={{ color: "var(--color-white)", fontFamily: "var(--font-noto-regular-16)" }}
@@ -82,7 +80,6 @@ const Card = ({
         </span>
       </div>
 
-      {/* 구분선 */}
       <div className="w-[360px] h-0 mt-[20px]" style={{ borderTop: "1px solid var(--color-gray-400)" }} />
 
       {/* 가격 */}
@@ -95,15 +92,23 @@ const Card = ({
         </span>
       </div>
 
-      {/* 잔여 */}
+      {/* 잔여 / 수량 */}
       <div className="w-[360px] flex justify-between mt-[10px] items-center">
         <span className="text-gray-300 text-[16px]" style={{ fontFamily: "var(--font-noto-regular-16)" }}>
-          잔여
+          {quantity !== null ? "수량" : "잔여"}
         </span>
         <div className="flex items-center">
-          <span className="text-white text-[18px] font-normal">{remaining}</span>
-          <span className="w-[5px]" />
-          <span className="text-gray-300 text-[18px] font-light">/ {total}</span>
+          {quantity !== null ? (
+            // Sell 모달: 수량 그대로
+            <span className="text-white text-[18px] font-normal">{quantity}</span>
+          ) : (
+            // 마켓 페이지: remaining / total
+            <>
+              <span className="text-white text-[18px] font-normal">{remaining}</span>
+              <span className="w-[5px]" />
+              <span className="text-gray-300 text-[18px] font-light">/ {total}</span>
+            </>
+          )}
         </div>
       </div>
 

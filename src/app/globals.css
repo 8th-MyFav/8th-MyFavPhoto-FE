@@ -1,6 +1,19 @@
 @import "tailwindcss";
 
 /* ────────────────────────────── */
+/* BR B 폰트 등록 */
+/* ────────────────────────────── */
+@font-face {
+  font-family: "BR B";
+  src: url("/fonts/BRB/BRBA.woff2") format("woff2"),
+       url("/fonts/BRB/BRBA.woff") format("woff"),
+       url("/fonts/BRB/배스킨라빈스B.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ────────────────────────────── */
 /* 색상 변수 정의 */
 /* ────────────────────────────── */
 :root {
@@ -21,35 +34,19 @@
   --foreground: var(--color-black);
 
   /* 폰트 변수 */
-  --font-br-62: "BR B", sans-serif;
-  --font-br-48: "BR B", sans-serif;
-  --font-br-46: "BR B", sans-serif;
-  --font-br-40: "BR B", sans-serif;
-  --font-br-24: "BR B", sans-serif;
-  --font-br-18: "BR B", sans-serif;
+  --font-br: "BR B", sans-serif;
+  --font-noto: "Noto Sans KR", sans-serif;
 
-  --font-noto-bold-40: "Noto Sans KR", sans-serif;
-  --font-noto-bold-32: "Noto Sans KR", sans-serif;
-  --font-noto-bold-28: "Noto Sans KR", sans-serif;
-  --font-noto-bold-24: "Noto Sans KR", sans-serif;
-  --font-noto-regular-24: "Noto Sans KR", sans-serif;
-  --font-noto-bold-22: "Noto Sans KR", sans-serif;
-  --font-noto-bold-20: "Noto Sans KR", sans-serif;
-  --font-noto-regular-20: "Noto Sans KR", sans-serif;
-  --font-noto-bold-18: "Noto Sans KR", sans-serif;
-  --font-noto-regular-18: "Noto Sans KR", sans-serif;
-  --font-noto-light-18: "Noto Sans KR", sans-serif;
-  --font-noto-bold-16: "Noto Sans KR", sans-serif;
-  --font-noto-regular-16: "Noto Sans KR", sans-serif;
-  --font-noto-light-16: "Noto Sans KR", sans-serif;
-  --font-noto-bold-14: "Noto Sans KR", sans-serif;
-  --font-noto-regular-14: "Noto Sans KR", sans-serif;
-  --font-noto-light-14: "Noto Sans KR", sans-serif;
-  --font-noto-bold-12: "Noto Sans KR", sans-serif;
-  --font-noto-regular-12: "Noto Sans KR", sans-serif;
-  --font-noto-light-12: "Noto Sans KR", sans-serif;
-  --font-noto-regular-10: "Noto Sans KR", sans-serif;
-  --font-noto-light-10: "Noto Sans KR", sans-serif;
+  /* 세부 폰트 크기별 프리셋 */
+  --font-br-62: var(--font-br);
+  --font-br-48: var(--font-br);
+  --font-br-46: var(--font-br);
+  --font-br-40: var(--font-br);
+  --font-br-24: var(--font-br);
+  --font-br-18: var(--font-br);
+
+  --font-noto-bold-40: var(--font-noto);
+  --font-noto-regular-16: var(--font-noto);
 }
 
 /* ────────────────────────────── */
@@ -68,7 +65,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-noto-regular-16);
+  font-family: var(--font-noto); /* ✅ 기본은 Noto Sans KR */
 }
 
 /* ────────────────────────────── */
@@ -77,6 +74,6 @@ body {
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-noto-regular-16);
+  --font-sans: var(--font-noto); /* ✅ Tailwind 기본 폰트 */
   --font-mono: monospace;
 }
