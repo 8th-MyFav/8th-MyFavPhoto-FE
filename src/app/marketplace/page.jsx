@@ -1,13 +1,16 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import MarketplaceHeader from "../components/molecules/marketplaceHeader";
-import SearchMolecule from "../components/molecules/search";
-import Dropdown from "../components/molecules/dropDown";
-import Card from "../components/organisms/card";
-import Modal from "../components/molecules/modal";
-import GNB from "../components/organisms/gnb";
+import MarketplaceHeader from "@/components/molecules/marketplaceHeader";
+import SearchMolecule from "@/components/molecules/search";
+import Dropdown from "@/components/molecules/dropDown";
+import Card from "@/components/organisms/card";
+import Modal from "@/components/molecules/modal";
+import GNB from "@/components/organisms/gnb";
+import SellPhotoModal from "@/components/organisms/sellPhotoModal";
+import CardDetailSellModal from "@/components/organisms/cardDetailSellModal";
 
+// 더미 카드 데이터
 const cardDataServer = Array.from({ length: 30 }, (_, i) => ({
   topImage: "/images/sample.svg",
   title: `아름다운 풍경 ${i + 1}`,
@@ -36,20 +39,20 @@ const MarketplacePage = () => {
   const [displayedCards, setDisplayedCards] = useState([]);
   const [hasMore, setHasMore] = useState(true);
 
-  // 모달 상태 관리
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
   const [modalContent, setModalContent] = useState("");
 
+  const [isSellModalOpen, setIsSellModalOpen] = useState(false);
+  const [selectedSellCard, setSelectedSellCard] = useState(null);
+
   const observer = useRef();
 
-  // 초기 카드 세팅
   useEffect(() => {
     const clientCards = cardDataServer.map((c) => ({ ...c, remaining: c.remaining }));
     setDisplayedCards(clientCards.slice(0, 9));
   }, []);
 
-  // 무한 스크롤
   const lastCardRef = (node) => {
     if (observer.current) observer.current.disconnect();
     observer.current = new IntersectionObserver((entries) => {
@@ -62,11 +65,9 @@ const MarketplacePage = () => {
     const currentLength = displayedCards.length;
     const more = cardDataServer.slice(currentLength, currentLength + 9);
     setDisplayedCards((prev) => [...prev, ...more]);
-    if (displayedCards.length + more.length >= cardDataServer.length)
-      setHasMore(false);
+    if (displayedCards.length + more.length >= cardDataServer.length) setHasMore(false);
   };
 
-  // 필터링 + 정렬
   const filteredCards = cardDataServer
     .filter((card) => {
       const matchesSearch =
@@ -89,38 +90,26 @@ const MarketplacePage = () => {
       return 0;
     });
 
-  // 카드 클릭 시 모달
   const handleCardClick = (card) => {
     setModalTitle("로그인이 필요합니다");
     setModalContent(
       <>
-        로그인 하시겠습니까?<br />
+        로그인 하시겠습니까?
+        <br />
         다양한 서비스를 편리하게 이용할 수 있습니다.
       </>
     );
-    setIsModalOpen(true);
+    setIsLoginModalOpen(true);
   };
 
-  // 판매 버튼 클릭 시 모달
-  const handleSellButtonClick = () => {
-    setModalTitle("로그인이 필요합니다");
-    setModalContent(
-      <>
-        로그인 하시겠습니까?<br />
-        다양한 서비스를 편리하게 이용할 수 있습니다.
-      </>
-    );
-    setIsModalOpen(true);
-  };
+  const handleSellButtonClick = () => setIsSellModalOpen(true);
 
   return (
     <div className="bg-black min-h-screen px-[80px] relative">
-      {/*GNB*/}
       <GNB />
-      {/* 헤더 */}
+
       <MarketplaceHeader onSellClick={handleSellButtonClick} />
 
-      {/* 필터 바 */}
       <div className="flex justify-between items-center mt-5 w-full">
         <div className="flex items-center">
           <div className="mr-[60px]">
@@ -158,28 +147,50 @@ const MarketplacePage = () => {
         />
       </div>
 
-      {/* 카드 리스트 */}
       <div className="grid grid-cols-3 gap-x-[80px] gap-y-[80px] mt-[80px]">
-        {filteredCards.map((card, index) => (
-          <div
-            key={index}
-            ref={index === filteredCards.length - 1 ? lastCardRef : null}
-            onClick={() => handleCardClick(card)}
-            className="cursor-pointer"
-          >
-            <Card {...card} />
+        {filteredCards.length > 0 ? (
+          filteredCards.map((card, index) => (
+            <div
+              key={index}
+              ref={index === filteredCards.length - 1 ? lastCardRef : null}
+              onClick={() => handleCardClick(card)}
+              className="cursor-pointer"
+            >
+              {/* 마켓 페이지에서는 잔여/총수량 */}
+              <Card {...card} showRemainingAsFraction={true} />
+            </div>
+          ))
+        ) : (
+          <div className="col-span-3 text-center text-gray-300 text-[18px] mt-[100px]">
+            조건에 맞는 포토카드가 없습니다.
           </div>
-        ))}
+        )}
       </div>
 
-      {/* 모달 */}
-      {isModalOpen && (
+      {isLoginModalOpen && (
         <Modal
           title={modalTitle}
           content={modalContent}
           buttonText="확인"
-          onClose={() => setIsModalOpen(false)}
-          onButtonClick={() => setIsModalOpen(false)}
+          onClose={() => setIsLoginModalOpen(false)}
+          onButtonClick={() => setIsLoginModalOpen(false)}
+        />
+      )}
+
+      {/* 판매 모달 */}
+      <SellPhotoModal
+        isOpen={isSellModalOpen}
+        onClose={() => setIsSellModalOpen(false)}
+        cards={cardDataServer}
+        onCardSelect={(card) => setSelectedSellCard(card)}
+      />
+
+      {/* 카드 상세 판매 모달 */}
+      {selectedSellCard && (
+        <CardDetailSellModal
+          isOpen={!!selectedSellCard}
+          onClose={() => setSelectedSellCard(null)}
+          card={selectedSellCard}
         />
       )}
     </div>

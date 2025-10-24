@@ -110,10 +110,10 @@ export function AuthProvider({ children }) {
   };
 
   // 회원가입
-  const signup = async (email, nickname, password, passwordConfirmation) => {
+  const signup = async (email, nickname, password) => {
     try {
       const response = await fetch(
-        `https://panda-market-api.vercel.app/auth/signUp`,
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/signup`,
         {
           method: "POST",
           headers: {
@@ -123,7 +123,6 @@ export function AuthProvider({ children }) {
             email,
             nickname,
             password,
-            passwordConfirmation,
           }),
         }
       );
