@@ -43,7 +43,7 @@ const Navigation = () => {
   if (!isAuthenticated) {
     // 로그인 안 된 경우
     return (
-      <nav className="flex gap-[30px] py-[30px] text-[var(--color-gray-200)] text-[14px]">
+      <nav className="flex gap-[30px] text-[var(--color-gray-200)] text-[14px] font-bold">
         <Link href="/login">로그인</Link>
         <Link href="/join">회원가입</Link>
       </nav>
@@ -51,12 +51,15 @@ const Navigation = () => {
   }
 
   return (
-    <nav className="flex gap-[30px] py-[30px] text-[var(--color-gray-200)] text-[14px]">
+    <nav className="flex gap-[30px] text-[var(--color-gray-200)] text-[14px] font-bold ">
       <p>{points} P</p>
-      <img src="/images/alarm.svg" alt="알림" />
-      <p className="font-[<베라폰트>]">{user?.nickname}</p>
+      <img src="/icons/alarm.svg" alt="알림" />
+      <p className="font-[family-name:var(--font-br)]">{user.nickname}</p>
       <p>|</p>
-      <button onClick={logout} className="text-[var(--color-gray-400)]">
+      <button
+        onClick={logout}
+        className="text-[var(--color-gray-400)] font-bold"
+      >
         로그아웃
       </button>
     </nav>

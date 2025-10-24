@@ -12,10 +12,39 @@ const JoinPage = () => {
   const [nickname, setNickname] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
+  const [errors, setErrors] = useState({
+    email: "",
+    nickname: "",
+    password: "",
+    passwordConfirmation: "",
+  });
   const { signup } = useAuth();
 
   const handleJoin = async function (e) {
     e.preventDefault();
+
+    // 기본 유효성 검사
+    const newErrors = {
+      email: "",
+      nickname: "",
+      password: "",
+      passwordConfirmation: "",
+    };
+    if (!email.trim()) newErrors.email = "이메일을 입력해주세요.";
+    if (!nickname.trim()) newErrors.nickname = "닉네임을 입력해주세요.";
+    if (!password.trim()) newErrors.password = "비밀번호를 입력해주세요.";
+    if (!password.trim())
+      newErrors.passwordConfirmation = "비밀번호를 확인 해주세요.";
+    setErrors(newErrors);
+
+    // 에러 있으면 로그인 시도 중단
+    if (
+      newErrors.email ||
+      newErrors.nickname ||
+      newErrors.password ||
+      newErrors.passwordConfirmation
+    )
+      return;
 
     const response = await signup(
       email,
@@ -54,7 +83,7 @@ const JoinPage = () => {
             className="flex justify-center px-[95px] mt-[151px] mb-[80px] h-[60px]"
           />
         </Link>
-        <form onSubmit={handleJoin} className="text-white">
+        <form onSubmit={handleJoin} className="text-white" noValidate>
           <FormGroup
             label="이메일"
             id="email"
@@ -63,6 +92,7 @@ const JoinPage = () => {
             placeholder="이메일을 입력해주세요"
             value={email}
             onChange={handleEmailChange}
+            error={errors.email}
           />
 
           <FormGroup
@@ -73,6 +103,7 @@ const JoinPage = () => {
             placeholder="닉네임을 입력해 주세요"
             value={nickname}
             onChange={handleNicknameChange}
+            error={errors.nickname}
           />
 
           <FormGroup
@@ -83,16 +114,20 @@ const JoinPage = () => {
             placeholder="8자 이상 입력해 주세요"
             value={password}
             onChange={handlePasswordChange}
+            error={errors.password}
+            showPasswordToggle={true}
           />
 
           <FormGroup
             label="비밀번호 확인"
             id="passwordConfirmation"
-            type="passwordConfirmation"
+            type="password"
             required
             placeholder="비밀번호를 한번 더 입력해 주세요"
             value={passwordConfirmation}
             onChange={handlePasswordConfirmationChange}
+            error={errors.passwordConfirmation}
+            showPasswordToggle={true}
           />
           <div className="text-[18px] pb-[40px]">
             <Button
