@@ -1,10 +1,10 @@
 "use client";
 
 import React from "react";
-import GNB from "./components/organisms/gnb";
-import Button from "./components/atoms/button";
+import GNB from "@/components/organisms/gnb";
+import Button from "@/components/atoms/button";
 import { useRouter } from "next/navigation";
-import Navigation from "./components/molecules/navigationMolecule";
+import Navigation from "@/components/molecules/navigationMolecule";
 
 const HomePage = () => {
   const router = useRouter();
