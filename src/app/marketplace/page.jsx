@@ -1,14 +1,14 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import MarketplaceHeader from "../components/molecules/marketplaceHeader";
-import SearchMolecule from "../components/molecules/search";
-import Dropdown from "../components/molecules/dropDown";
-import Card from "../components/organisms/card";
-import Modal from "../components/molecules/modal";
-import GNB from "../components/organisms/gnb";
-import SellPhotoModal from "../components/organisms/sellPhotoModal";
-import CardDetailSellModal from "../components/organisms/cardDetailSellModal";
+import MarketplaceHeader from "@/components/molecules/marketplaceHeader";
+import SearchMolecule from "@/components/molecules/search";
+import Dropdown from "@/components/molecules/dropDown";
+import Card from "@/components/organisms/card";
+import Modal from "@/components/molecules/modal";
+import GNB from "@/components/organisms/gnb";
+import SellPhotoModal from "@/components/organisms/sellPhotoModal";
+import CardDetailSellModal from "@/components/organisms/cardDetailSellModal";
 
 // 더미 카드 데이터
 const cardDataServer = Array.from({ length: 30 }, (_, i) => ({
