@@ -21,7 +21,7 @@ const ProfileModal = () => {
 
   return (
     <div className="flex flex-col items-center mt-[100px]">
-      {/*임시 프로필 버튼 */}
+      {/* 임시 프로필 버튼 */}
       <button
         onClick={handleToggle}
         className="px-4 py-2 bg-yellow-400 text-black rounded-none font-bold"
