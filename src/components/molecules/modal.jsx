@@ -8,6 +8,8 @@ const Modal = ({
   buttonText = "확인",
   onClose,
   onButtonClick,
+  imageSrc, 
+  imageAlt = "Modal Image", 
 }) => {
   return (
     <div className="fixed inset-0 z-50 flex justify-center items-center pointer-events-none">
@@ -40,11 +42,25 @@ const Modal = ({
             fontSize: "20px",
             fontWeight: 700,
             textAlign: "center",
-            marginBottom: "40px",
+            marginBottom: "20px",
           }}
         >
           {title}
         </h2>
+
+        {/* 이미지 (있으면 표시) */}
+        {imageSrc && (
+          <img
+            src={imageSrc}
+            alt={imageAlt}
+            style={{
+              width: "200px",
+              height: "auto",
+              marginBottom: "20px",
+              borderRadius: "4px",
+            }}
+          />
+        )}
 
         {/* 내용 */}
         <p
