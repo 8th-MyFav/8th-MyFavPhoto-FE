@@ -16,10 +16,6 @@ const HomePage = () => {
   return (
     <div className="bg-[var(--color-black)]">
       <div>
-        <header>
-          <GNB />
-          <Navigation />
-        </header>
         <main>
           <div>
             <div className="bg-[var(--color-black)]">
