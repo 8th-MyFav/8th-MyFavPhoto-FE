@@ -1,9 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import Button from "../atoms/button";
 
 const CardDetailSellModal = ({ isOpen, onClose, card }) => {
+  const router = useRouter();
   if (!isOpen || !card) return null;
 
   const [selectedRarity, setSelectedRarity] = useState("");
@@ -32,6 +34,26 @@ const CardDetailSellModal = ({ isOpen, onClose, card }) => {
 
   const decrease = () => {
     if (quantity > 1) setQuantity(quantity - 1);
+  };
+
+  const handleSell = () => {
+    // 조건 확인
+    const isValid =
+      quantity > 0 &&
+      selectedRarity &&
+      selectedCategory &&
+      description.trim().length > 0;
+
+    if (isValid) {
+    // 조건 만족 → 성공 페이지로 이동
+    router.push(`marketplace/sell/success`);
+  } else {
+    // 조건 불만족 → 실패 페이지로 이동
+    router.push(`marketplace/sell/fail`);
+  }
+
+    // 모달 닫기
+    onClose();
   };
 
   return (
@@ -130,7 +152,6 @@ const CardDetailSellModal = ({ isOpen, onClose, card }) => {
               <span className="font-bold text-[16px] mr-[108px]">총 판매 수량</span>
 
               <div className="flex items-center">
-                {/* 수량 박스 */}
                 <div className="flex items-center justify-between w-[176px] h-[50px] border border-gray-300 bg-[#161616] rounded-[2px] flex-shrink-0 px-[10px]">
                   <button className="text-white text-[20px]" onClick={decrease}>
                     -
@@ -141,7 +162,6 @@ const CardDetailSellModal = ({ isOpen, onClose, card }) => {
                   </button>
                 </div>
 
-                {/* / 숫자 + 최대 n장 */}
                 <div className="flex flex-col items-center justify-center ml-[10px] leading-tight">
                   <span className="text-[20px]" style={{ color: "var(--white-white, #FFF)" }}>
                     / {card.remaining}
@@ -165,13 +185,9 @@ const CardDetailSellModal = ({ isOpen, onClose, card }) => {
 
         {/* 교환 희망 정보 섹션 */}
         <div className="text-white mb-[30px] pt-[30px]">
-          {/* 제목 */}
           <h4 className="text-[20px] font-bold mb-[20px]">교환 희망 정보</h4>
-
-          {/* 흰색 구분선 */}
           <div className="border-b-[2px] border-[#EEE] mb-[20px]" />
 
-          {/* 내용 */}
           <div className="flex gap-[30px] mb-[20px]">
             {/* 등급 */}
             <div className="flex-1 flex flex-col">
@@ -181,21 +197,13 @@ const CardDetailSellModal = ({ isOpen, onClose, card }) => {
                 value={selectedRarity}
                 onChange={(e) => setSelectedRarity(e.target.value)}
               >
-                <option value="" disabled className="bg-black text-gray-400">
+                <option value="" disabled>
                   등급을 선택해 주세요
                 </option>
-                <option value="COMMON" className="bg-black text-gray-400">
-                  COMMON
-                </option>
-                <option value="RARE" className="bg-black text-gray-400">
-                  RARE
-                </option>
-                <option value="SUPER RARE" className="bg-black text-gray-400">
-                  SUPER RARE
-                </option>
-                <option value="LEGENDARY" className="bg-black text-gray-400">
-                  LEGENDARY
-                </option>
+                <option value="COMMON">COMMON</option>
+                <option value="RARE">RARE</option>
+                <option value="SUPER RARE">SUPER RARE</option>
+                <option value="LEGENDARY">LEGENDARY</option>
               </select>
             </div>
 
@@ -207,21 +215,13 @@ const CardDetailSellModal = ({ isOpen, onClose, card }) => {
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
               >
-                <option value="" disabled className="bg-black text-gray-400">
+                <option value="" disabled>
                   장르를 선택해 주세요
                 </option>
-                <option value="풍경" className="bg-black text-gray-400">
-                  풍경
-                </option>
-                <option value="인물" className="bg-black text-gray-400">
-                  인물
-                </option>
-                <option value="동물" className="bg-black text-gray-400">
-                  동물
-                </option>
-                <option value="추상" className="bg-black text-gray-400">
-                  추상
-                </option>
+                <option value="풍경">풍경</option>
+                <option value="인물">인물</option>
+                <option value="동물">동물</option>
+                <option value="추상">추상</option>
               </select>
             </div>
           </div>
@@ -255,12 +255,7 @@ const CardDetailSellModal = ({ isOpen, onClose, card }) => {
             height="60px"
             backgroundColor="#EFFF04"
             color="#0F0F0F"
-            onClick={() => {
-              alert(
-                `판매 등록 완료!\n수량: ${quantity}장\n가격: ${card.price}P`
-              );
-              onClose();
-            }}
+            onClick={handleSell}
           />
         </div>
       </div>
