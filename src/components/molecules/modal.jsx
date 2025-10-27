@@ -6,9 +6,10 @@ const Modal = ({
   title = "제목",
   content = "내용",
   buttonText = "확인",
-  imageSrc, 
   onClose,
   onButtonClick,
+  imageSrc, 
+  imageAlt = "Modal Image", 
 }) => {
   return (
     <div className="fixed inset-0 z-50 flex justify-center items-center pointer-events-none">
@@ -16,41 +17,83 @@ const Modal = ({
       <div className="absolute inset-0 backdrop-blur-sm pointer-events-none"></div>
 
       {/* 모달 박스 */}
-      <div className="relative flex flex-col w-[560px] h-auto rounded-[2px] bg-gray-700 z-10 pointer-events-auto">
+      <div
+        className="relative flex flex-col items-center rounded-[2px] bg-gray-700 z-10 pointer-events-auto"
+        style={{
+          width: "560px",
+          flexShrink: 0,
+          paddingTop: "40px",
+          paddingBottom: "63px",
+        }}
+      >
         {/* X 버튼 */}
         <button
           onClick={onClose}
-          className="absolute top-[30px] right-[30px] w-[32px] h-[32px] cursor-pointer"
+          className="absolute top-[20px] right-[20px] w-[32px] h-[32px] cursor-pointer"
         >
           <img src="/images/close.svg" alt="Close" className="w-full h-full" />
         </button>
 
-        {/* 이미지 */}
-        {imageSrc && (
-          <div className="flex justify-center mt-8">
-            <img src={imageSrc} alt="Modal Image" className="max-w-full max-h-[150px] rounded" />
-          </div>
-        )}
-
         {/* 제목 */}
-        <h2 className="text-white text-center text-[20px] font-bold mt-[20px] mx-[40px] whitespace-nowrap overflow-hidden text-ellipsis">
+        <h2
+          style={{
+            color: "var(--white-white, #FFF)",
+            fontFamily: "Noto Sans KR",
+            fontSize: "20px",
+            fontWeight: 700,
+            textAlign: "center",
+            marginBottom: "20px",
+          }}
+        >
           {title}
         </h2>
 
+        {/* 이미지 (있으면 표시) */}
+        {imageSrc && (
+          <img
+            src={imageSrc}
+            alt={imageAlt}
+            style={{
+              width: "200px",
+              height: "auto",
+              marginBottom: "20px",
+              borderRadius: "4px",
+            }}
+          />
+        )}
+
         {/* 내용 */}
-        <p className="text-gray-300 text-center text-[16px] font-normal mt-[20px] mx-[40px] whitespace-pre-line">
+        <p
+          style={{
+            color: "var(--gray-gray300, #A4A4A4)",
+            fontFamily: "Noto Sans KR",
+            fontSize: "16px",
+            fontWeight: 400,
+            textAlign: "center",
+            marginBottom: "60px",
+          }}
+        >
           {content}
         </p>
 
         {/* 버튼 */}
-        <div className="flex justify-center mt-6 mb-[40px]">
-          <button
-            onClick={onButtonClick}
-            className="flex justify-center items-center w-[170px] h-[60px] gap-[10px] rounded-[2px] bg-[var(--main-main,#EFFF04)] text-black text-[18px] font-bold cursor-pointer"
-          >
-            {buttonText}
-          </button>
-        </div>
+        <button
+          onClick={onButtonClick}
+          style={{
+            width: "170px",
+            height: "60px",
+            borderRadius: "2px",
+            background: "var(--main-main,#EFFF04)",
+            color: "var(--black-black, #0F0F0F)",
+            fontFamily: "Noto Sans KR",
+            fontSize: "18px",
+            fontWeight: 700,
+            textAlign: "center",
+            cursor: "pointer",
+          }}
+        >
+          {buttonText}
+        </button>
       </div>
     </div>
   );
