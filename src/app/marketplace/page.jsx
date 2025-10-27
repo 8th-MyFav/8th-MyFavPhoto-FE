@@ -6,7 +6,6 @@ import SearchMolecule from "@/components/molecules/search";
 import Dropdown from "@/components/molecules/dropDown";
 import Card from "@/components/organisms/card";
 import Modal from "@/components/molecules/modal";
-import GNB from "@/components/organisms/gnb";
 import SellPhotoModal from "@/components/organisms/sellPhotoModal";
 import CardDetailSellModal from "@/components/organisms/cardDetailSellModal";
 
@@ -30,6 +29,8 @@ const cardDataServer = Array.from({ length: 30 }, (_, i) => ({
   favoriteImg: "/images/favorite.svg",
 }));
 
+const ITEMS_PER_PAGE = 6; // 한 번에 로드할 카드 수
+
 const MarketplacePage = () => {
   const [searchText, setSearchText] = useState("");
   const [selectedRarity, setSelectedRarity] = useState("");
@@ -48,26 +49,7 @@ const MarketplacePage = () => {
 
   const observer = useRef();
 
-  useEffect(() => {
-    const clientCards = cardDataServer.map((c) => ({ ...c, remaining: c.remaining }));
-    setDisplayedCards(clientCards.slice(0, 9));
-  }, []);
-
-  const lastCardRef = (node) => {
-    if (observer.current) observer.current.disconnect();
-    observer.current = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting && hasMore) loadMore();
-    });
-    if (node) observer.current.observe(node);
-  };
-
-  const loadMore = () => {
-    const currentLength = displayedCards.length;
-    const more = cardDataServer.slice(currentLength, currentLength + 9);
-    setDisplayedCards((prev) => [...prev, ...more]);
-    if (displayedCards.length + more.length >= cardDataServer.length) setHasMore(false);
-  };
-
+  // 필터링 + 정렬 적용
   const filteredCards = cardDataServer
     .filter((card) => {
       const matchesSearch =
@@ -90,6 +72,29 @@ const MarketplacePage = () => {
       return 0;
     });
 
+  // 초기 카드 로딩
+  useEffect(() => {
+    setDisplayedCards(filteredCards.slice(0, ITEMS_PER_PAGE));
+    setHasMore(filteredCards.length > ITEMS_PER_PAGE);
+  }, [searchText, selectedRarity, selectedCategory, selectedStatus, sortOrder]);
+
+  // 무한 스크롤 마지막 카드 감지
+  const lastCardRef = (node) => {
+    if (observer.current) observer.current.disconnect();
+    observer.current = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && hasMore) loadMore();
+    });
+    if (node) observer.current.observe(node);
+  };
+
+  // 더 불러오기
+  const loadMore = () => {
+    const currentLength = displayedCards.length;
+    const more = filteredCards.slice(currentLength, currentLength + ITEMS_PER_PAGE);
+    setDisplayedCards((prev) => [...prev, ...more]);
+    if (currentLength + more.length >= filteredCards.length) setHasMore(false);
+  };
+
   const handleCardClick = (card) => {
     setModalTitle("로그인이 필요합니다");
     setModalContent(
@@ -106,7 +111,6 @@ const MarketplacePage = () => {
 
   return (
     <div className="bg-black min-h-screen px-[80px] relative">
-      <GNB />
 
       <MarketplaceHeader onSellClick={handleSellButtonClick} />
 
@@ -148,15 +152,14 @@ const MarketplacePage = () => {
       </div>
 
       <div className="grid grid-cols-3 gap-x-[80px] gap-y-[80px] mt-[80px]">
-        {filteredCards.length > 0 ? (
-          filteredCards.map((card, index) => (
+        {displayedCards.length > 0 ? (
+          displayedCards.map((card, index) => (
             <div
               key={index}
-              ref={index === filteredCards.length - 1 ? lastCardRef : null}
+              ref={index === displayedCards.length - 1 ? lastCardRef : null}
               onClick={() => handleCardClick(card)}
               className="cursor-pointer"
             >
-              {/* 마켓 페이지에서는 잔여/총수량 */}
               <Card {...card} showRemainingAsFraction={true} />
             </div>
           ))
