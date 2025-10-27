@@ -94,7 +94,7 @@ const CardDetailEdit = ({ isOpen, onClose, card }) => {
         <div className="flex justify-start gap-[20px] mb-[30px]">
           {/* 이미지 수정 */}
           <img
-            src={card.imageUrl} // topImage → imageUrl
+            src={card.imageUrl} 
             alt={card.title}
             className="w-[380px] h-[260px] object-cover rounded"
           />
@@ -220,7 +220,7 @@ const CardDetailEdit = ({ isOpen, onClose, card }) => {
         {/* 버튼 */}
         <div className="flex justify-end gap-[20px]">
           <Button
-            text="취소"
+            text="취소하기"
             width="400px"
             height="60px"
             backgroundColor="transparent"
@@ -229,7 +229,7 @@ const CardDetailEdit = ({ isOpen, onClose, card }) => {
             onClick={onClose}
           />
           <Button
-            text="저장"
+            text="수정하기"
             width="400px"
             height="60px"
             backgroundColor="#EFFF04"
