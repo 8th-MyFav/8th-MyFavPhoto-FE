@@ -1,25 +1,49 @@
 "use client";
 
+import Link from "next/link";
 import React from "react";
+import Navigation from "../molecules/navigationMolecule";
+import { usePathname } from "next/navigation";
 
 const GNB = ({ isLoggedIn }) => {
-  return (
-    <nav className="w-full h-[60px] flex justify-between items-center bg-black text-white">
-      {/* 좌측 로고 */}
-      <div className="flex items-center cursor-pointer">
-        <img src="/images/favorite.svg" alt="최애의 포토" className="w-[120px] h-auto" />
-      </div>
+  const pathname = usePathname();
 
-      {/* 우측 메뉴 */}
-      <div className="flex items-center gap-[30px]">
-        {!isLoggedIn && (
-          <>
-            <button className="text-white font-medium cursor-pointer">로그인</button>
-            <button className="text-white font-medium cursor-pointer">회원가입</button>
-          </>
-        )}
+  // 숨길 페이지 경로
+  const hidePagePathname = ["/login", "/join"];
+
+  // 숨김 여부 판별 함수
+  const hideGNBpathname = (pathname) => {
+    return hidePagePathname.includes(pathname);
+  };
+
+  // 현재 pathname이 숨김 목록에 포함되면 GNB 렌더링 안함
+  if (hideGNBpathname(pathname)) {
+    return null;
+  }
+
+  console.log(pathname);
+  return (
+    <div className="bg-black">
+      <div className="flex justify-center mx-[220px] bg-black">
+        <nav className="w-full h-[60px] flex justify-between items-center bg-black">
+          {/* 좌측 로고 */}
+          <div className="flex items-center cursor-pointer">
+            <Link href="/">
+              <img
+                src="/images/favorite.svg"
+                alt="최애의 포토"
+                className="w-[120px] h-auto"
+              />
+            </Link>
+          </div>
+
+          {/* 우측 메뉴 */}
+          <div className="flex items-center gap-[30px]">
+            <Navigation />
+          </div>
+        </nav>
       </div>
-    </nav>
+    </div>
   );
 };
 
