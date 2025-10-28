@@ -198,31 +198,4 @@ const MarketplacePage = () => {
       )}
 
       {/* 판매 모달 */}
-      <SellPhotoModal
-        isOpen={isSellModalOpen}
-        onClose={() => setIsSellModalOpen(false)}
-        cards={cardDataServer}
-        onCardSelect={(card) => setSelectedSellCard(card)}
-      />
-
-      {/* 카드 상세 판매 모달 */}
-      {selectedSellCard && (
-        <CardDetailSellModal
-          isOpen={!!selectedSellCard}
-          onClose={() => setSelectedSellCard(null)}
-          card={selectedSellCard}
-        />
-      )}
-
-      {/* 랜덤 포인트 모달 */}
-      {isPointModalOpen && (
-        <PointModal
-          onClose={handlePointModalClose}
-          onComplete={handlePointModalClose}
-        />
-      )}
-    </div>
-  );
-};
-
-export default MarketplacePage;
+      
