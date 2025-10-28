@@ -1,16 +1,15 @@
 "use client";
 
 import React from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const SellFailPage = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
-  const cardInfo = {
-    rarity: "LEGENDARY",
-    title: "우리집 앞마당",
-    quantity: 2,
-  };
+  const rarity = searchParams.get("rarity") || "LEGENDARY";
+  const title = searchParams.get("title") || "우리집 앞마당";
+  const quantity = searchParams.get("quantity") || 1;
 
   const handleGoToMarketplace = () => {
     router.push("/marketplace");
@@ -21,9 +20,7 @@ const SellFailPage = () => {
   };
 
   return (
-    <div className="bg-black min-h-screen text-white relative">
-
-      {/* 중앙 콘텐츠 */}
+    <div className="bg-black min-h-[668px] text-white relative">
       <div className="flex flex-col items-center justify-center h-[80vh] text-center relative px-4">
         {/* 제목 */}
         <div
@@ -33,7 +30,6 @@ const SellFailPage = () => {
           <span style={{ color: "var(--white-white, #FFF)" }}>판매 등록 </span>
           <span style={{ color: "var(--gray-gray300, #A4A4A4)" }}>실패</span>
 
-          {/* 닫기 버튼 */}
           <img
             src="/images/close.svg"
             alt="close"
@@ -47,7 +43,7 @@ const SellFailPage = () => {
           style={{ fontFamily: "var(--font-noto)" }}
           className="text-white text-center text-[20px] font-bold leading-normal mb-[60px]"
         >
-          [{cardInfo.rarity} | {cardInfo.title}] {cardInfo.quantity}장 판매 등록에 실패했습니다.
+          [{rarity} | {title}] {quantity}장 판매 등록에 실패했습니다.
         </p>
 
         {/* 버튼 */}
