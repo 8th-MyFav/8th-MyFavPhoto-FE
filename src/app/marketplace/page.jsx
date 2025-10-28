@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import MarketplaceHeader from "@/components/molecules/marketplaceHeader";
 import SearchMolecule from "@/components/molecules/search";
 import Dropdown from "@/components/molecules/dropDown";
 import Card from "@/components/organisms/card";
-import Modal from "@/components/molecules/modal";
+//import Modal from "@/components/molecules/modal";
 import SellPhotoModal from "@/components/organisms/sellPhotoModal";
 import CardDetailSellModal from "@/components/organisms/cardDetailSellModal";
 
@@ -32,6 +33,7 @@ const cardDataServer = Array.from({ length: 30 }, (_, i) => ({
 const ITEMS_PER_PAGE = 6; // 한 번에 로드할 카드 수
 
 const MarketplacePage = () => {
+  const router = useRouter();
   const [searchText, setSearchText] = useState("");
   const [selectedRarity, setSelectedRarity] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -40,6 +42,7 @@ const MarketplacePage = () => {
   const [displayedCards, setDisplayedCards] = useState([]);
   const [hasMore, setHasMore] = useState(true);
 
+  // 로그인 모달 (나중에 사용할 예정)
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
   const [modalContent, setModalContent] = useState("");
@@ -95,23 +98,15 @@ const MarketplacePage = () => {
     if (currentLength + more.length >= filteredCards.length) setHasMore(false);
   };
 
-  const handleCardClick = (card) => {
-    setModalTitle("로그인이 필요합니다");
-    setModalContent(
-      <>
-        로그인 하시겠습니까?
-        <br />
-        다양한 서비스를 편리하게 이용할 수 있습니다.
-      </>
-    );
-    setIsLoginModalOpen(true);
+  // 카드 클릭 시 상세 페이지 이동
+  const handleCardClick = (index) => {
+    router.push(`/marketplace/detail/${index}`);
   };
 
   const handleSellButtonClick = () => setIsSellModalOpen(true);
 
   return (
     <div className="bg-black min-h-screen px-[80px] relative">
-
       <MarketplaceHeader onSellClick={handleSellButtonClick} />
 
       <div className="flex justify-between items-center mt-5 w-full">
@@ -157,7 +152,7 @@ const MarketplacePage = () => {
             <div
               key={index}
               ref={index === displayedCards.length - 1 ? lastCardRef : null}
-              onClick={() => handleCardClick(card)}
+              onClick={() => handleCardClick(index)}
               className="cursor-pointer"
             >
               <Card {...card} showRemainingAsFraction={true} />
@@ -170,6 +165,8 @@ const MarketplacePage = () => {
         )}
       </div>
 
+      {/*
+      // 로그인 모달 (나중에 사용할 예정)
       {isLoginModalOpen && (
         <Modal
           title={modalTitle}
@@ -179,6 +176,7 @@ const MarketplacePage = () => {
           onButtonClick={() => setIsLoginModalOpen(false)}
         />
       )}
+      */}
 
       {/* 판매 모달 */}
       <SellPhotoModal
