@@ -6,8 +6,8 @@
 @font-face {
   font-family: "BR B";
   src: url("/fonts/BRB/BRBA.woff2") format("woff2"),
-       url("/fonts/BRB/BRBA.woff") format("woff"),
-       url("/fonts/BRB/배스킨라빈스B.otf") format("opentype");
+    url("/fonts/BRB/BRBA.woff") format("woff"),
+    url("/fonts/BRB/배스킨라빈스B.otf") format("opentype");
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -17,18 +17,18 @@
 /* 색상 변수 정의 */
 /* ────────────────────────────── */
 :root {
-  --color-black: #0F0F0F;
+  --color-black: #0f0f0f;
   --color-gray-500: #161616;
-  --color-gray-400: #5A5A5A;
-  --color-gray-300: #A4A4A4;
-  --color-gray-200: #DDDDDD;
-  --color-gray-100: #EEEEEE;
-  --color-white: #FFFFFF;
-  --color-red: #FF483D;
-  --color-blue: #29C9F9;
-  --color-purple: #A77EFF;
-  --color-pink: #FF2A6A;
-  --color-main: #EFFF04;
+  --color-gray-400: #5a5a5a;
+  --color-gray-300: #a4a4a4;
+  --color-gray-200: #dddddd;
+  --color-gray-100: #eeeeee;
+  --color-white: #ffffff;
+  --color-red: #ff483d;
+  --color-blue: #29c9f9;
+  --color-purple: #a77eff;
+  --color-pink: #ff2a6a;
+  --color-main: #efff04;
 
   --background: var(--color-white);
   --foreground: var(--color-black);
@@ -66,6 +66,29 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-noto); /* ✅ 기본은 Noto Sans KR */
+}
+
+/* 입력 요소 포커스/자동완성 기본 배경색 제거 */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--color-gray-200);
+  -webkit-box-shadow: 0 0 0px 1000px var(--color-black) inset;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  background: var(--color-black);
+  border-color: var(--color-gray-200);
 }
 
 /* ────────────────────────────── */
