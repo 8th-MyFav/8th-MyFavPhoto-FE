@@ -18,7 +18,7 @@ const Input = ({
 }) => {
   return (
     <input
-      className="w-[520px] bg-[var(--color-black)] border rounded-xs py-[18px] px-[20px] text-[var(--color-gray-200)] border-[var(--color-gray-200)]"
+      className="w-[520px] bg-[var(--color-black)] border rounded-xs py-[18px] px-[20px] text-[var(--color-gray-200)] border-[var(--color-gray-200)] appearance-none focus:outline-none focus:bg-[var(--color-black)] focus:border-[var(--color-gray-200)]"
       type={inputType}
       id={id}
       name={name}
