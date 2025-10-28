@@ -1,18 +1,15 @@
-// 하드 코딩 방식 나중에 쿼리문으로 변경 해야됨
-
 "use client";
 
 import React from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const SellSuccessPage = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
-  const cardInfo = {
-    rarity: "LEGENDARY",
-    title: "우리집 앞마당",
-    quantity: 2,
-  };
+  const rarity = searchParams.get("rarity") || "LEGENDARY";
+  const title = searchParams.get("title") || "우리집 앞마당";
+  const quantity = searchParams.get("quantity") || 1;
 
   const handleGoToMyCards = () => {
     router.push("/mypage/sell");
@@ -23,10 +20,7 @@ const SellSuccessPage = () => {
   };
 
   return (
-    <div className="bg-black min-h-screen text-white relative">
-
-
-      {/* 중앙 콘텐츠 */}
+    <div className="bg-black min-h-[668px] text-white relative">
       <div className="flex flex-col items-center justify-center h-[80vh] text-center relative px-4">
         {/* 제목 */}
         <div
@@ -35,7 +29,6 @@ const SellSuccessPage = () => {
         >
           판매 등록 <span className="text-[var(--color-main)]">성공</span>
 
-          {/* 닫기 버튼 */}
           <img
             src="/images/close.svg"
             alt="close"
@@ -49,7 +42,7 @@ const SellSuccessPage = () => {
           style={{ fontFamily: "var(--font-noto)" }}
           className="text-white text-center text-[20px] font-bold leading-normal mb-[60px]"
         >
-          [{cardInfo.rarity} | {cardInfo.title}] {cardInfo.quantity}장 판매 등록에 성공했습니다!
+          [{rarity} | {title}] {quantity}장 판매 등록에 성공했습니다!
         </p>
 
         {/* 버튼 */}
