@@ -214,7 +214,7 @@ const MarketplacePage = () => {
         />
       )}
 
-      {/* 랜덤포인트 모달 */}
+      {/* 랜덤 포인트 모달 */}
       {isPointModalOpen && (
         <PointModal
           onClose={handlePointModalClose}
