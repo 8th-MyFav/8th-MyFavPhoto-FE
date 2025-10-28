@@ -16,10 +16,6 @@ const HomePage = () => {
   return (
     <div className="bg-[var(--color-black)]">
       <div>
-        <header>
-          <GNB />
-          <Navigation />
-        </header>
         <main>
           <div>
             <div className="bg-[var(--color-black)]">
@@ -27,20 +23,20 @@ const HomePage = () => {
                 <img
                   src="/images/favorite.svg"
                   alt="로고"
-                  className="absolute pt-[90px] pb-[22.8px] w-[138.945px] z-2"
+                  className="absolute pt-[77px] pb-[22px] w-[138.945px] z-2"
                 />
               </div>
               <div className="flex justify-center">
-                <div className="absolute pt-[125px] ">
-                  <h1 className="text-[40px] font-bold text-white align-center pb-[33px]">
+                <div className="absolute pt-[125px] leading-snug ">
+                  <h1 className="text-[40px] font-bold text-white align-center text-center pb-[33px]">
                     구매하기 어려웠던
                     <br />
-                    <span className="text-[var(--color-main)] text-bold text-[40px]">
+                    <span className="text-[var(--color-main)] text-bold text-[40px] text-center">
                       나의 최대
                     </span>
                     가 여기에!
                   </h1>
-                  <div className="flex justify-center pb-[33px]">
+                  <div className="flex justify-center">
                     <Button
                       text="최애 찾으러 가기"
                       width="235px"
@@ -55,9 +51,9 @@ const HomePage = () => {
                 </div>
               </div>
             </div>
-            <div>
+            <div className="mt-[30px]">
               <img
-                src="/images/hp-main001.svg"
+                src="/images/hpMain001.svg"
                 alt="배경"
                 className="z-0 w-screen"
               />
@@ -77,7 +73,7 @@ const HomePage = () => {
                 <p className="text[18px] text-white">
                   포인트로 안전하게 교환하세요
                 </p>
-                <img src="/images/hp-main002.svg" alt="배경" className="z-0" />
+                <img src="/images/hpMain002.svg" alt="배경" className="z-0" />
               </div>
               <div>
                 <div className="pl-[428px] pt-[133px] pb-[40px]">
@@ -95,7 +91,7 @@ const HomePage = () => {
                   </p>
                 </div>
               </div>
-              <img src="/images/hp-main003.png" alt="배경" className="z-0" />
+              <img src="/images/hpMain003.png" alt="배경" className="z-0" />
             </div>
             <div>
               <div className="pl-[428px] pt-[133px] pb-[40px]">
@@ -110,12 +106,12 @@ const HomePage = () => {
                 </p>
                 <p className="text[18px] text-white">포인트를 획득하세요</p>
               </div>
-              <img src="/images/hp-main004.svg" alt="배경" className="z-0" />
+              <img src="/images/hpMain004.svg" alt="배경" className="z-0" />
             </div>
             <div className="flex justify-center">
               <div className="pt-[113px] text-center">
                 <img
-                  src="/images/hp-main005.svg"
+                  src="/images/hpMain005.svg"
                   alt="배경"
                   className="pb-[27px] mx-auto"
                 />

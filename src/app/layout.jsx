@@ -1,3 +1,4 @@
+import GNB from "@/components/organisms/gnb";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { Geist, Geist_Mono, Noto_Sans_KR } from "next/font/google";
@@ -37,7 +38,12 @@ export default function RootLayout({ children }) {
           antialiased
         `}
       >
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <header>
+            <GNB />
+          </header>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

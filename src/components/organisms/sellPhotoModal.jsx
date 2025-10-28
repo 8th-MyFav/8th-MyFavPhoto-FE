@@ -112,7 +112,11 @@ const SellPhotoModal = ({ isOpen, onClose, cards = [], onCardSelect }) => {
                 key={index}
                 onClick={() => {
                   onClose(); // Sell 모달 닫기
-                  onCardSelect && onCardSelect(card); // 선택 카드 전달
+                  onCardSelect &&
+                    onCardSelect({
+                      ...card,
+                      rarity: card.rarityIcon, // 중요: CardDetailSellModal용 필드 추가
+                    });
                 }}
                 className="cursor-pointer"
               >
