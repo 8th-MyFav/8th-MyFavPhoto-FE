@@ -37,7 +37,6 @@ const CardDetailSellModal = ({ isOpen, onClose, card }) => {
   };
 
   const handleSell = () => {
-    // 조건 확인
     const isValid =
       quantity > 0 &&
       selectedRarity &&
@@ -45,14 +44,11 @@ const CardDetailSellModal = ({ isOpen, onClose, card }) => {
       description.trim().length > 0;
 
     if (isValid) {
-    // 조건 만족 → 성공 페이지로 이동
-    router.push(`marketplace/sell/success`);
-  } else {
-    // 조건 불만족 → 실패 페이지로 이동
-    router.push(`marketplace/sell/fail`);
-  }
+      router.push(`/marketplace/sell/success?rarity=${card.rarity}&title=${encodeURIComponent(card.title)}&quantity=${quantity}`);
+    } else {
+      router.push(`/marketplace/sell/fail?rarity=${card.rarity}&title=${encodeURIComponent(card.title)}&quantity=${quantity}`);
+    }
 
-    // 모달 닫기
     onClose();
   };
 
@@ -83,10 +79,12 @@ const CardDetailSellModal = ({ isOpen, onClose, card }) => {
 
         {/* 헤더 */}
         <div className="flex flex-col mb-[40px]">
-          <h2 className="text-[24px] text-gray-400 font-[BR B] mb-[10px]">
+          <h2 className="text-[24px] text-gray-400 font-[BR B] mb-[10px]"
+          style={{ fontFamily: "var(--font-br)" }}>
             나의 포토카드 판매하기
           </h2>
-          <h3 className="text-[40px] font-bold text-white mb-[40px] border-b border-white pb-[10px]">
+          <h3 className="text-[40px] text-white mb-[40px] border-b border-white pb-[10px]"
+          style={{ fontFamily: "var(--font-br)" }}>
             {card.title}
           </h3>
         </div>
@@ -107,13 +105,13 @@ const CardDetailSellModal = ({ isOpen, onClose, card }) => {
               <div className="flex items-center gap-[15px]">
                 <span
                   style={{
-                    color: getRarityColor(card.rarityIcon),
+                    color: getRarityColor(card.rarity),
                     fontFamily: "Noto Sans KR",
                     fontSize: "24px",
                     fontWeight: 700,
                   }}
                 >
-                  {card.rarityIcon}
+                  {card.rarity}
                 </span>
 
                 <span className="text-gray-400">|</span>
