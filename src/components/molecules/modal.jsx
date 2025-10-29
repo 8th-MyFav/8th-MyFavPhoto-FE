@@ -18,7 +18,7 @@ const Modal = ({
 
       {/* 모달 박스 */}
       <div
-        className="relative flex flex-col items-center rounded-[2px] bg-gray-700 z-10 pointer-events-auto"
+        className="relative flex flex-col items-center rounded-[2px] bg-gray-500 z-10 pointer-events-auto"
         style={{
           width: "560px",
           flexShrink: 0,
