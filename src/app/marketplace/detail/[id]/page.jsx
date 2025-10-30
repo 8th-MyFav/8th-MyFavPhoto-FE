@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Modal from "@/components/molecules/modal";
 import CardTradeModal from "@/components/organisms/cardTradeModal";
 import ExchangeModal from "@/components/organisms/exchangeModal";
+import TradeCard from "@/components/organisms/tradeCard";
 
 // 더미 카드 데이터
 const cardDataServer = Array.from({ length: 30 }, (_, i) => ({
@@ -39,6 +40,11 @@ export default function DetailPage() {
   const [isTradeModalOpen, setIsTradeModalOpen] = useState(false);
   const [isExchangeModalOpen, setIsExchangeModalOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState(null);
+
+  // 취소 모달
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  const [cancelTargetCard, setCancelTargetCard] = useState(null);
+
   const total = card ? count * card.price : 0;
 
   const decrease = () => count > 1 && setCount(count - 1);
@@ -64,6 +70,20 @@ export default function DetailPage() {
     } else {
       router.push(`/marketplace/detail/${cardId}/fail${query}`);
     }
+  };
+
+  // TradeCard purchase 모드 취소 버튼 클릭
+  const handleCancelTradeCard = (targetCard) => {
+    setCancelTargetCard(targetCard);
+    setIsCancelModalOpen(true);
+  };
+
+  // 취소 확인 버튼 클릭
+  const handleConfirmCancel = () => {
+    console.log("교환 제시 취소 완료:", cancelTargetCard);
+    setIsCancelModalOpen(false);
+    setCancelTargetCard(null);
+    // 실제 로직: 선택 카드 제거 등
   };
 
   return (
@@ -103,7 +123,6 @@ export default function DetailPage() {
 
         {/* 카드 상세 정보 */}
         <div className="flex flex-col md:flex-row gap-10 items-start">
-          {/* 이미지 */}
           <div className="flex-1">
             <img
               src={card.topImage}
@@ -112,7 +131,6 @@ export default function DetailPage() {
             />
           </div>
 
-          {/* 카드 정보 */}
           <div style={{ width: "440px" }}>
             <div className="flex justify-between items-center mb-8">
               <div className="flex gap-4 items-center">
@@ -135,9 +153,7 @@ export default function DetailPage() {
             </div>
 
             <hr className="border-gray-700 mb-4" />
-
             <p className="text-white mb-6">{card.content}</p>
-
             <hr className="border-gray-700 mb-4" />
 
             {/* 가격 및 수량 */}
@@ -171,8 +187,7 @@ export default function DetailPage() {
             <div className="flex justify-between items-center mb-10">
               <span className="text-white text-lg">총 가격</span>
               <span className="text-white font-bold text-xl">
-                {total} P{" "}
-                <span className="text-gray-400 text-lg">({count}장)</span>
+                {total} P <span className="text-gray-400 text-lg">({count}장)</span>
               </span>
             </div>
 
@@ -219,7 +234,7 @@ export default function DetailPage() {
             style={{
               gap: "15px",
               marginTop: "20px",
-              marginBottom: "120px", // ✅ 여기에 margin-bottom 추가
+              marginBottom: "120px",
             }}
           >
             <span style={{ color: rarityColor, fontWeight: 700 }}>
@@ -233,7 +248,7 @@ export default function DetailPage() {
             </span>
           </div>
 
-          {/* ✅ 내가 제시한 교환 목록 추가 */}
+          {/* 내가 제시한 교환 목록 */}
           <h3
             style={{
               color: "var(--white-white, #FFF)",
@@ -251,12 +266,33 @@ export default function DetailPage() {
             style={{
               border: "none",
               borderTop: "2px solid var(--gray-gray100, #EEE)",
+              marginBottom: "70px",
             }}
           />
+
+          <div className="flex flex-col md:flex-row gap-6">
+            {cardDataServer.slice(0, 2).map((dummyCard, index) => (
+              <TradeCard
+                key={index}
+                proposal={{
+                  id: index,
+                  imageUrl: dummyCard.topImage,
+                  title: dummyCard.title,
+                  rarity: dummyCard.rarity,
+                  category: dummyCard.category,
+                  price: dummyCard.price,
+                  description: dummyCard.content,
+                  sellerName: dummyCard.author,
+                }}
+                mode="purchase"
+                onCancel={() => handleCancelTradeCard(dummyCard)}
+              />
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* 교환 선택 모달 */}
+      {/* 모달 */}
       {isTradeModalOpen && (
         <CardTradeModal
           isOpen={isTradeModalOpen}
@@ -269,7 +305,6 @@ export default function DetailPage() {
         />
       )}
 
-      {/* 교환 제안 모달 */}
       {isExchangeModalOpen && (
         <ExchangeModal
           selectedCard={selectedCard}
@@ -278,7 +313,6 @@ export default function DetailPage() {
         />
       )}
 
-      {/* 구매 모달 */}
       {isModalOpen && (
         <Modal
           title="포토카드 구매"
@@ -286,6 +320,17 @@ export default function DetailPage() {
           buttonText="구매하기"
           onClose={() => setIsModalOpen(false)}
           onButtonClick={handlePurchase}
+        />
+      )}
+
+      {/* 취소 확인 모달 */}
+      {isCancelModalOpen && cancelTargetCard && (
+        <Modal
+          title="교환 제시 취소"
+          content={`[${cancelTargetCard.rarity} | ${cancelTargetCard.title}] 교환 제시를 취소하시겠습니까?`}
+          buttonText="취소하기"
+          onClose={() => setIsCancelModalOpen(false)}
+          onButtonClick={handleConfirmCancel}
         />
       )}
     </div>
