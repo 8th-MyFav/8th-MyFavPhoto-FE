@@ -3,19 +3,29 @@
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Modal from "@/components/molecules/modal";
+import CardTradeModal from "@/components/organisms/cardTradeModal";
+import ExchangeModal from "@/components/organisms/exchangeModal";
 
 // 더미 카드 데이터
 const cardDataServer = Array.from({ length: 30 }, (_, i) => ({
   topImage: "/images/sample.svg",
   title: `아름다운 풍경 ${i + 1}`,
-  rarity: i % 4 === 0 ? "COMMON" : i % 4 === 1 ? "RARE" : i % 4 === 2 ? "SUPER RARE" : "LEGENDARY",
+  rarity:
+    i % 4 === 0
+      ? "COMMON"
+      : i % 4 === 1
+      ? "RARE"
+      : i % 4 === 2
+      ? "SUPER RARE"
+      : "LEGENDARY",
   category: i % 3 === 0 ? "풍경" : i % 3 === 1 ? "인물" : "동물",
   author: `글쓴이 ${i + 1}`,
   content: "포토카드 상세 설명입니다.",
   price: (i + 1) * 10,
   remaining: i % 3 === 0 ? 0 : 2,
   total: 5,
-  exchangeInfo: "푸릇푸릇한 여름 풍경, 눈 많이 내린 겨울 풍경 사진에 관심이 많습니다.",
+  exchangeInfo:
+    "푸릇푸릇한 여름 풍경, 눈 많이 내린 겨울 풍경 사진에 관심이 많습니다.",
 }));
 
 export default function DetailPage() {
@@ -26,28 +36,32 @@ export default function DetailPage() {
 
   const [count, setCount] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isTradeModalOpen, setIsTradeModalOpen] = useState(false);
+  const [isExchangeModalOpen, setIsExchangeModalOpen] = useState(false);
+  const [selectedCard, setSelectedCard] = useState(null);
   const total = card ? count * card.price : 0;
 
-  const decrease = () => { if (count > 1) setCount(count - 1); };
-  const increase = () => { if (count < card.remaining) setCount(count + 1); };
+  const decrease = () => count > 1 && setCount(count - 1);
+  const increase = () => count < card.remaining && setCount(count + 1);
 
-  if (!card) return <div className="text-white p-8">카드를 찾을 수 없습니다.</div>;
+  if (!card)
+    return <div className="text-white p-8">카드를 찾을 수 없습니다.</div>;
 
   // 등급 색상 설정
-  let rarityColor = "var(--yellow-yellow, #EFFF04)";
-  if (card.rarity === "RARE") rarityColor = "var(--blue-blue, #29C9F9)";
-  else if (card.rarity === "SUPER RARE") rarityColor = "var(--purple-purple, #A77EFF)";
-  else if (card.rarity === "LEGENDARY") rarityColor = "var(--pink-pink, #FF2A6A)";
+  let rarityColor = "var(--color-main)";
+  if (card.rarity === "RARE") rarityColor = "var(--color-blue)";
+  else if (card.rarity === "SUPER RARE") rarityColor = "var(--color-purple)";
+  else if (card.rarity === "LEGENDARY") rarityColor = "var(--color-pink)";
 
-  // 모달 구매 버튼 클릭 시 처리
+  // 구매 버튼 클릭 시 처리
   const handlePurchase = () => {
     setIsModalOpen(false);
-    const query = `?rarity=${card.rarity}&title=${encodeURIComponent(card.title)}&quantity=${count}`;
+    const query = `?rarity=${card.rarity}&title=${encodeURIComponent(
+      card.title
+    )}&quantity=${count}`;
     if (count <= card.remaining) {
-      // 구매 가능 -> 성공 페이지로 이동
       router.push(`/marketplace/detail/${cardId}/success${query}`);
     } else {
-      // 구매 불가 -> 실패 페이지로 이동
       router.push(`/marketplace/detail/${cardId}/fail${query}`);
     }
   };
@@ -59,13 +73,9 @@ export default function DetailPage() {
         <div className="mb-8">
           <div
             style={{
-              color: "var(--gray-gray300, #A4A4A4)",
-              fontFamily: "BR B",
+              color: "var(--color-gray-300)",
+              fontFamily: "var(--font-br)",
               fontSize: "24px",
-              fontStyle: "normal",
-              fontWeight: 400,
-              lineHeight: "normal",
-              letterSpacing: "-0.72px",
               marginBottom: "60px",
             }}
           >
@@ -73,14 +83,11 @@ export default function DetailPage() {
           </div>
 
           <h2
-            className="font-bold"
             style={{
-              color: "var(--white-white, #FFF)",
-              fontFamily: '"Noto Sans KR"',
+              color: "var(--color-white)",
+              fontFamily: "var(--font-noto)",
               fontSize: "40px",
-              fontStyle: "normal",
               fontWeight: 700,
-              lineHeight: "normal",
               marginBottom: "20px",
             }}
           >
@@ -88,40 +95,38 @@ export default function DetailPage() {
           </h2>
           <hr
             style={{
-              border: "none",
-              borderTop: "2px solid var(--gray-gray100, #EEE)",
+              borderTop: "2px solid var(--color-gray-100)",
               marginBottom: "70px",
             }}
           />
         </div>
 
+        {/* 카드 상세 정보 */}
         <div className="flex flex-col md:flex-row gap-10 items-start">
           {/* 이미지 */}
           <div className="flex-1">
-            <img src={card.topImage} alt={card.title} className="rounded-md object-cover w-full" />
+            <img
+              src={card.topImage}
+              alt={card.title}
+              className="rounded-md object-cover w-full"
+            />
           </div>
 
           {/* 카드 정보 */}
           <div style={{ width: "440px" }}>
             <div className="flex justify-between items-center mb-8">
               <div className="flex gap-4 items-center">
-                <span style={{ color: rarityColor, fontFamily: '"Noto Sans KR"', fontSize: "24px", fontWeight: 700 }}>
+                <span style={{ color: rarityColor, fontWeight: 700 }}>
                   {card.rarity}
                 </span>
-                <span style={{ color: "var(--gray-gray300, #A4A4A4)", fontFamily: '"Noto Sans KR"', fontSize: "24px", fontWeight: 700 }}>
-                  |
-                </span>
-                <span style={{ color: "var(--gray-gray300, #A4A4A4)", fontFamily: '"Noto Sans KR"', fontSize: "24px", fontWeight: 700 }}>
+                <span style={{ color: "var(--color-gray-300)" }}>|</span>
+                <span style={{ color: "var(--color-gray-300)" }}>
                   {card.category}
                 </span>
               </div>
               <span
                 style={{
-                  color: "var(--white-white, #FFF)",
-                  fontFamily: '"Noto Sans KR"',
-                  fontSize: "24px",
-                  fontWeight: 700,
-                  lineHeight: "normal",
+                  color: "var(--color-white)",
                   textDecorationLine: "underline",
                 }}
               >
@@ -131,23 +136,21 @@ export default function DetailPage() {
 
             <hr className="border-gray-700 mb-4" />
 
-            <p style={{ color: "var(--white-white, #FFF)", fontFamily: '"Noto Sans KR"', fontSize: "18px", fontWeight: 400, margin: "30px 0" }}>
-              {card.content}
-            </p>
+            <p className="text-white mb-6">{card.content}</p>
 
             <hr className="border-gray-700 mb-4" />
 
-            {/* 가격 / 잔여 */}
+            {/* 가격 및 수량 */}
             <div className="space-y-3 mb-6">
-              <div className="flex justify-between text-lg">
+              <div className="flex justify-between">
                 <span className="text-gray-400">가격</span>
                 <span className="text-white font-bold">{card.price} P</span>
               </div>
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between">
                 <span className="text-gray-400">잔여</span>
-                <span className="flex gap-1">
+                <span>
                   <span className="text-white font-bold">{card.remaining}</span>
-                  <span className="text-gray-400">/ {card.total}</span>
+                  <span className="text-gray-400"> / {card.total}</span>
                 </span>
               </div>
             </div>
@@ -158,9 +161,9 @@ export default function DetailPage() {
             <div className="flex justify-between items-center mb-6">
               <span className="text-white text-lg">구매수량</span>
               <div className="flex items-center border border-white rounded-md px-2">
-                <button onClick={decrease} className="w-8 h-8 text-lg flex items-center justify-center">−</button>
+                <button onClick={decrease}>−</button>
                 <span className="w-8 text-center">{count}</span>
-                <button onClick={increase} className="w-8 h-8 text-lg flex items-center justify-center">+</button>
+                <button onClick={increase}>＋</button>
               </div>
             </div>
 
@@ -168,13 +171,14 @@ export default function DetailPage() {
             <div className="flex justify-between items-center mb-10">
               <span className="text-white text-lg">총 가격</span>
               <span className="text-white font-bold text-xl">
-                {total} P <span className="text-gray-400 text-lg">({count}장)</span>
+                {total} P{" "}
+                <span className="text-gray-400 text-lg">({count}장)</span>
               </span>
             </div>
 
-            {/* 포토카드 구매하기 버튼 */}
+            {/* 구매 버튼 */}
             <button
-              className="bg-[#fff600] rounded-md w-full h-20 text-black font-bold cursor-pointer"
+              className="bg-[var(--color-main)] rounded-md w-full h-20 text-black font-bold cursor-pointer"
               style={{ marginBottom: "120px" }}
               onClick={() => setIsModalOpen(true)}
             >
@@ -186,10 +190,11 @@ export default function DetailPage() {
         {/* 교환 희망 정보 */}
         <div className="mt-20">
           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-6 mb-[20px]">
-            <h3 className="font-semibold" style={{ fontSize: "40px" }}>교환 희망 정보</h3>
+            <h3 style={{ fontSize: "40px", fontWeight: 700 }}>교환 희망 정보</h3>
             <button
-              className="bg-[#fff600] text-black font-semibold rounded-md cursor-pointer"
+              className="bg-[var(--color-main)] text-black font-semibold rounded-md cursor-pointer"
               style={{ width: "440px", height: "60px" }}
+              onClick={() => setIsTradeModalOpen(true)}
             >
               포토카드 교환하기
             </button>
@@ -199,32 +204,81 @@ export default function DetailPage() {
 
           <p
             style={{
-              color: "var(--white-white, #FFF)",
-              fontFamily: '"Noto Sans KR"',
+              color: "var(--color-white)",
+              fontFamily: "var(--font-noto)",
               fontSize: "24px",
               fontWeight: 700,
-              lineHeight: "normal",
               marginTop: "60px",
             }}
           >
             {card.exchangeInfo}
           </p>
 
-          <div className="flex items-center" style={{ gap: "15px", marginTop: "20px" }}>
-            <span style={{ color: rarityColor, fontFamily: '"Noto Sans KR"', fontSize: "24px", fontWeight: 700 }}>
+          <div
+            className="flex items-center"
+            style={{
+              gap: "15px",
+              marginTop: "20px",
+              marginBottom: "120px", // ✅ 여기에 margin-bottom 추가
+            }}
+          >
+            <span style={{ color: rarityColor, fontWeight: 700 }}>
               {card.rarity}
             </span>
-            <span style={{ color: "var(--gray-gray400, #5A5A5A)", fontFamily: '"Noto Sans KR"', fontSize: "24px", fontWeight: 700 }}>
+            <span style={{ color: "var(--color-gray-400)", fontWeight: 700 }}>
               |
             </span>
-            <span style={{ color: "var(--gray-gray300, #A4A4A4)", fontFamily: '"Noto Sans KR"', fontSize: "24px", fontWeight: 700 }}>
+            <span style={{ color: "var(--color-gray-300)", fontWeight: 700 }}>
               {card.category}
             </span>
           </div>
+
+          {/* ✅ 내가 제시한 교환 목록 추가 */}
+          <h3
+            style={{
+              color: "var(--white-white, #FFF)",
+              fontFamily: "Noto Sans KR",
+              fontSize: "40px",
+              fontStyle: "normal",
+              fontWeight: 700,
+              lineHeight: "normal",
+              marginBottom: "20px",
+            }}
+          >
+            내가 제시한 교환 목록
+          </h3>
+          <hr
+            style={{
+              border: "none",
+              borderTop: "2px solid var(--gray-gray100, #EEE)",
+            }}
+          />
         </div>
       </div>
 
-      {/* 모달 */}
+      {/* 교환 선택 모달 */}
+      {isTradeModalOpen && (
+        <CardTradeModal
+          isOpen={isTradeModalOpen}
+          onClose={() => setIsTradeModalOpen(false)}
+          onCardSelect={(selected) => {
+            setSelectedCard(selected);
+            setIsTradeModalOpen(false);
+            setTimeout(() => setIsExchangeModalOpen(true), 100);
+          }}
+        />
+      )}
+
+      {/* 교환 제안 모달 */}
+      {isExchangeModalOpen && (
+        <ExchangeModal
+          selectedCard={selectedCard}
+          targetCard={card}
+          onClose={() => setIsExchangeModalOpen(false)}
+        />
+      )}
+
+      {/* 구매 모달 */}
       {isModalOpen && (
         <Modal
           title="포토카드 구매"

@@ -8,26 +8,31 @@ import NotificationButton from "./notificationButton";
 const Navigation = () => {
   const { isAuthenticated, loading, user, logout } = useAuth();
   const [points, setPoints] = useState(0);
-  const [showProfile, setShowProfile] = useState(false); //profile 완료되면 삭제 예정
 
-  // 프로필 모달 핸들러
-  const handleProfileModal = () => {
-    setShowProfile(!showProfile);
-  };
+  // 포인트 상태 변경 디버깅
+  useEffect(() => {
+    console.log("포인트 상태 변경:", points);
+  }, [points]);
 
   useEffect(
     function () {
-      // 로그인 여부를 판단함
-      if (!isAuthenticated && !loading) {
-        // 로그인된 경우 포인트 데이터를 불러옴
+      // 로그인된 경우에만 포인트 데이터를 불러옴
+      if (isAuthenticated && !loading) {
         const fetchPoints = async () => {
           try {
-            const response = await fetch("/points", {
-              method: "GET",
-            });
-            const data = await response.json();
-            if (typeof totalPoints === "number") {
-              setPoints(totalPoints);
+            const token = localStorage.getItem("accessToken");
+            if (!token) return;
+
+            const res = await fetch(
+              `${process.env.NEXT_PUBLIC_API_URL}/users/points`,
+              {
+                headers: { Authorization: `Bearer ${token}` },
+              }
+            );
+
+            if (res.ok) {
+              const data = await res.json();
+              setPoints(Number(data?.acc_point) || 0);
             }
           } catch (error) {
             console.error("포인트 불러오기 실패:", error);
@@ -66,11 +71,7 @@ const Navigation = () => {
       <nav className="flex justify-center items-center gap-[30px] text-[var(--color-gray-200)] text-[14px] font-bold ">
         <p>{points} P</p>
         <NotificationButton />
-        <p
-          className="self-end cursor-pointer"
-          style={{ fontFamily: "var(--font-br)" }}
-          onClick={handleProfileModal}
-        >
+        <p className="self-end" style={{ fontFamily: "var(--font-br)" }}>
           {user.nickname}
         </p>
         <p className="flex justify-center self-start">|</p>
@@ -81,70 +82,6 @@ const Navigation = () => {
           로그아웃
         </button>
       </nav>
-
-      {/* 프로필 모달 - 260x231 사이즈, 네비게이션 바로 밑 */}
-      {showProfile && (
-        <>
-          {/* 배경 오버레이 */}
-          <div
-            className="fixed inset-0 z-40"
-            onClick={() => setShowProfile(false)}
-            style={{ pointerEvents: "auto" }}
-          />
-          {/* 모달 */}
-          <div
-            className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-[260px] bg-[#161616] rounded-lg shadow-xl/30 z-50 px-[20px] pb-[20px]"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div
-              className="p-4 text-white"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="border-b border-gray-400">
-                <p className="text-[18px] mb-[20px] font-noto-bold">
-                  안녕하세요, {user.nickname}님!
-                </p>
-                <p className="flex justify-between text-[12px] text-[var(--color-gray-300)] pb-[20px]">
-                  보유 포인트:{" "}
-                  <span className="text-[var(--color-main)]">{points} P</span>
-                </p>
-              </div>
-              <div className="flex flex-col gap-[14px] pt-[20px]">
-                <Link
-                  href="/marketplace"
-                  className="block w-full text-left text-sm hover:text-yellow-300 transition"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowProfile(false);
-                  }}
-                >
-                  마켓플레이
-                </Link>
-                <Link
-                  href="/"
-                  className="block w-full text-left text-sm hover:text-yellow-300 transition"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowProfile(false);
-                  }}
-                >
-                  마이 갤러리
-                </Link>
-                <Link
-                  href="/"
-                  className="block w-full text-left text-sm hover:text-yellow-300 transition"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowProfile(false);
-                  }}
-                >
-                  판매 중인 포토카드
-                </Link>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
     </div>
   );
 };
