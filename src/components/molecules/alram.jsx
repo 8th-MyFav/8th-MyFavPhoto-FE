@@ -1,109 +1,79 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
 
-const NotificationUI = () => {
-  const [show, setShow] = useState(false);
-
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      name: "홍승전",
-      grade: "COMMON",
-      content: "카드 뽑기",
-      count: 3,
-      action: "획득하셨",
-      time: "1시간 전",
-      isRead: false,
-    },
-    {
-      id: 2,
-      name: "홍승전",
-      grade: "LEGENDARY",
-      content: "랜덤박스",
-      count: 1,
-      action: "열으셨",
-      time: "2시간 전",
-      isRead: false,
-    },
-    {
-      id: 3,
-      name: "홍승전",
-      grade: "RARE",
-      content: "교환 제안",
-      count: 2,
-      action: "받으셨",
-      time: "3시간 전",
-      isRead: false,
-    },
-    {
-      id: 4,
-      name: "홍승전",
-      grade: "COMMON",
-      content: "포인트 보상",
-      count: 5,
-      action: "획득하셨",
-      time: "5시간 전",
-      isRead: false,
-    },
-    {
-      id: 5,
-      name: "홍승전",
-      grade: "LEGENDARY",
-      content: "카드 합성",
-      count: 1,
-      action: "완료하셨",
-      time: "1일 전",
-      isRead: false,
-    },
-  ]);
-
-  // 알림창 ON/OFF 토글
-  const handleToggle = () => {
-    setShow((prev) => !prev);
-  };
-
-  // 클릭 시 읽음 처리
-  const handleRead = (id) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
-    );
-  };
+const NotificationUI = ({
+  show,
+  notifications,
+  onClose,
+  onItemClick,
+  currentPage,
+  totalPages,
+  onPageChange,
+}) => {
+  if (!show) return null;
 
   return (
-    <div className="flex flex-col items-center mt-[100px]">
-      {/* 임시 알림 버튼 */}
-      <button
-        onClick={handleToggle}
-        className="px-4 py-2 bg-yellow-400 text-black rounded-md font-bold"
+    <>
+      {/* 배경 오버레이 */}
+      <div
+        className="fixed inset-0 z-40"
+        onClick={onClose}
+        style={{ pointerEvents: "auto" }}
+      />
+      {/* 알림 모달 */}
+      <div
+        className="absolute top-full left-1/2 transform -translate-x-1/2 w-[300px] bg-[#161616] rounded-[2px] shadow-xl/30 z-50 pointer-events-auto rounded-t-[2px]"
+        onClick={(e) => e.stopPropagation()}
       >
-        알림 버튼
-      </button>
-
-      {/* 알림창 컨테이너 */}
-      {show && (
-        <div className="flex flex-col mt-5 gap-0">
+        <div className="flex flex-col gap-0">
           {notifications.map((n) => (
             <div
               key={n.id}
-              onClick={() => handleRead(n.id)}
-              className={`w-[300px] h-[107px] rounded-none flex justify-center items-center cursor-pointer transition border-b border-[#3A3A3A] ${
-                n.isRead ? "bg-[#222222] opacity-60" : "bg-[#161616]"
-              }`}
+              onClick={() => onItemClick(n.id)}
+              className={`w-full h-[107px] rounded-none flex justify-center items-center cursor-pointer transition border-b border-[var(--color-gray-400)] px-[20px] text-left 
+                ${n.isRead ? "bg-[#161616]" : "bg-[#222222]"}`}
             >
-              {/* 내부 컨텐츠 */}
-              <div className="w-[260px] h-[67px] flex flex-col justify-between text-white text-sm">
-                <p className="text-[14px] font-regular">
-                  {n.name}님이 [{n.grade} | {n.content}]을 {n.count}장{" "}
-                  {n.action}
-                  습니다.
+              {/* 내부 컨텐츠 (API 형식에 맞춤) */}
+              <div className="flex flex-col justify-between text-sm">
+                <p
+                  className={`text-[14px] font-noto ${
+                    n.isRead ? "text-[var(--color-gray-400)]" : "text-white"
+                  }`}
+                >
+                  {n.message || "알림이 도착했습니다."}
                 </p>
-                <span className="text-[12px] text-[#A4A4A4]">{n.time}</span>
+                <span className="text-[12px] text-[var(--color-gray-400)] font-noto">
+                  {n.time}
+                </span>
               </div>
             </div>
           ))}
         </div>
-      )}
-    </div>
+
+        {/* 페이지네이션 */}
+        {totalPages > 1 && (
+          <div className="flex justify-center items-center gap-2 p-3 border-t border-[var(--color-gray-400)]">
+            <button
+              onClick={() => onPageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="px-2 py-1 text-xs text-[var(--color-gray-300)] disabled:opacity-50 disabled:cursor-not-allowed hover:text-white"
+            >
+              이전
+            </button>
+            <span className="text-xs text-[var(--color-gray-300)]">
+              {currentPage} / {totalPages}
+            </span>
+            <button
+              onClick={() => onPageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="px-2 py-1 text-xs text-[var(--color-gray-300)] disabled:opacity-50 disabled:cursor-not-allowed hover:text-white"
+            >
+              다음
+            </button>
+          </div>
+        )}
+      </div>
+    </>
   );
 };
 
