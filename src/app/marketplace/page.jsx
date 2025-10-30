@@ -58,8 +58,12 @@ const MarketplacePage = () => {
       const matchesSearch =
         card.title.toLowerCase().includes(searchText.toLowerCase()) ||
         card.author.toLowerCase().includes(searchText.toLowerCase());
-      const matchesRarity = selectedRarity ? card.rarityIcon === selectedRarity : true;
-      const matchesCategory = selectedCategory ? card.category === selectedCategory : true;
+      const matchesRarity = selectedRarity
+        ? card.rarityIcon === selectedRarity
+        : true;
+      const matchesCategory = selectedCategory
+        ? card.category === selectedCategory
+        : true;
       const matchesStatus =
         selectedStatus === "판매중"
           ? card.remaining > 0
@@ -93,7 +97,10 @@ const MarketplacePage = () => {
   // 더 불러오기
   const loadMore = () => {
     const currentLength = displayedCards.length;
-    const more = filteredCards.slice(currentLength, currentLength + ITEMS_PER_PAGE);
+    const more = filteredCards.slice(
+      currentLength,
+      currentLength + ITEMS_PER_PAGE
+    );
     setDisplayedCards((prev) => [...prev, ...more]);
     if (currentLength + more.length >= filteredCards.length) setHasMore(false);
   };
