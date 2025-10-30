@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import NotificationButton from "./notificationButton";
+import ProfileModal from "./profile";
 
 const Navigation = () => {
   const { isAuthenticated, loading, user, logout } = useAuth();
@@ -71,8 +72,8 @@ const Navigation = () => {
       <nav className="flex justify-center items-center gap-[30px] text-[var(--color-gray-200)] text-[14px] font-bold ">
         <p>{points} P</p>
         <NotificationButton />
-        <p className="self-end" style={{ fontFamily: "var(--font-br)" }}>
-          {user.nickname}
+        <p className="self-center" style={{ fontFamily: "var(--font-br)" }}>
+          {user.nickname} <ProfileModal />
         </p>
         <p className="flex justify-center self-start">|</p>
         <button

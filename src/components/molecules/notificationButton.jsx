@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import NotificationUI from "./alram"; // 알림 UI 컴포넌트
 
 const NotificationButton = () => {
@@ -9,6 +9,7 @@ const NotificationButton = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const ITEMS_PER_PAGE = 5;
+  const notiModal = useRef();
 
   const formatTime = (iso) => {
     if (!iso) return "";
@@ -35,7 +36,7 @@ const NotificationButton = () => {
         return "판매되었습니다.";
       case "SOLD_OUT":
         return "품절되었습니다.";
-      case "TRADE_OFFER":
+      case "TRADE_OFFERED":
         return "포토카드 교환을 제안했습니다.";
       case "TRADE_ACCEPTED":
         return "포토카드 교환이 성사되었습니다.";
@@ -56,89 +57,43 @@ const NotificationButton = () => {
     });
   };
 
-  // 알림 목록 불러오기 (서버 페이지네이션 사용)
-  const fetchNotifications = async (signal, page = 1) => {
-    try {
-      const token = localStorage.getItem("accessToken");
-      if (!token) {
-        console.warn("액세스 토큰이 없습니다.");
-        return;
-      }
+  // 더미 알림 로딩 (UI 점검용)
+  const loadDummyNotifications = () => {
+    const now = Date.now();
+    const oneHourAgo = new Date(now - 60 * 60000).toISOString();
+    const mk = (id, isRead, message) => ({
+      id,
+      isRead,
+      time: formatTime(oneHourAgo),
+      createdAtMs: Date.parse(oneHourAgo),
+      message,
+    });
 
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/notifications?page=${page}&pageSize=${ITEMS_PER_PAGE}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          signal,
-        }
-      );
+    const dummy = [
+      mk(1, false, "기며누님이 [RARE | 우리집 앞마당]을 1장 구매했습니다."),
+      mk(
+        2,
+        false,
+        "예진쓰님이 [COMMON | 스페인 여행]의 포토카드 교환을 제안했습니다."
+      ),
+      mk(3, true, "[LEGENDARY | 우리집 앞마당]이 품절되었습니다."),
+      mk(4, true, "[RARE | How Far I’ll Go] 3장을 성공적으로 구매했습니다."),
+      mk(
+        5,
+        false,
+        "예진쓰님과의 [COMMON | 스페인 여행]의 포토카드 교환이 성사되었습니다."
+      ),
+    ];
 
-      const contentType = res.headers.get("content-type") || "";
-      if (!res.ok) {
-        const text = await res.text();
-        console.error("알림 API 오류", res.status, text.slice(0, 500));
-        return;
-      }
-
-      if (!contentType.includes("application/json")) {
-        const text = await res.text();
-        console.error(
-          "알림 API가 JSON을 반환하지 않음:",
-          contentType,
-          text.slice(0, 500)
-        );
-        return;
-      }
-
-      const data = await res.json();
-
-      // 서버에서 배열로 직접 반환
-      if (!Array.isArray(data)) {
-        console.warn("알림 응답이 배열이 아닙니다:", data);
-        return;
-      }
-
-      // API 응답 데이터를 UI 형식으로 변환
-      const formattedNotifications = data.map((item) => ({
-        id: item.id,
-        isRead: Boolean(item.is_read),
-        time: item.createdAt ? formatTime(item.createdAt) : "",
-        createdAtMs: item.createdAt ? Date.parse(item.createdAt) : 0,
-        message: messageFromCategory(item.category),
-      }));
-
-      const sorted = sortNotifications(formattedNotifications);
-
-      // 읽지 않은 알림의 개수를 계산 (현재 페이지 기준)
-      const unread = sorted.filter((n) => !n.isRead).length;
-      setUnreadCount(unread);
-      setNotifications(sorted);
-
-      // 서버 페이지네이션: 현재 페이지가 마지막 페이지인지 확인
-      // (5개 미만이면 마지막 페이지로 간주)
-      const isLastPage = data.length < ITEMS_PER_PAGE;
-      if (isLastPage) {
-        setTotalPages(currentPage);
-      } else {
-        setTotalPages(currentPage + 1); // 다음 페이지가 있을 가능성
-      }
-    } catch (err) {
-      if (err.name === "AbortError") {
-        return; // 의도적 취소
-      }
-      console.error("알림 불러오기 실패:", err);
-    }
+    const sorted = sortNotifications(dummy);
+    setNotifications(sorted);
+    setUnreadCount(sorted.filter((n) => !n.isRead).length);
+    setTotalPages(Math.max(1, Math.ceil(sorted.length / ITEMS_PER_PAGE)));
   };
 
-  // 컴포넌트 마운트 시 알림 목록을 불러옴
+  // 컴포넌트 마운트 시 더미 알림 로드 (API 비활성화)
   useEffect(() => {
-    const controller = new AbortController();
-    fetchNotifications(controller.signal, currentPage);
-    return () => controller.abort(); // 컴포넌트 언마운트 시 fetch 취소
+    loadDummyNotifications();
   }, [currentPage]);
 
   // notifications 변경 시 읽지 않은 개수 동기화
@@ -169,37 +124,16 @@ const NotificationButton = () => {
     setCurrentPage(page);
   };
 
-  // 읽음 처리 API 호출
+  // 읽음 처리 (로컬만 갱신 - API 호출 주석 처리)
   const markAsRead = async (notificationId) => {
-    try {
-      const token = localStorage.getItem("accessToken");
-      if (!token) return;
-
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/notifications/${notificationId}/read`,
-        {
-          method: "PATCH",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
+    setNotifications((prev) => {
+      const updated = prev.map((notification) =>
+        notification.id === notificationId
+          ? { ...notification, isRead: true }
+          : notification
       );
-
-      if (res.ok) {
-        // 서버에서 읽음 처리 성공 시 로컬 상태도 업데이트 + 정렬 반영
-        setNotifications((prev) => {
-          const updated = prev.map((notification) =>
-            notification.id === notificationId
-              ? { ...notification, isRead: true }
-              : notification
-          );
-          return sortNotifications(updated);
-        });
-      }
-    } catch (error) {
-      console.error("읽음 처리 실패:", error);
-    }
+      return sortNotifications(updated);
+    });
   };
 
   return (

@@ -1,10 +1,8 @@
 "use client";
 
 import React from "react";
-import GNB from "@/components/organisms/gnb";
 import Button from "@/components/atoms/button";
 import { useRouter } from "next/navigation";
-import Navigation from "@/components/molecules/navigationMolecule";
 
 const HomePage = () => {
   const router = useRouter();
@@ -32,7 +30,7 @@ const HomePage = () => {
                     구매하기 어려웠던
                     <br />
                     <span className="text-[var(--color-main)] text-bold text-[40px] text-center">
-                      나의 최대
+                      나의 최애
                     </span>
                     가 여기에!
                   </h1>
