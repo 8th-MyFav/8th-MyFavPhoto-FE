@@ -216,7 +216,11 @@ export default function DetailPage() {
 
           <div
             className="flex items-center"
-            style={{ gap: "15px", marginTop: "20px" }}
+            style={{
+              gap: "15px",
+              marginTop: "20px",
+              marginBottom: "120px", // ✅ 여기에 margin-bottom 추가
+            }}
           >
             <span style={{ color: rarityColor, fontWeight: 700 }}>
               {card.rarity}
@@ -228,6 +232,27 @@ export default function DetailPage() {
               {card.category}
             </span>
           </div>
+
+          {/* ✅ 내가 제시한 교환 목록 추가 */}
+          <h3
+            style={{
+              color: "var(--white-white, #FFF)",
+              fontFamily: "Noto Sans KR",
+              fontSize: "40px",
+              fontStyle: "normal",
+              fontWeight: 700,
+              lineHeight: "normal",
+              marginBottom: "20px",
+            }}
+          >
+            내가 제시한 교환 목록
+          </h3>
+          <hr
+            style={{
+              border: "none",
+              borderTop: "2px solid var(--gray-gray100, #EEE)",
+            }}
+          />
         </div>
       </div>
 
