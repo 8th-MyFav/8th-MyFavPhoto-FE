@@ -30,7 +30,7 @@ const NotificationUI = ({
             <div
               key={n.id}
               onClick={() => onItemClick(n.id)}
-              className={`w-full h-[107px] rounded-none flex justify-center items-center cursor-pointer transition border-b border-[var(--color-gray-400)] px-[20px] text-left 
+              className={`w-full h-[107px] rounded-none flex justify-start items-center cursor-pointer transition border-b border-[var(--color-gray-400)] px-[20px] text-left 
                 ${n.isRead ? "bg-[#161616]" : "bg-[#222222]"}`}
             >
               {/* 내부 컨텐츠 (API 형식에 맞춤) */}
@@ -40,7 +40,7 @@ const NotificationUI = ({
                     n.isRead ? "text-[var(--color-gray-400)]" : "text-white"
                   }`}
                 >
-                  {n.message || "알림이 도착했습니다."}
+                  {n.message || "새로운 알림이 없습니다."}
                 </p>
                 <span className="text-[12px] text-[var(--color-gray-400)] font-noto">
                   {n.time}
