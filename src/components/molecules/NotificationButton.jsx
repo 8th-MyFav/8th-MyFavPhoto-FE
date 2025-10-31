@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import NotificationUI from "./alram"; // 알림 UI 컴포넌트
+import NotificationUI from "./Notification"; // 알림 UI 컴포넌트
 
 const NotificationButton = () => {
   const [showNotifications, setShowNotifications] = useState(false);
@@ -77,11 +77,18 @@ const NotificationButton = () => {
         "예진쓰님이 [COMMON | 스페인 여행]의 포토카드 교환을 제안했습니다."
       ),
       mk(3, true, "[LEGENDARY | 우리집 앞마당]이 품절되었습니다."),
-      mk(4, true, "[RARE | How Far I’ll Go] 3장을 성공적으로 구매했습니다."),
+      mk(4, true, `[RARE | How Far I’ll Go] 3장을 성공적으로 구매했습니다.`),
       mk(
         5,
         false,
-        "예진쓰님과의 [COMMON | 스페인 여행]의 포토카드 교환이 성사되었습니다."
+        "기며누 [RARE | 우리집 앞마당] 포토카드 교환을 제안했습니다."
+      ),
+      mk(6, true, "예진쓰님이 [COMMON | 스페인 여행]가 품절되었습니다."),
+      mk(7, false, `[RARE | How Far I’ll Go] 1장을 성공적으로 구매했습니다.`),
+      mk(
+        8,
+        false,
+        "예진쓰님이 [COMMON | 스페인 여행]의 포토카드 교환을 제안했습니다.."
       ),
     ];
 
@@ -104,7 +111,6 @@ const NotificationButton = () => {
 
   // 버튼 클릭 핸들러
   const handleClick = () => {
-    console.log("알림 버튼 클릭됨!");
     setShowNotifications(!showNotifications);
   };
 

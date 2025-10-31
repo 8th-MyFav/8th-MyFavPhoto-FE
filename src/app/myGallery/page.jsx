@@ -6,7 +6,9 @@ import MyGalleryHeader from "@/components/molecules/myGalleryHeader";
 import Card from "@/components/organisms/card";
 import SearchMolecule from "@/components/molecules/search";
 import Dropdown from "@/components/molecules/dropDown";
-import Pagenation from "@/components/molecules/pagenation";
+import Pagination from "@/components/molecules/pagination";
+import Modal from "@/components/molecules/modal";
+import { PATHNAME } from "@/constants";
 
 // sample-auth-needed
 // 이 페이지는 무조건 로그인이 돼야만 들어올 수 있는 페이지
@@ -14,6 +16,7 @@ import Pagenation from "@/components/molecules/pagenation";
 export default function MyGalleryPage() {
   const router = useRouter();
   const { isAuthenticated, loading, user } = useAuth();
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [ownedItems, setOwnedItems] = useState([]);
   const [searchText, setSearchText] = useState("");
@@ -34,17 +37,14 @@ export default function MyGalleryPage() {
     function () {
       // 로그인 여부를 판단함
       if (!isAuthenticated && !loading) {
-        // 로딩이 끝났는데, 로그인도 안된 경우
-        router.push("/login");
+        // 로딩이 끝났는데, 로그인도 안된 경우 모달 노출
+        setLoginModalOpen(true);
       } else {
         // 로딩이 끝나지 않았거나, 로그인이 된 경우
       }
     },
     [isAuthenticated, loading]
   );
-
-  // 디바운스된 키워드
-  const debouncedKeyword = useMemo(() => searchText, [searchText]);
 
   // 내 포토카드 목록 조회 (페이지네이션/필터/검색)
   useEffect(
@@ -65,7 +65,7 @@ export default function MyGalleryPage() {
             pageSize: String(pageSize),
             grade: gradeParam,
             genre: genreParam,
-            keyword: debouncedKeyword,
+            keyword: searchText,
           });
 
           const res = await fetch(
@@ -118,7 +118,7 @@ export default function MyGalleryPage() {
       pageSize,
       selectedRarity,
       selectedCategory,
-      debouncedKeyword,
+      searchText,
     ]
   );
 
@@ -235,8 +235,17 @@ export default function MyGalleryPage() {
 
   return (
     <div className="bg-black">
+      {loginModalOpen && (
+        <Modal
+          title="로그인이 필요합니다"
+          content="로그인 후 이용해 주세요."
+          buttonText="로그인하기"
+          onClose={() => setLoginModalOpen(false)}
+          onButtonClick={() => router.push(PATHNAME.LOGIN)}
+        />
+      )}
       <div className="bg-black">
-        <div className="bg-black mx-[220px]">
+        <div className="bg-black mx-x-desktop">
           <div className="">
             <MyGalleryHeader
               ownerName={user?.nickname || ""}
@@ -274,7 +283,7 @@ export default function MyGalleryPage() {
                 <Card key={idx} {...card} showRemainingAsFraction={true} />
               ))
             ) : (
-              <div className="col-span-3 text-center text-gray-300 text-[18px] mt-[100px]">
+              <div className="col-span-3 text-center text-gray-300 text-noto-xs mt-[100px]">
                 보유한 카드가 없습니다.
               </div>
             )}
@@ -282,7 +291,7 @@ export default function MyGalleryPage() {
 
           {/* 페이지네이션 */}
           <div className="flex justify-center items-center gap-4 mt-[24px]">
-            <Pagenation
+            <Pagination
               page={page}
               pageSize={pageSize}
               totalCount={headerTotal}

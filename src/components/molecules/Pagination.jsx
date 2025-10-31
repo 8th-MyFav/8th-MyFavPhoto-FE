@@ -7,7 +7,7 @@ import React from "react";
 // - pageSize: number
 // - totalCount: number
 // - onChange: (nextPage:number) => void
-const Pagenation = ({ page = 1, pageSize = 15, totalCount = 0, onChange }) => {
+const Pagination = ({ page = 1, pageSize = 15, totalCount = 0, onChange }) => {
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
   const go = (p) => {
@@ -101,4 +101,4 @@ const Pagenation = ({ page = 1, pageSize = 15, totalCount = 0, onChange }) => {
   );
 };
 
-export default Pagenation;
+export default Pagination;
