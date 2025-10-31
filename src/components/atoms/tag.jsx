@@ -1,5 +1,5 @@
 "use client";
-
+// Tag 컴포넌트
 import React from "react";
 
 export default function Tag({ type = "sale", size = "medium" }) {

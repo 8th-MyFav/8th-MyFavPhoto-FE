@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-// Badge 컴포넌트
+// Badge 컴포넌트.
 export default function Badge({ type = "COMMON", count = 0 }) {
   const COLORS = {
     COMMON: "var(--color-main)", // #EFFF04

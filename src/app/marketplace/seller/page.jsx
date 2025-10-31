@@ -1,6 +1,6 @@
 // 나의 판매 포토카드 페이지 (판매 중인 포토카드 페이지)
 "use client";
-
+// 판매자 페이지
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import MarketplaceHeader from "@/components/molecules/marketplaceHeader";
@@ -197,7 +197,6 @@ const SellerPage = () => {
         />
       )}
       */}
-
       {/* 판매 모달 */}
       <SellPhotoModal
         isOpen={isSellModalOpen}
