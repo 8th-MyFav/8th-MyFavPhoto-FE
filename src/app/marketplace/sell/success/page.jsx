@@ -18,7 +18,7 @@ export default function SellSuccessPage() {
       title={title}
       quantity={quantity}
       buttonText="나의 판매 포토카드에서 확인하기"
-      buttonAction={() => router.push("/mypage/sell")}
+      buttonAction={() => router.push("/marketplace/seller")}
     />
   );
 }

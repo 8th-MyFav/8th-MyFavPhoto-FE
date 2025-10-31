@@ -18,7 +18,7 @@ export default function PurchaseSuccessPage() {
       title={title}
       quantity={quantity}
       buttonText="마이갤러리에서 확인하기"
-      buttonAction={() => router.push("/mypage/gallery")}
+      buttonAction={() => router.push("/myGallery")}
     />
   );
 }
