@@ -36,4 +36,7 @@ export default function Tag({ type = "sale", size = "medium" }) {
       {s.text}
     </div>
   );
+feat-김성준2
 }
+}
+develop

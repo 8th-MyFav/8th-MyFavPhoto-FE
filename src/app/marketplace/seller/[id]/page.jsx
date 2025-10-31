@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import TradeCard from "@/components/organisms/tradeCard";
 import Modal from "@/components/molecules/modal";
 import CardDetailEditModal from "@/components/organisms/cardDetailEdit"; 
-
 const SellerDetailPage = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false); 
