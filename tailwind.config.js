@@ -6,6 +6,7 @@ module.exports = {
   ],
   theme: {
     screens: {
+      // 예시: mobile:w-[200px] , tablet:w-[200px]
       // mobile: 100px ~ 767px
       mobile: { max: "767px", min: "100px" },
       // tablet: 768px ~ 1199px (이미지의 1200px은 desktop 시작점으로 둠)
@@ -35,6 +36,44 @@ module.exports = {
         purple: "var(--color-purple)", // #a77eff
         pink: "var(--color-pink)", // #ff2a6a
         main: "var(--color-main)", // #efff04
+        "noti-read": "var(--color-noti-read)",
+        "noti-unread": "var(--color-noti-unread)",
+      },
+      fontSize: {
+        // 예시: text-br-3xl, text-noto-2xl
+
+        // 베라 폰트 : 사이즈
+        "br-3xl": ["62px", { fontFamily: "var(--font-br)" }],
+        "br-2xl": ["48px", { fontFamily: "var(--font-br)" }],
+        "br-lg": ["20px", { fontFamily: "var(--font-br)" }],
+        "br-md": ["18px", { fontFamily: "var(--font-br)" }],
+        "br-sm": ["16px", { fontFamily: "var(--font-br)" }],
+        // noto 폰트 : 사이즈
+        "noto-3xl": ["62px", { fontFamily: "var(--font-noto)" }],
+        "noto-2xl": ["48px", { fontFamily: "var(--font-noto)" }],
+        "noto-xl": ["40px", { fontFamily: "var(--font-noto)" }],
+        "noto-lg": ["36px", { fontFamily: "var(--font-noto)" }],
+        "noto-md": ["32px", { fontFamily: "var(--font-noto)" }],
+        "noto-base": ["24px", { fontFamily: "var(--font-noto)" }],
+        "noto-sm": ["20px", { fontFamily: "var(--font-noto)" }],
+        "noto-xs": ["18px", { fontFamily: "var(--font-noto)" }],
+        "noto-2xs": ["16px", { fontFamily: "var(--font-noto)" }],
+        "noto-3xs": ["14px", { fontFamily: "var(--font-noto)" }],
+        "noto-4xs": ["12px", { fontFamily: "var(--font-noto)" }],
+        "noto-5xs": ["10px", { fontFamily: "var(--font-noto)" }],
+      },
+
+      spacing: {
+        // 반응형 컨테이너 패딩 시스템
+        // 예시:  px-container-mobile, px-container-tablet, px-container-desktop
+        "container-mobile": "15px",
+        "container-tablet": "20px",
+        "container-desktop": "220px",
+        // 축약형으로도 사용 가능
+        // 예시: px-x-mobile, px-x-tablet, px-x-desktop
+        "x-mobile": "15px",
+        "x-tablet": "20px",
+        "x-desktop": "220px",
       },
     },
   },

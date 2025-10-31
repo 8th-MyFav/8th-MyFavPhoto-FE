@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
 import Button from "@/components/atoms/button";
 import FormGroup from "@/components/molecules/formGroup";
+import Modal from "@/components/molecules/modal";
+import { PATHNAME } from "@/constants";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -13,6 +15,12 @@ const LoginPage = () => {
   const [errors, setErrors] = useState({ email: "", password: "" });
   const { login, isAuthenticated, loading: authLoading } = useAuth();
   const router = useRouter();
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalContent, setModalContent] = useState({
+    title: "",
+    content: "",
+    buttonText: "확인",
+  });
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -28,7 +36,6 @@ const LoginPage = () => {
 
     try {
       const response = await login(email, password);
-      console.log("response:", response);
 
       if (!response.success) {
         // 로그인 실패
@@ -36,21 +43,31 @@ const LoginPage = () => {
           email: response.field === "email" ? response.message : "",
           password: response.field === "password" ? response.message : "",
         });
-        alert(response.message);
+        setModalContent({
+          title: "로그인 실패",
+          content: response.message,
+          buttonText: "확인",
+        });
+        setModalOpen(true);
         return;
       }
 
       // 로그인 성공
-      router.push("/");
+      router.push(PATHNAME.HOME);
     } catch (err) {
-      console.error("로그인 에러:", err);
       setErrors({ email: "", password: "서버 오류가 발생했습니다." });
+      setModalContent({
+        title: "일시적인 오류가 발생했어요",
+        content: "잠시 후 다시 시도해주세요.",
+        buttonText: "닫기",
+      });
+      setModalOpen(true);
     }
   };
 
   useEffect(() => {
     if (!authLoading && isAuthenticated) {
-      router.push("/");
+      router.push(PATHNAME.HOME);
     }
   }, [isAuthenticated, authLoading, router]);
 
@@ -58,8 +75,17 @@ const LoginPage = () => {
 
   return (
     <div className="bg-black min-h-screen px-[80px] flex justify-center">
-      <div className="border-[var(--color-gray-200)]">
-        <Link href="/">
+      {modalOpen && (
+        <Modal
+          title={modalContent.title}
+          content={modalContent.content}
+          buttonText={modalContent.buttonText}
+          onClose={() => setModalOpen(false)}
+          onButtonClick={() => setModalOpen(false)}
+        />
+      )}
+      <div className="border-gray-200">
+        <Link href={PATHNAME.HOME}>
           <img
             src="/images/favorite.svg"
             className="flex justify-center px-[95px] mt-[277px] mb-[80px] h-[60px]"
@@ -103,11 +129,11 @@ const LoginPage = () => {
           </div>
         </form>
 
-        <div className="flex justify-center gap-4 text-white text-[16px]">
+        <div className="flex justify-center gap-4 text-white text-noto-2xs">
           <p>최애의 포토가 처음이신가요?</p>
           <Link
-            className="text-[var(--color-main)] underline underline-offset-4"
-            href="/join"
+            className="text-main underline underline-offset-4"
+            href={PATHNAME.JOIN}
           >
             회원가입하기
           </Link>
