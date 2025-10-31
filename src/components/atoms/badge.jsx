@@ -11,6 +11,7 @@ export default function Badge({ type = "COMMON", count = 0 }) {
   };
 
   const color = COLORS[type.toUpperCase()];
+  const fontSize = SIZE[size];
 
   return (
     <div
