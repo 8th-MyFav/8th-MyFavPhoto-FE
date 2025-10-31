@@ -2,14 +2,15 @@
 
 import Link from "next/link";
 import React from "react";
-import Navigation from "../molecules/navigationMolecule";
+import Navigation from "../molecules/Navigation";
 import { usePathname } from "next/navigation";
+import { PATHNAME } from "@/constants";
 
-const GNB = ({ isLoggedIn }) => {
+const GNB = () => {
   const pathname = usePathname();
 
   // 숨길 페이지 경로
-  const hidePagePathname = ["/login", "/join"];
+  const hidePagePathname = [PATHNAME.LOGIN, PATHNAME.JOIN];
 
   // 숨김 여부 판별 함수
   const hideGNBpathname = (pathname) => {
@@ -21,14 +22,13 @@ const GNB = ({ isLoggedIn }) => {
     return null;
   }
 
-  console.log(pathname);
   return (
     <div className="bg-black">
-      <div className="flex justify-center mx-[220px] bg-black">
+      <div className="flex justify-center px-x-desktop bg-black">
         <nav className="w-full h-[60px] flex justify-between items-center bg-black">
           {/* 좌측 로고 */}
           <div className="flex items-center cursor-pointer">
-            <Link href="/">
+            <Link href={PATHNAME.HOME}>
               <img
                 src="/images/favorite.svg"
                 alt="최애의 포토"

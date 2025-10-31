@@ -1,14 +1,8 @@
-// 나의 판매 포토카드 페이지 (판매 중인 포토카드 페이지)
 "use client";
-feat-김성준2
-// 판매자 페이지
-import React, { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
-import MarketplaceHeader from "@/components/molecules/marketplaceHeader";
+
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import SellerHeader from "@/components/molecules/sellerHeader";
-develop
 import SearchMolecule from "@/components/molecules/search";
 import Dropdown from "@/components/molecules/dropDown";
 import Card from "@/components/organisms/card";
@@ -16,10 +10,6 @@ import Card from "@/components/organisms/card";
 import SellPhotoModal from "@/components/organisms/sellPhotoModal";
 import CardDetailSellModal from "@/components/organisms/cardDetailSellModal";
 import Tag from "@/components/atoms/tag";
-feat-김성준2
-import Badge from "@/components/atoms/badge";
-=======
-develop
 
 // 더미 카드 데이터
 const cardDataServer = Array.from({ length: 30 }, (_, i) => ({
@@ -117,37 +107,14 @@ const SellerPage = () => {
   const handleSellButtonClick = () => setIsSellModalOpen(true);
 
   return (
- feat-김성준2
-<div className="bg-black min-h-screen px-[80px] py-[40px] text-white relative">
-      {/* 상단 제목 */}
-      <h1 className="flex items-center text-white text-[62px] font-normal tracking-[-1.86px] flex justify-between items-center w-full pb-5 border-b border-white
-    fontFamily">나의 판매 포토카드</h1>
-    
-      <p className="text-[24px] text-white-300 mb-[20px] mt-[32px]">
-        유디님이 보유한 포토카드 <span className="text-[20px] text-gray-300">({filteredCards.length}장)</span>
-      </p>
-      
-<div className="flex gap-4 mb-[28px] ">
-  <Badge type="COMMON" count={20} />
-  <Badge type="RARE" count={8} />
-  <Badge type="SUPER RARE" count={3} />
-  <Badge type="LEGENDARY" count={5} />
-</div>
-      <div className="flex justify-between items-center mt-5 w-full tracking-[-1.86px] flex justify-between items-center w-full pb-5 border-t border-gray-400 mt-[40px] pt-[20px]">
-
     <div className="bg-black min-h-screen px-[80px] relative">
       <SellerHeader onSellClick={handleSellButtonClick} />
 
       <div className="flex justify-between items-center mt-5 w-full">
- develop
         <div className="flex items-center">
           <div className="mr-[60px]">
             <SearchMolecule onSearch={(text) => setSearchText(text)} />
           </div>
- feat-김성준2
-
-
-develop
           <div className="flex gap-[45px]">
             <Dropdown
               placeholder="등급"
@@ -159,13 +126,6 @@ develop
               options={["풍경", "인물", "동물", "추상"]}
               onChange={(value) => setSelectedCategory(value)}
             />
-feat-김성준2
-             <Dropdown
-              placeholder="판매방법"
-              options={["판매", "교환"]}
-              onChange={(value) => setSelectedStatus(value)}
-            />
- develop
             <Dropdown
               placeholder="매진여부"
               options={["판매중", "매진"]}
@@ -217,10 +177,7 @@ feat-김성준2
         />
       )}
       */}
-feat-김성준2
 
-
-develop
       {/* 판매 모달 */}
       <SellPhotoModal
         isOpen={isSellModalOpen}

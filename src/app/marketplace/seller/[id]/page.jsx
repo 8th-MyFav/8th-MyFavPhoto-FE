@@ -428,7 +428,7 @@ const SellerDetailPage = () => {
         >
           교환 제시 목록
         </h2>
-        <div className="border-t border-gray-700 mb-[40px]" />
+        <div className="border-t border-white mb-[70px]" />
 
         <div className="flex flex-col lg:flex-row gap-[40px] flex-wrap">
           {tradeProposals.map((proposal) => (
