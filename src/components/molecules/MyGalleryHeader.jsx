@@ -2,6 +2,7 @@
 import React from "react";
 import Button from "../atoms/button";
 import { useRouter } from "next/navigation";
+import { PATHNAME } from "@/constants";
 
 const MyGalleryHeader = ({
   ownerName = "",
@@ -13,7 +14,7 @@ const MyGalleryHeader = ({
 
   const handleNewPhotoCard = (e) => {
     e.preventDefault();
-    router.push("/create");
+    router.push(PATHNAME.CREATE);
   };
   const router = useRouter();
 

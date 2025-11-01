@@ -53,7 +53,7 @@ const LoginPage = () => {
       }
 
       // 로그인 성공
-      router.push(PATHNAME.HOME);
+      router.push(PATHNAME.MARKET);
     } catch (err) {
       setErrors({ email: "", password: "서버 오류가 발생했습니다." });
       setModalContent({
@@ -67,7 +67,7 @@ const LoginPage = () => {
 
   useEffect(() => {
     if (!authLoading && isAuthenticated) {
-      router.push(PATHNAME.HOME);
+      router.push(PATHNAME.MARKET);
     }
   }, [isAuthenticated, authLoading, router]);
 
@@ -85,7 +85,7 @@ const LoginPage = () => {
         />
       )}
       <div className="border-gray-200">
-        <Link href={PATHNAME.HOME}>
+        <Link href={PATHNAME.MARKET}>
           <img
             src="/images/favorite.svg"
             className="flex justify-center px-[95px] mt-[277px] mb-[80px] h-[60px]"
