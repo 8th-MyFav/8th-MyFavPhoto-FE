@@ -2,7 +2,8 @@
 
 import React from "react";
 
-export default function Badge({ type = "COMMON", size = "large" }) {
+// Badge 컴포넌트
+export default function Badge({ type = "COMMON", count = 0, size = "large" }) {
   // 등급별 색상
   const COLORS = {
     COMMON: "#EFFF04",
@@ -17,15 +18,22 @@ export default function Badge({ type = "COMMON", size = "large" }) {
     small: "text-[15px]",
   };
 
-  const color = COLORS[type.toUpperCase()];
-  const fontSize = SIZE[size];
+  const color = COLORS[type.toUpperCase()] || "#EFFF04";
+  const fontSize = SIZE[size] || SIZE.large;
 
   return (
     <div
-      className={`font-semibold ${fontSize}`}
-      style={{ color }}
+      className={`flex flex-col items-center justify-center border rounded-none text-center px-[20px] py-[8px] font-light ${fontSize}`}
+      style={{
+        borderColor: color,
+        color,
+        border: `1px solid ${color}`,
+        fontFamily: "var(--font-noto)",
+      }}
     >
-      {type.toUpperCase()}
+      <span>
+        {type.toUpperCase()} {count}장
+      </span>
     </div>
   );
 }

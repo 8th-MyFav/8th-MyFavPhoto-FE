@@ -1,8 +1,6 @@
 @import "tailwindcss";
 
-/* ────────────────────────────── */
 /* BR B 폰트 등록 */
-/* ────────────────────────────── */
 @font-face {
   font-family: "BR B";
   src: url("/fonts/BRB/BRBA.woff2") format("woff2"),
@@ -13,9 +11,7 @@
   font-display: swap;
 }
 
-/* ────────────────────────────── */
 /* 색상 변수 정의 */
-/* ────────────────────────────── */
 :root {
   --color-black: #0f0f0f;
   --color-gray-500: #161616;
@@ -36,22 +32,9 @@
   /* 폰트 변수 */
   --font-br: "BR B", sans-serif;
   --font-noto: "Noto Sans KR", sans-serif;
-
-  /* 세부 폰트 크기별 프리셋 */
-  --font-br-62: var(--font-br);
-  --font-br-48: var(--font-br);
-  --font-br-46: var(--font-br);
-  --font-br-40: var(--font-br);
-  --font-br-24: var(--font-br);
-  --font-br-18: var(--font-br);
-
-  --font-noto-bold-40: var(--font-noto);
-  --font-noto-regular-16: var(--font-noto);
 }
 
-/* ────────────────────────────── */
 /* 다크 모드 지원 */
-/* ────────────────────────────── */
 @media (prefers-color-scheme: dark) {
   :root {
     --background: var(--color-black);
@@ -59,13 +42,11 @@
   }
 }
 
-/* ────────────────────────────── */
 /* 기본 body 스타일 */
-/* ────────────────────────────── */
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-noto); /* ✅ 기본은 Noto Sans KR */
+  font-family: var(--font-noto-sans-kr); /* 기본은 next/font Noto Sans KR */
 }
 
 /* 입력 요소 포커스/자동완성 기본 배경색 제거 */
@@ -91,12 +72,80 @@ select:focus {
   border-color: var(--color-gray-200);
 }
 
-/* ────────────────────────────── */
 /* Tailwind용 커스텀 속성 (theme inline) */
-/* ────────────────────────────── */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-noto); /* ✅ Tailwind 기본 폰트 */
+
+  /* Tailwind v4 theme color tokens */
+  --color-black: var(--color-black);
+  --color-white: var(--color-white);
+  --color-gray-100: var(--color-gray-100);
+  --color-gray-200: var(--color-gray-200);
+  --color-gray-300: var(--color-gray-300);
+  --color-gray-400: var(--color-gray-400);
+  --color-gray-500: var(--color-gray-500);
+  --color-red: var(--color-red);
+  --color-blue: var(--color-blue);
+  --color-purple: var(--color-purple);
+  --color-pink: var(--color-pink);
+  --color-main: var(--color-main);
+  --color-noti-read: #161616;
+  --color-noti-unread: #222222;
+  --font-sans: var(--font-noto-sans-kr);
+  --font-br: var(--font-br);
   --font-mono: monospace;
+
+  /* Tailwind v4 custom text sizes for project conventions (Noto) */
+  --text-noto-3xl: 62px;
+  --text-noto-2xl: 48px;
+  --text-noto-xl: 40px;
+  --text-noto-lg: 36px;
+  --text-noto-md: 32px;
+  --text-noto-base: 24px;
+  --text-noto-sm: 20px;
+  --text-noto-xs: 18px;
+  --text-noto-2xs: 16px;
+  --text-noto-3xs: 14px;
+  --text-noto-4xs: 12px;
+  --text-noto-5xs: 10px;
+
+  /* BR font sizes (family applied via CSS rule) */
+  --text-br-3xl: 62px;
+  --text-br-2xl: 48px;
+  --text-br-lg: 20px;
+  --text-br-md: 18px;
+  --text-br-sm: 16px;
+
+  /* 커스텀 border-radius (기본 스타일) */
+  --radius-base: 2px;
+
+  /* Spacing tokens to mirror Tailwind config */
+  --spacing-container-mobile: 15px;
+  --spacing-container-tablet: 20px;
+  --spacing-container-desktop: 220px;
+  --spacing-x-mobile: 15px;
+  --spacing-x-tablet: 20px;
+  --spacing-x-desktop: 220px;
+}
+
+/* BR 폰트 크기 클래스에 폰트 패밀리 자동 적용 */
+.text-br-3xl,
+.text-br-2xl,
+.text-br-lg,
+.text-br-md,
+.text-br-sm {
+  font-family: var(--font-br);
+}
+
+/* 숫자 입력 스피너 제거 (Chrome, Safari, Edge) */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* 숫자 입력 스피너 제거 (Firefox) */
+input[type="number"] {
+  -moz-appearance: textfield;
 }

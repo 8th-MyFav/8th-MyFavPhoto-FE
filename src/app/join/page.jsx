@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import React, { useReducer, useState } from "react";
 import FormGroup from "@/components/molecules/formGroup";
 import Button from "@/components/atoms/button";
+import { PATHNAME } from "@/constants";
 
 const JoinPage = () => {
   const router = useRouter();
@@ -57,7 +58,7 @@ const JoinPage = () => {
       alert(response.message);
     } else {
       alert(`회원가입에 성공하였습니다.`);
-      router.push(`/login`);
+      router.push(PATHNAME.LOGIN);
     }
   };
 
@@ -76,8 +77,8 @@ const JoinPage = () => {
 
   return (
     <div className="bg-black min-h-screen px-[80px] flex justify-center">
-      <div className="border-[var(--color-gray-200)]">
-        <Link href="/">
+      <div className="border-gray-200">
+        <Link href={PATHNAME.HOME}>
           <img
             src="/images/favorite.svg"
             className="flex justify-center px-[95px] mt-[151px] mb-[80px] h-[60px]"
@@ -129,8 +130,9 @@ const JoinPage = () => {
             error={errors.passwordConfirmation}
             showPasswordToggle={true}
           />
-          <div className="text-[18px] pb-[40px]">
+          <div className="text-noto-xs pb-[40px]">
             <Button
+              type="submit"
               text="가입하기"
               width="520px"
               height="60px"
@@ -144,7 +146,7 @@ const JoinPage = () => {
           <p>이미 최애의포토 회원이신가요?</p>
           <Link
             className="text-[var(--color-main)] underline underline-offset-4"
-            href="/login"
+            href={PATHNAME.LOGIN}
           >
             로그인하기
           </Link>

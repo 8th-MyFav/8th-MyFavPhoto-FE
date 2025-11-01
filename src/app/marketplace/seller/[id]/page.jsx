@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import TradeCard from "@/components/organisms/tradeCard";
 import Modal from "@/components/molecules/modal";
 import CardDetailEditModal from "@/components/organisms/cardDetailEdit"; 
-
 const SellerDetailPage = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false); 
@@ -429,7 +428,7 @@ const SellerDetailPage = () => {
         >
           교환 제시 목록
         </h2>
-        <div className="border-t border-gray-700 mb-[40px]" />
+        <div className="border-t border-white mb-[70px]" />
 
         <div className="flex flex-col lg:flex-row gap-[40px] flex-wrap">
           {tradeProposals.map((proposal) => (

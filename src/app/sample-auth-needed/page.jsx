@@ -16,7 +16,7 @@ export default function SampleAuthNeededPage() {
       // 로그인 여부를 판단함
       if (!isAuthenticated && !loading) {
         // 로딩이 끝났는데, 로그인도 안된 경우
-        router.push("/login");
+        router.push(PATHNAME.LOGIN);
       } else {
         // 로딩이 끝나지 않았거나, 로그인이 된 경우
       }

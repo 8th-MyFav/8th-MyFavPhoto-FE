@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import Card from "./Card";
+import Card from "./card";
 
 const ExchangeModal = ({ selectedCard, onClose, targetCard }) => {
   const [offerText, setOfferText] = useState("");

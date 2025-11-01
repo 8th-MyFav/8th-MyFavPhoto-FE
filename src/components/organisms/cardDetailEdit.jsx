@@ -1,11 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
 import Button from "../atoms/button";
 
 const CardDetailEdit = ({ isOpen, onClose, card }) => {
-  const router = useRouter();
   if (!isOpen || !card) return null;
 
   const [selectedRarity, setSelectedRarity] = useState(card.rarity || "");
@@ -49,12 +47,7 @@ const CardDetailEdit = ({ isOpen, onClose, card }) => {
       selectedCategory &&
       description.trim().length > 0;
 
-    if (isValid) {
-      router.push("/marketplace/sell/success");
-    } else {
-      router.push("/marketplace/sell/fail");
-    }
-
+    // router.push 제거: 성공/실패 페이지 이동 없이 모달만 닫기
     onClose();
   };
 
@@ -92,7 +85,6 @@ const CardDetailEdit = ({ isOpen, onClose, card }) => {
 
         {/* 메인 정보 */}
         <div className="flex justify-start gap-[20px] mb-[30px]">
-          {/* 이미지 수정 */}
           <img
             src={card.imageUrl} 
             alt={card.title}
@@ -163,7 +155,6 @@ const CardDetailEdit = ({ isOpen, onClose, card }) => {
                   <span className="text-[18px]">{price}</span>
                   <button className="text-white text-[20px]" onClick={increasePrice}>+</button>
                 </div>
-                {/* P 위치 총 판매 수량 기준으로 맞춤 */}
                 <span className="text-[18px] text-white ml-[10px]">P</span>
               </div>
             </div>

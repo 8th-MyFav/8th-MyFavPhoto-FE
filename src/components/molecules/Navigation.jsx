@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import NotificationButton from "./notificationButton";
+import { PATHNAME } from "@/constants";
 
 const Navigation = () => {
   const { isAuthenticated, loading, user, logout } = useAuth();
@@ -55,11 +56,11 @@ const Navigation = () => {
   if (!isAuthenticated) {
     // 로그인 안 된 경우
     return (
-      <nav className="flex gap-[30px] text-[var(--color-gray-200)] text-[14px] font-bold">
-        <Link className="cursor-pointer no-underline" href="/login">
+      <nav className="flex gap-[30px] text-gray-200 text-noto-3xs font-bold">
+        <Link className="cursor-pointer no-underline" href={PATHNAME.LOGIN}>
           로그인
         </Link>
-        <Link className="cursor-pointer no-underline" href="/join">
+        <Link className="cursor-pointer no-underline" href={PATHNAME.JOIN}>
           회원가입
         </Link>
       </nav>
@@ -68,16 +69,14 @@ const Navigation = () => {
 
   return (
     <div className="relative">
-      <nav className="flex justify-center items-center gap-[30px] text-[var(--color-gray-200)] text-[14px] font-bold ">
-        <p>{points} P</p>
+      <nav className="flex justify-center items-center gap-[30px] text-gray-200 text-noto-3x ">
+        <p className="font-br font-bold">{points} P</p>
         <NotificationButton />
-        <p className="self-end" style={{ fontFamily: "var(--font-br)" }}>
-          {user.nickname}
-        </p>
+        <p className="self-center font-br">{user.nickname}</p>
         <p className="flex justify-center self-start">|</p>
         <button
           onClick={logout}
-          className="text-[var(--color-gray-400)] font-noto-bold cursor-pointer bg-transparent border-none p-0"
+          className="flex justify-center self-start text-gray-400 text-noto-3x font-bold cursor-pointer bg-transparent border-none p-0"
         >
           로그아웃
         </button>
