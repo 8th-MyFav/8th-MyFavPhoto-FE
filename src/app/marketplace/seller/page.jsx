@@ -1,25 +1,17 @@
 // 나의 판매 포토카드 페이지 (판매 중인 포토카드 페이지)
 "use client";
-feat-김성준2
-// 판매자 페이지
+
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import MarketplaceHeader from "@/components/molecules/marketplaceHeader";
-import React, { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+
 import SellerHeader from "@/components/molecules/sellerHeader";
-develop
 import SearchMolecule from "@/components/molecules/search";
 import Dropdown from "@/components/molecules/dropDown";
 import Card from "@/components/organisms/card";
-//import Modal from "@/components/molecules/modal";
 import SellPhotoModal from "@/components/organisms/sellPhotoModal";
 import CardDetailSellModal from "@/components/organisms/cardDetailSellModal";
 import Tag from "@/components/atoms/tag";
-feat-김성준2
 import Badge from "@/components/atoms/badge";
-=======
-develop
 
 // 더미 카드 데이터
 const cardDataServer = Array.from({ length: 30 }, (_, i) => ({
@@ -53,11 +45,7 @@ const SellerPage = () => {
   const [displayedCards, setDisplayedCards] = useState([]);
   const [hasMore, setHasMore] = useState(true);
 
-  // 로그인 모달 (나중에 사용할 예정)
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const [modalTitle, setModalTitle] = useState("");
-  const [modalContent, setModalContent] = useState("");
-
+  // 판매 모달 관련 상태
   const [isSellModalOpen, setIsSellModalOpen] = useState(false);
   const [selectedSellCard, setSelectedSellCard] = useState(null);
 
@@ -92,7 +80,7 @@ const SellerPage = () => {
     setHasMore(filteredCards.length > ITEMS_PER_PAGE);
   }, [searchText, selectedRarity, selectedCategory, selectedStatus, sortOrder]);
 
-  // 무한 스크롤 마지막 카드 감지
+  // 무한 스크롤
   const lastCardRef = (node) => {
     if (observer.current) observer.current.disconnect();
     observer.current = new IntersectionObserver((entries) => {
@@ -101,7 +89,7 @@ const SellerPage = () => {
     if (node) observer.current.observe(node);
   };
 
-  // 더 불러오기
+  // 추가 카드 로드
   const loadMore = () => {
     const currentLength = displayedCards.length;
     const more = filteredCards.slice(currentLength, currentLength + ITEMS_PER_PAGE);
@@ -117,37 +105,35 @@ const SellerPage = () => {
   const handleSellButtonClick = () => setIsSellModalOpen(true);
 
   return (
- feat-김성준2
-<div className="bg-black min-h-screen px-[80px] py-[40px] text-white relative">
+    <div className="bg-black min-h-screen px-[80px] py-[40px] text-white relative">
       {/* 상단 제목 */}
-      <h1 className="flex items-center text-white text-[62px] font-normal tracking-[-1.86px] flex justify-between items-center w-full pb-5 border-b border-white
-    fontFamily">나의 판매 포토카드</h1>
-    
-      <p className="text-[24px] text-white-300 mb-[20px] mt-[32px]">
-        유디님이 보유한 포토카드 <span className="text-[20px] text-gray-300">({filteredCards.length}장)</span>
-      </p>
-      
-<div className="flex gap-4 mb-[28px] ">
-  <Badge type="COMMON" count={20} />
-  <Badge type="RARE" count={8} />
-  <Badge type="SUPER RARE" count={3} />
-  <Badge type="LEGENDARY" count={5} />
-</div>
-      <div className="flex justify-between items-center mt-5 w-full tracking-[-1.86px] flex justify-between items-center w-full pb-5 border-t border-gray-400 mt-[40px] pt-[20px]">
+      <h1 className="flex items-center justify-between text-white text-[62px] font-normal tracking-[-1.86px] border-b border-white pb-5">
+        나의 판매 포토카드
+      </h1>
 
-    <div className="bg-black min-h-screen px-[80px] relative">
+      {/* 보유 현황 */}
+      <p className="text-[24px] text-white mb-[20px] mt-[32px]">
+        유디님이 보유한 포토카드{" "}
+        <span className="text-[20px] text-gray-300">({filteredCards.length}장)</span>
+      </p>
+
+      {/* 등급별 뱃지 */}
+      <div className="flex gap-4 mb-[28px]">
+        <Badge type="COMMON" count={20} />
+        <Badge type="RARE" count={8} />
+        <Badge type="SUPER RARE" count={3} />
+        <Badge type="LEGENDARY" count={5} />
+      </div>
+
       <SellerHeader onSellClick={handleSellButtonClick} />
 
-      <div className="flex justify-between items-center mt-5 w-full">
- develop
+      {/* 필터 및 정렬 */}
+      <div className="flex justify-between items-center mt-5 w-full border-t border-gray-400 pt-[20px]">
         <div className="flex items-center">
           <div className="mr-[60px]">
             <SearchMolecule onSearch={(text) => setSearchText(text)} />
           </div>
- feat-김성준2
 
-
-develop
           <div className="flex gap-[45px]">
             <Dropdown
               placeholder="등급"
@@ -159,15 +145,8 @@ develop
               options={["풍경", "인물", "동물", "추상"]}
               onChange={(value) => setSelectedCategory(value)}
             />
-feat-김성준2
-             <Dropdown
-              placeholder="판매방법"
-              options={["판매", "교환"]}
-              onChange={(value) => setSelectedStatus(value)}
-            />
- develop
             <Dropdown
-              placeholder="매진여부"
+              placeholder="판매 상태"
               options={["판매중", "매진"]}
               onChange={(value) => setSelectedStatus(value)}
             />
@@ -185,7 +164,9 @@ feat-김성준2
             optionList: { padding: "10px 24px" },
           }}
         />
-      </div> 
+      </div>
+
+      {/* 카드 리스트 */}
       <div className="grid grid-cols-3 gap-x-[80px] gap-y-[80px] mt-[80px]">
         {displayedCards.length > 0 ? (
           displayedCards.map((card, index) => (
@@ -205,23 +186,7 @@ feat-김성준2
         )}
       </div>
 
-      {/*
-      // 로그인 모달 (나중에 사용할 예정)
-      {isLoginModalOpen && (
-        <Modal
-          title={modalTitle}
-          content={modalContent}
-          buttonText="확인"
-          onClose={() => setIsLoginModalOpen(false)}
-          onButtonClick={() => setIsLoginModalOpen(false)}
-        />
-      )}
-      */}
-feat-김성준2
-
-
-develop
-      {/* 판매 모달 */}
+      {/* 판매 등록 모달 */}
       <SellPhotoModal
         isOpen={isSellModalOpen}
         onClose={() => setIsSellModalOpen(false)}

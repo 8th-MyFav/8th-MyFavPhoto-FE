@@ -1,16 +1,9 @@
 "use client";
 
 import React from "react";
- feat-김성준2
-// Badge 컴포넌트.
-export default function Badge({ type = "COMMON", count = 0 }) {
-  const COLORS = {
-    COMMON: "var(--color-main)", // #EFFF04
-    RARE: "var(--color-blue)", // #29C9F9
-    "SUPER RARE": "var(--color-purple)", // #A77EFF
-    LEGENDARY: "var(--color-pink)", // #FF2A6A
 
-export default function Badge({ type = "COMMON", size = "large" }) {
+// Badge 컴포넌트
+export default function Badge({ type = "COMMON", count = 0, size = "large" }) {
   // 등급별 색상
   const COLORS = {
     COMMON: "#EFFF04",
@@ -23,23 +16,19 @@ export default function Badge({ type = "COMMON", size = "large" }) {
   const SIZE = {
     large: "text-[22px]",
     small: "text-[15px]",
- develop
   };
 
-  const color = COLORS[type.toUpperCase()];
-  const fontSize = SIZE[size];
+  const color = COLORS[type.toUpperCase()] || "#EFFF04";
+  const fontSize = SIZE[size] || SIZE.large;
 
   return (
     <div
- feat-김성준2
-      className="flex flex-col items-center justify-center border rounded-none text-center px-[20px] py-[8px]"
+      className={`flex flex-col items-center justify-center border rounded-none text-center px-[20px] py-[8px] font-light ${fontSize}`}
       style={{
         borderColor: color,
-        color: color,
-        border : "0px solid ${color}",
+        color,
+        border: `1px solid ${color}`,
         fontFamily: "var(--font-noto)",
-        fontSize: "18px", // Tailwind 설정에서 br-18과 동일
-        fontWeight: 300,
       }}
     >
       <span>
@@ -48,12 +37,3 @@ export default function Badge({ type = "COMMON", size = "large" }) {
     </div>
   );
 }
-
-      className={`font-semibold ${fontSize}`}
-      style={{ color }}
-    >
-      {type.toUpperCase()}
-    </div>
-  );
-}
- develop
