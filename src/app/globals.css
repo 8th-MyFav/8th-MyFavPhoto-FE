@@ -137,3 +137,15 @@ select:focus {
 .text-br-sm {
   font-family: var(--font-br);
 }
+
+/* 숫자 입력 스피너 제거 (Chrome, Safari, Edge) */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* 숫자 입력 스피너 제거 (Firefox) */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
