@@ -4,4 +4,5 @@ export const PATHNAME = {
   MARKET: "/marketplace",
   MYGAL: "/myGallery",
   HOME: "/",
+  CREATE: "/myGallery/create",
 };

@@ -99,7 +99,7 @@ const SellerPage = () => {
 
   // 카드 클릭 시 상세 페이지 이동
   const handleCardClick = (index) => {
-    router.push(`/marketplace/detail/${index}`);
+    router.push(`/marketplace/seller/${index}`);
   };
 
   const handleSellButtonClick = () => setIsSellModalOpen(true);
