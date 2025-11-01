@@ -57,7 +57,4 @@ const Label = ({
   );
 };
 
- feat-김성준2
 export default Label;
-export default Label;
- develop
