@@ -4,10 +4,12 @@ import { useAuth } from "@/contexts/AuthContext";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import NotificationButton from "./notificationButton";
+import ProfileModal from "./profile";
 
 const Navigation = () => {
   const { isAuthenticated, loading, user, logout } = useAuth();
   const [points, setPoints] = useState(0);
+  const [showProfile, setShowProfile] = useState(false);
 
   // 포인트 상태 변경 디버깅
   useEffect(() => {
@@ -71,9 +73,13 @@ const Navigation = () => {
       <nav className="flex justify-center items-center gap-[30px] text-[var(--color-gray-200)] text-[14px] font-bold ">
         <p>{points} P</p>
         <NotificationButton />
-        <p className="self-end" style={{ fontFamily: "var(--font-br)" }}>
+        <button
+          onClick={() => setShowProfile((prev) => !prev)}
+          className="self-end text-left cursor-pointer bg-transparent border-none p-0 hover:text-yellow-300"
+          style={{ fontFamily: "var(--font-br)" }}
+        >
           {user.nickname}
-        </p>
+        </button>
         <p className="flex justify-center self-start">|</p>
         <button
           onClick={logout}
@@ -82,6 +88,7 @@ const Navigation = () => {
           로그아웃
         </button>
       </nav>
+      <ProfileModal show={showProfile} name={user.nickname} point={points} />
     </div>
   );
 };
