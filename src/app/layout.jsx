@@ -2,7 +2,7 @@ import GNB from "@/components/organisms/gnb";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { Geist, Geist_Mono, Noto_Sans_KR } from "next/font/google";
-import TanStackQueryProvider from "./tanstackProvider";
+import TanStackQueryProvider from "../contexts/tanstackProvider";
 
 //  Noto Sans KR (Google Fonts)
 const notoSansKR = Noto_Sans_KR({

@@ -5,7 +5,8 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useState } from "react";
 
 const TanStackQueryProvider = ({ children }) => {
-  const [queryClient] = useState(() =>
+  const [queryClient] = useState(
+    () =>
       new QueryClient({
         defaultOptions: {
           queries: {
@@ -16,7 +17,8 @@ const TanStackQueryProvider = ({ children }) => {
   );
   return (
     <QueryClientProvider client={queryClient}>
-      <ReactQueryDevtools initialIsOpen={false}>{children}</ReactQueryDevtools>
+      {children}
+      <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );
 };
