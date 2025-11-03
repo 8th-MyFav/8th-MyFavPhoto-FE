@@ -6,6 +6,7 @@ import Modal from "@/components/molecules/modal";
 import CardTradeModal from "@/components/organisms/cardTradeModal";
 import ExchangeModal from "@/components/organisms/exchangeModal";
 import TradeCard from "@/components/organisms/tradeCard";
+import { PATHNAME } from "@/constants";
 
 // 더미 카드 데이터
 const cardDataServer = Array.from({ length: 30 }, (_, i) => ({
@@ -66,9 +67,9 @@ export default function DetailPage() {
       card.title
     )}&quantity=${count}`;
     if (count <= card.remaining) {
-      router.push(`/marketplace/detail/${cardId}/success${query}`);
+      router.push(`${PATHNAME.MARKET_DETAIL_SUCCESS(cardId)}${query}`);
     } else {
-      router.push(`/marketplace/detail/${cardId}/fail${query}`);
+      router.push(`${PATHNAME.MARKET_DETAIL_FAIL(cardId)}${query}`);
     }
   };
 
@@ -187,7 +188,8 @@ export default function DetailPage() {
             <div className="flex justify-between items-center mb-10">
               <span className="text-white text-lg">총 가격</span>
               <span className="text-white font-bold text-xl">
-                {total} P <span className="text-gray-400 text-lg">({count}장)</span>
+                {total} P{" "}
+                <span className="text-gray-400 text-lg">({count}장)</span>
               </span>
             </div>
 
@@ -205,7 +207,9 @@ export default function DetailPage() {
         {/* 교환 희망 정보 */}
         <div className="mt-20">
           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-6 mb-[20px]">
-            <h3 style={{ fontSize: "40px", fontWeight: 700 }}>교환 희망 정보</h3>
+            <h3 style={{ fontSize: "40px", fontWeight: 700 }}>
+              교환 희망 정보
+            </h3>
             <button
               className="bg-[var(--color-main)] text-black font-semibold rounded-md cursor-pointer"
               style={{ width: "440px", height: "60px" }}
