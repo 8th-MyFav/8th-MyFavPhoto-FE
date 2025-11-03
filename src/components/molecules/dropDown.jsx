@@ -11,7 +11,7 @@ const Dropdown = ({
   optionListMarginTop = "18px",
   optionListPadding = "10px 12px",
   customStyles = {},
-  onChange = () => {}, 
+  onChange = () => {},
 }) => {
   const [selected, setSelected] = useState("");
   const [isOpen, setIsOpen] = useState(false);
@@ -19,7 +19,7 @@ const Dropdown = ({
   const handleSelect = (opt) => {
     setSelected(opt);
     setIsOpen(false);
-    onChange(opt); 
+    onChange(opt);
   };
 
   return (

@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import { useRouter } from "next/navigation";
+import { PATHNAME } from "@/constants";
 
 const ProfileModal = ({ show, name, point }) => {
   const router = useRouter();
@@ -44,7 +45,7 @@ const ProfileModal = ({ show, name, point }) => {
             마이갤러리
           </button>
           <button
-            onClick={() => handleNavigate("/marketplace/seller")}
+            onClick={() => handleNavigate(PATHNAME.MPSELLER)}
             className="text-[14px] font-bold hover:text-yellow-300 transition whitespace-nowrap"
           >
             판매 중인 포토카드

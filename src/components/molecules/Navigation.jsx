@@ -5,10 +5,12 @@ import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import NotificationButton from "./notificationButton";
 import { PATHNAME } from "@/constants";
+import ProfileModal from "./profile";
 
 const Navigation = () => {
   const { isAuthenticated, loading, user, logout } = useAuth();
   const [points, setPoints] = useState(0);
+  const [showProfile, setShowProfile] = useState(false);
 
   // 포인트 상태 변경 디버깅
   useEffect(() => {
@@ -56,7 +58,7 @@ const Navigation = () => {
   if (!isAuthenticated) {
     // 로그인 안 된 경우
     return (
-      <nav className="flex gap-[30px] text-gray-200 text-noto-3xs font-bold">
+      <nav className="flex gap-sm text-gray-200 text-noto-3xs font-bold">
         <Link className="cursor-pointer no-underline" href={PATHNAME.LOGIN}>
           로그인
         </Link>
@@ -69,11 +71,34 @@ const Navigation = () => {
 
   return (
     <div className="relative">
-      <nav className="flex justify-center items-center gap-[30px] text-gray-200 text-noto-3x ">
+      <nav className="flex justify-center items-center gap-[30px] text-gray-200 text-noto-3x">
+        {/* 포인트 */}
         <p className="font-br font-bold">{points} P</p>
+
+        {/* 알림 버튼 */}
         <NotificationButton />
-        <p className="self-center font-br">{user.nickname}</p>
+
+        {/* 프로필 + 모달 */}
+        <div className="relative">
+          <button
+            onClick={() => setShowProfile((prev) => !prev)}
+            className="text-left cursor-pointer bg-transparent border-none p-0 hover:text-yellow-300 font-br"
+          >
+            {user.nickname}
+          </button>
+
+          {/* 버튼 밖에 위치한 모달 */}
+          <ProfileModal
+            show={showProfile}
+            name={user.nickname}
+            point={points}
+          />
+        </div>
+
+        {/* 구분선 */}
         <p className="flex justify-center self-start">|</p>
+
+        {/* 로그아웃 */}
         <button
           onClick={logout}
           className="flex justify-center self-start text-gray-400 text-noto-3x font-bold cursor-pointer bg-transparent border-none p-0"

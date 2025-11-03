@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Button from "../atoms/button";
+import { PATHNAME, GRADE } from "@/constants";
 
 const CardDetailSellModal = ({ isOpen, onClose, card }) => {
   const router = useRouter();
@@ -15,13 +16,13 @@ const CardDetailSellModal = ({ isOpen, onClose, card }) => {
 
   const getRarityColor = (rarity) => {
     switch (rarity?.toUpperCase()) {
-      case "COMMON":
+      case GRADE.COMMON:
         return "#EFFF04";
-      case "RARE":
+      case GRADE.RARE:
         return "#29C9F9";
-      case "SUPER RARE":
+      case GRADE.SUPER_RARE:
         return "#A77EFF";
-      case "LEGENDARY":
+      case GRADE.LEGENDARY:
         return "#FF2A6A";
       default:
         return "#A4A4A4";
@@ -44,9 +45,17 @@ const CardDetailSellModal = ({ isOpen, onClose, card }) => {
       description.trim().length > 0;
 
     if (isValid) {
-      router.push(`/marketplace/sell/success?rarity=${card.rarity}&title=${encodeURIComponent(card.title)}&quantity=${quantity}`);
+      router.push(
+        `${PATHNAME.SELL_SUCCESS}?rarity=${
+          card.rarity
+        }&title=${encodeURIComponent(card.title)}&quantity=${quantity}`
+      );
     } else {
-      router.push(`/marketplace/sell/fail?rarity=${card.rarity}&title=${encodeURIComponent(card.title)}&quantity=${quantity}`);
+      router.push(
+        `${PATHNAME.SELL_FAIL}?rarity=${card.rarity}&title=${encodeURIComponent(
+          card.title
+        )}&quantity=${quantity}`
+      );
     }
 
     onClose();
@@ -79,12 +88,16 @@ const CardDetailSellModal = ({ isOpen, onClose, card }) => {
 
         {/* 헤더 */}
         <div className="flex flex-col mb-[40px]">
-          <h2 className="text-[24px] text-gray-400 font-[BR B] mb-[10px]"
-          style={{ fontFamily: "var(--font-br)" }}>
+          <h2
+            className="text-[24px] text-gray-400 font-[BR B] mb-[10px]"
+            style={{ fontFamily: "var(--font-br)" }}
+          >
             나의 포토카드 판매하기
           </h2>
-          <h3 className="text-[40px] text-white mb-[40px] border-b border-white pb-[10px]"
-          style={{ fontFamily: "var(--font-br)" }}>
+          <h3
+            className="text-[40px] text-white mb-[40px] border-b border-white pb-[10px]"
+            style={{ fontFamily: "var(--font-br)" }}
+          >
             {card.title}
           </h3>
         </div>
@@ -147,7 +160,9 @@ const CardDetailSellModal = ({ isOpen, onClose, card }) => {
 
             {/* 총 판매 수량 */}
             <div className="flex items-center mb-[20px]">
-              <span className="font-bold text-[16px] mr-[108px]">총 판매 수량</span>
+              <span className="font-bold text-[16px] mr-[108px]">
+                총 판매 수량
+              </span>
 
               <div className="flex items-center">
                 <div className="flex items-center justify-between w-[176px] h-[50px] border border-gray-300 bg-[#161616] rounded-[2px] flex-shrink-0 px-[10px]">
@@ -161,10 +176,16 @@ const CardDetailSellModal = ({ isOpen, onClose, card }) => {
                 </div>
 
                 <div className="flex flex-col items-center justify-center ml-[10px] leading-tight">
-                  <span className="text-[20px]" style={{ color: "var(--white-white, #FFF)" }}>
+                  <span
+                    className="text-[20px]"
+                    style={{ color: "var(--white-white, #FFF)" }}
+                  >
                     / {card.remaining}
                   </span>
-                  <span className="text-[12px]" style={{ color: "var(--gray-gray200, #DDD)" }}>
+                  <span
+                    className="text-[12px]"
+                    style={{ color: "var(--gray-gray200, #DDD)" }}
+                  >
                     최대 {card.remaining}장
                   </span>
                 </div>
@@ -173,7 +194,9 @@ const CardDetailSellModal = ({ isOpen, onClose, card }) => {
 
             {/* 장당 가격 */}
             <div className="flex items-center mb-[30px]">
-              <span className="font-bold text-[16px] mr-[127px]">장당 가격</span>
+              <span className="font-bold text-[16px] mr-[127px]">
+                장당 가격
+              </span>
               <div className="flex items-center justify-center w-[230px] h-[50px] border border-gray-300 bg-[#161616] rounded-[2px] text-[18px]">
                 {card.price}P
               </div>
@@ -198,10 +221,10 @@ const CardDetailSellModal = ({ isOpen, onClose, card }) => {
                 <option value="" disabled>
                   등급을 선택해 주세요
                 </option>
-                <option value="COMMON">COMMON</option>
-                <option value="RARE">RARE</option>
-                <option value="SUPER RARE">SUPER RARE</option>
-                <option value="LEGENDARY">LEGENDARY</option>
+                <option value={GRADE.COMMON}>{GRADE.COMMON}</option>
+                <option value={GRADE.RARE}>{GRADE.RARE}</option>
+                <option value={GRADE.SUPER_RARE}>{GRADE.SUPER_RARE}</option>
+                <option value={GRADE.LEGENDARY}>{GRADE.LEGENDARY}</option>
               </select>
             </div>
 
@@ -226,7 +249,9 @@ const CardDetailSellModal = ({ isOpen, onClose, card }) => {
 
           {/* 설명 */}
           <div className="flex flex-col">
-            <label className="mb-[8px] font-bold text-[16px]">교환 희망 설명</label>
+            <label className="mb-[8px] font-bold text-[16px]">
+              교환 희망 설명
+            </label>
             <textarea
               className="w-full h-[120px] p-3 rounded border border-white/20 bg-transparent text-white placeholder-gray-400 resize-none"
               placeholder="설명을 입력해 주세요"

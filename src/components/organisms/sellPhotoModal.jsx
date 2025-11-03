@@ -4,6 +4,7 @@ import React, { useState, useMemo } from "react";
 import Search from "../molecules/search";
 import Dropdown from "../molecules/dropDown";
 import Card from "../organisms/card";
+import { GRADE } from "@/constants";
 
 const SellPhotoModal = ({ isOpen, onClose, cards = [], onCardSelect }) => {
   if (!isOpen) return null;
@@ -18,8 +19,12 @@ const SellPhotoModal = ({ isOpen, onClose, cards = [], onCardSelect }) => {
         card.title.toLowerCase().includes(searchText.toLowerCase()) ||
         card.author.toLowerCase().includes(searchText.toLowerCase());
 
-      const matchesRarity = selectedRarity ? card.rarityIcon === selectedRarity : true;
-      const matchesCategory = selectedCategory ? card.category === selectedCategory : true;
+      const matchesRarity = selectedRarity
+        ? card.rarityIcon === selectedRarity
+        : true;
+      const matchesCategory = selectedCategory
+        ? card.category === selectedCategory
+        : true;
 
       return matchesSearch && matchesRarity && matchesCategory;
     });
@@ -85,7 +90,12 @@ const SellPhotoModal = ({ isOpen, onClose, cards = [], onCardSelect }) => {
           </div>
           <div className="flex gap-[45px]">
             <Dropdown
-              options={["COMMON", "RARE", "SUPER RARE", "LEGENDARY"]}
+              options={[
+                GRADE.COMMON,
+                GRADE.RARE,
+                GRADE.SUPER_RARE,
+                GRADE.LEGENDARY,
+              ]}
               placeholder="등급"
               height="48px"
               maxWidth="300px"

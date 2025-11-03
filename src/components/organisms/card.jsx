@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import CardMeta from "@/components/molecules/CardMeta";
 
 const Card = ({
   topImage = "/images/sample.svg",
@@ -24,8 +25,10 @@ const Card = ({
   };
 
   if (rarityText === "RARE") rarityStyle.color = "var(--blue-blue, #29C9F9)";
-  else if (rarityText === "SUPER RARE") rarityStyle.color = "var(--purple-purple, #A77EFF)";
-  else if (rarityText === "LEGENDARY") rarityStyle.color = "var(--pink-pink, #FF2A6A)";
+  else if (rarityText === "SUPER RARE")
+    rarityStyle.color = "var(--purple-purple, #A77EFF)";
+  else if (rarityText === "LEGENDARY")
+    rarityStyle.color = "var(--pink-pink, #FF2A6A)";
 
   return (
     <div
@@ -40,7 +43,9 @@ const Card = ({
         <img
           src={topImage}
           alt="Top Image"
-          className={`w-full h-full object-cover ${remaining === 0 ? "opacity-40" : ""}`}
+          className={`w-full h-full object-cover ${
+            remaining === 0 ? "opacity-40" : ""
+          }`}
         />
         {remaining === 0 && (
           <img
@@ -67,46 +72,69 @@ const Card = ({
 
       {/* 레어도 영역 */}
       <div className="w-[360px] flex justify-between items-center mt-[10px] h-[23px]">
-        <div className="flex items-center gap-[10px] h-[23px]">
-          <span style={rarityStyle}>{rarityText}</span>
-          <span className="text-gray-400 text-[16px] flex items-center h-[23px]">|</span>
-          <span className="text-gray-300 text-[16px] flex items-center h-[23px]">{category}</span>
-        </div>
+        <CardMeta
+          rarityText={rarityText}
+          rarityStyle={rarityStyle}
+          category={category}
+          variant="2xs"
+          className="w-auto"
+        />
         <span
           className="underline text-[16px]"
-          style={{ color: "var(--color-white)", fontFamily: "var(--font-noto-regular-16)" }}
+          style={{
+            color: "var(--color-white)",
+            fontFamily: "var(--font-noto-regular-16)",
+          }}
         >
           {author}
         </span>
       </div>
 
-      <div className="w-[360px] h-0 mt-[20px]" style={{ borderTop: "1px solid var(--color-gray-400)" }} />
+      <div
+        className="w-[360px] h-0 mt-[20px]"
+        style={{ borderTop: "1px solid var(--color-gray-400)" }}
+      />
 
       {/* 가격 */}
       <div className="w-[360px] flex justify-between mt-[20px] items-center">
-        <span className="text-gray-300 text-[16px]" style={{ fontFamily: "var(--font-noto-regular-16)" }}>
+        <span
+          className="text-gray-300 text-[16px]"
+          style={{ fontFamily: "var(--font-noto-regular-16)" }}
+        >
           가격
         </span>
-        <span className="text-white text-[18px]" style={{ fontFamily: "var(--font-noto-regular-18)" }}>
+        <span
+          className="text-white text-[18px]"
+          style={{ fontFamily: "var(--font-noto-regular-18)" }}
+        >
           {price} P
         </span>
       </div>
 
       {/* 잔여 / 수량 */}
       <div className="w-[360px] flex justify-between mt-[10px] items-center">
-        <span className="text-gray-300 text-[16px]" style={{ fontFamily: "var(--font-noto-regular-16)" }}>
+        <span
+          className="text-gray-300 text-[16px]"
+          style={{ fontFamily: "var(--font-noto-regular-16)" }}
+        >
           {quantity !== null ? "수량" : "잔여"}
         </span>
         <div className="flex items-center">
           {quantity !== null ? (
             // Sell 모달: 수량 그대로
-            <span className="text-white text-[18px] font-normal">{quantity}</span>
+            <span className="text-white text-[18px] font-normal">
+              {quantity}
+            </span>
           ) : (
             // 마켓 페이지: remaining / total
             <>
-              <span className="text-white text-[18px] font-normal">{remaining}</span>
+              <span className="text-white text-[18px] font-normal">
+                {remaining}
+              </span>
               <span className="w-[5px]" />
-              <span className="text-gray-300 text-[18px] font-light">/ {total}</span>
+              <span className="text-gray-300 text-[18px] font-light">
+                / {total}
+              </span>
             </>
           )}
         </div>
