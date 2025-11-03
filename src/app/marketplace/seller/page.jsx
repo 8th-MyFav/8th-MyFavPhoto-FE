@@ -57,8 +57,12 @@ const SellerPage = () => {
       const matchesSearch =
         card.title.toLowerCase().includes(searchText.toLowerCase()) ||
         card.author.toLowerCase().includes(searchText.toLowerCase());
-      const matchesRarity = selectedRarity ? card.rarityIcon === selectedRarity : true;
-      const matchesCategory = selectedCategory ? card.category === selectedCategory : true;
+      const matchesRarity = selectedRarity
+        ? card.rarityIcon === selectedRarity
+        : true;
+      const matchesCategory = selectedCategory
+        ? card.category === selectedCategory
+        : true;
       const matchesStatus =
         selectedStatus === "판매중"
           ? card.remaining > 0
@@ -92,7 +96,10 @@ const SellerPage = () => {
   // 추가 카드 로드
   const loadMore = () => {
     const currentLength = displayedCards.length;
-    const more = filteredCards.slice(currentLength, currentLength + ITEMS_PER_PAGE);
+    const more = filteredCards.slice(
+      currentLength,
+      currentLength + ITEMS_PER_PAGE
+    );
     setDisplayedCards((prev) => [...prev, ...more]);
     if (currentLength + more.length >= filteredCards.length) setHasMore(false);
   };
@@ -114,7 +121,9 @@ const SellerPage = () => {
       {/* 보유 현황 */}
       <p className="text-[24px] text-white mb-[20px] mt-[32px]">
         유디님이 보유한 포토카드{" "}
-        <span className="text-[20px] text-gray-300">({filteredCards.length}장)</span>
+        <span className="text-[20px] text-gray-300">
+          ({filteredCards.length}장)
+        </span>
       </p>
 
       {/* 등급별 뱃지 */}

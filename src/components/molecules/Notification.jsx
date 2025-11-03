@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useMemo } from "react";
+import Pagination from "./Pagination";
 
 const NotificationUI = ({
   show,
@@ -104,25 +105,13 @@ const NotificationUI = ({
 
         {/* 페이지네이션 */}
         {calculatedTotalPages > 1 && (
-          <div className="flex justify-center items-center gap-2 p-3 border-t border-gray-400 rounded-b-base">
-            <button
-              onClick={() => handlePageChange(activeCurrentPage - 1)}
-              disabled={activeCurrentPage === 1}
-              className="px-2 py-1 text-noto-3xs text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:text-white"
-            >
-              이전
-            </button>
-            <span className="text-noto-3xs text-gray-300">
-              {activeCurrentPage} / {calculatedTotalPages}
-            </span>
-            <button
-              onClick={() => handlePageChange(activeCurrentPage + 1)}
-              disabled={activeCurrentPage === calculatedTotalPages}
-              className="px-2 py-1 text-noto-3xs text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:text-white"
-            >
-              다음
-            </button>
-          </div>
+          <Pagination
+            page={activeCurrentPage}
+            pageSize={itemsPerPage}
+            totalCount={allNotifications.length}
+            onChange={handlePageChange}
+            variant="simple"
+          />
         )}
       </div>
     </>

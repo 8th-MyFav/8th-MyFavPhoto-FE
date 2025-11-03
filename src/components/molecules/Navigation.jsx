@@ -82,7 +82,7 @@ const Navigation = () => {
         <div className="relative">
           <button
             onClick={() => setShowProfile((prev) => !prev)}
-            className="text-left cursor-pointer bg-transparent border-none p-0 hover:text-yellow-300 font-br"
+            className="text-left cursor-pointer bg-transparent border-none p-0 hover:text-main font-br"
           >
             {user.nickname}
           </button>

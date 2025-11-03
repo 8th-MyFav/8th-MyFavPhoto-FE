@@ -11,6 +11,7 @@ import React from "react";
 // - showRarity?: boolean (default true)
 // - showCategory?: boolean (default true)
 // - showDivider?: boolean (default true)
+
 const CardMeta = ({
   rarityText,
   rarityStyle,
