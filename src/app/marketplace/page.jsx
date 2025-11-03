@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import MarketplaceHeader from "@/components/molecules/marketplaceHeader";
+import PagesHeader from "@/components/organisms/PagesHeader";
 import SearchMolecule from "@/components/molecules/search";
 import Dropdown from "@/components/molecules/dropDown";
 import Card from "@/components/organisms/card";
@@ -10,6 +10,7 @@ import Modal from "@/components/molecules/modal";
 import SellPhotoModal from "@/components/organisms/sellPhotoModal";
 import CardDetailSellModal from "@/components/organisms/cardDetailSellModal";
 import PointModal from "@/components/molecules/pointModal";
+import { PATHNAME, GRADE } from "@/constants";
 
 // 더미 카드 데이터
 const cardDataServer = Array.from({ length: 30 }, (_, i) => ({
@@ -142,15 +143,15 @@ const MarketplacePage = () => {
   };
 
   const handleCardClick = (index) => {
-    router.push(`/marketplace/detail/${index}`);
+    router.push(PATHNAME.MARKET_DETAIL(index));
   };
 
   const handleSellButtonClick = () => setIsSellModalOpen(true);
 
-  const handleLogin = () => router.push("/login");
+  const handleLogin = () => router.push(PATHNAME.LOGIN);
 
   return (
-    <div className="bg-black min-h-screen px-[80px] relative">
+    <div className="bg-black">
       {!isLoggedIn ? (
         <>
           {isLoginModalOpen && (
@@ -165,83 +166,93 @@ const MarketplacePage = () => {
         </>
       ) : (
         <>
-          <MarketplaceHeader onSellClick={handleSellButtonClick} />
+          <div className="bg-black mx-x-desktop">
+            <div>
+              <PagesHeader buttonOnClick={handleSellButtonClick} />
+            </div>
+            <div className="flex justify-between items-center mt-5 w-full">
+              <div className="flex items-center">
+                <div className="mr-[60px]">
+                  <SearchMolecule onSearch={(text) => setSearchText(text)} />
+                </div>
+                <div className="flex gap-[45px]">
+                  <Dropdown
+                    placeholder="등급"
+                    options={[
+                      GRADE.COMMON,
+                      GRADE.RARE,
+                      GRADE.SUPER_RARE,
+                      GRADE.LEGENDARY,
+                    ]}
+                    onChange={(value) => setSelectedRarity(value)}
+                  />
+                  <Dropdown
+                    placeholder="장르"
+                    options={["풍경", "인물", "동물", "추상"]}
+                    onChange={(value) => setSelectedCategory(value)}
+                  />
+                  <Dropdown
+                    placeholder="매진여부"
+                    options={["판매중", "매진"]}
+                    onChange={(value) => setSelectedStatus(value)}
+                  />
+                </div>
+              </div>
 
-          <div className="flex justify-between items-center mt-5 w-full">
-            <div className="flex items-center">
-              <div className="mr-[60px]">
-                <SearchMolecule onSearch={(text) => setSearchText(text)} />
-              </div>
-              <div className="flex gap-[45px]">
-                <Dropdown
-                  placeholder="등급"
-                  options={["COMMON", "RARE", "SUPER RARE", "LEGENDARY"]}
-                  onChange={(value) => setSelectedRarity(value)}
-                />
-                <Dropdown
-                  placeholder="장르"
-                  options={["풍경", "인물", "동물", "추상"]}
-                  onChange={(value) => setSelectedCategory(value)}
-                />
-                <Dropdown
-                  placeholder="매진여부"
-                  options={["판매중", "매진"]}
-                  onChange={(value) => setSelectedStatus(value)}
-                />
-              </div>
+              <Dropdown
+                placeholder="낮은 가격순"
+                options={["낮은 가격순", "높은 가격순", "최신순"]}
+                height="50px"
+                width="180px"
+                onChange={(value) => setSortOrder(value)}
+                customStyles={{
+                  container: { border: "1px solid #FFF", padding: "12px" },
+                  optionList: { padding: "10px 20px" },
+                }}
+              />
             </div>
 
-            <Dropdown
-              placeholder="낮은 가격순"
-              options={["낮은 가격순", "높은 가격순", "최신순"]}
-              height="50px"
-              width="123px"
-              onChange={(value) => setSortOrder(value)}
-              customStyles={{
-                container: { border: "1px solid #FFF", padding: "12px" },
-                optionList: { padding: "10px 24px" },
-              }}
-            />
-          </div>
-
-          <div className="grid grid-cols-3 gap-x-[80px] gap-y-[80px] mt-[80px]">
-            {displayedCards.length > 0 ? (
-              displayedCards.map((card, index) => (
-                <div
-                  key={index}
-                  ref={index === displayedCards.length - 1 ? lastCardRef : null}
-                  onClick={() => handleCardClick(index)}
-                  className="cursor-pointer"
-                >
-                  <Card {...card} showRemainingAsFraction={true} />
+            <div className="grid grid-cols-3 gap-x-[80px] gap-y-[80px] mt-[80px]">
+              {displayedCards.length > 0 ? (
+                displayedCards.map((card, index) => (
+                  <div
+                    key={index}
+                    ref={
+                      index === displayedCards.length - 1 ? lastCardRef : null
+                    }
+                    onClick={() => handleCardClick(index)}
+                    className="cursor-pointer"
+                  >
+                    <Card {...card} showRemainingAsFraction={true} />
+                  </div>
+                ))
+              ) : (
+                <div className="col-span-3 text-center text-gray-300 text-[18px] mt-[100px]">
+                  조건에 맞는 포토카드가 없습니다.
                 </div>
-              ))
-            ) : (
-              <div className="col-span-3 text-center text-gray-300 text-[18px] mt-[100px]">
-                조건에 맞는 포토카드가 없습니다.
-              </div>
+              )}
+            </div>
+
+            <SellPhotoModal
+              isOpen={isSellModalOpen}
+              onClose={() => setIsSellModalOpen(false)}
+              cards={cardDataServer}
+              onCardSelect={(card) => setSelectedSellCard(card)}
+            />
+
+            {selectedSellCard && (
+              <CardDetailSellModal
+                isOpen={!!selectedSellCard}
+                onClose={() => setSelectedSellCard(null)}
+                card={selectedSellCard}
+              />
+            )}
+
+            {/* ✅ 포인트 모달 */}
+            {isPointModalOpen && (
+              <PointModal onClose={() => setIsPointModalOpen(false)} />
             )}
           </div>
-
-          <SellPhotoModal
-            isOpen={isSellModalOpen}
-            onClose={() => setIsSellModalOpen(false)}
-            cards={cardDataServer}
-            onCardSelect={(card) => setSelectedSellCard(card)}
-          />
-
-          {selectedSellCard && (
-            <CardDetailSellModal
-              isOpen={!!selectedSellCard}
-              onClose={() => setSelectedSellCard(null)}
-              card={selectedSellCard}
-            />
-          )}
-
-          {/* ✅ 포인트 모달 */}
-          {isPointModalOpen && (
-            <PointModal onClose={() => setIsPointModalOpen(false)} />
-          )}
         </>
       )}
     </div>

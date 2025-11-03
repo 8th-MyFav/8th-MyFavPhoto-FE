@@ -59,7 +59,7 @@ export function AuthProvider({ children }) {
         `${process.env.NEXT_PUBLIC_API_URL}/token/refresh`,
         {
           method: "POST",
-          credentials: "include",
+          credentials: "include", // Cookie
         }
       );
 

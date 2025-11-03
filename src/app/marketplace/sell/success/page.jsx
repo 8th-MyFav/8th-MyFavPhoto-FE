@@ -1,5 +1,6 @@
 "use client";
 import ActionResultPage from "@/components/organisms/actionResultPage";
+import { PATHNAME } from "@/constants";
 import { useSearchParams, useRouter } from "next/navigation";
 
 export default function SellSuccessPage() {
@@ -18,7 +19,7 @@ export default function SellSuccessPage() {
       title={title}
       quantity={quantity}
       buttonText="나의 판매 포토카드에서 확인하기"
-      buttonAction={() => router.push("/marketplace/seller")}
+      buttonAction={() => router.push(PATHNAME.MPSELLER)}
     />
   );
 }

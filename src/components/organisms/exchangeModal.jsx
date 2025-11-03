@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Card from "./card";
+import { PATHNAME } from "@/constants";
 
 const ExchangeModal = ({ selectedCard, onClose, targetCard }) => {
   const [offerText, setOfferText] = useState("");
@@ -21,13 +22,13 @@ const ExchangeModal = ({ selectedCard, onClose, targetCard }) => {
   const handleExchange = () => {
     if (isExchangeValid()) {
       router.push(
-        `/marketplace/exchange/success?title=${encodeURIComponent(
+        `${PATHNAME.EXCHANGE_SUCCESS}?title=${encodeURIComponent(
           targetCard.title
         )}&my=${encodeURIComponent(selectedCard.title)}`
       );
     } else {
       router.push(
-        `/marketplace/exchange/fail?title=${encodeURIComponent(
+        `${PATHNAME.EXCHANGE_FAIL}?title=${encodeURIComponent(
           targetCard.title
         )}&my=${encodeURIComponent(selectedCard.title)}`
       );

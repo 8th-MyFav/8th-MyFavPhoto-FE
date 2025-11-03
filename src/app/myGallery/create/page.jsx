@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Button from "@/components/atoms/button";
 import Dropdown from "@/components/molecules/dropDown";
+import { GRADE } from "@/constants";
 
 const CreatePhotoPage = () => {
   const router = useRouter();
@@ -22,34 +23,27 @@ const CreatePhotoPage = () => {
     const file = e.target.files?.[0];
     if (file) {
       setPhoto(file);
-      if (errors.photo) {
-        setErrors((prev) => ({ ...prev, photo: "" }));
-      }
+      if (errors.photo) setErrors((prev) => ({ ...prev, photo: "" }));
     }
   };
 
   const handleDragOver = (e) => {
     e.preventDefault();
-    e.stopPropagation();
     setIsDragOver(true);
   };
 
   const handleDragLeave = (e) => {
     e.preventDefault();
-    e.stopPropagation();
     setIsDragOver(false);
   };
 
   const handleDrop = (e) => {
     e.preventDefault();
-    e.stopPropagation();
     setIsDragOver(false);
     const file = e.dataTransfer.files?.[0];
     if (file) {
       setPhoto(file);
-      if (errors.photo) {
-        setErrors((prev) => ({ ...prev, photo: "" }));
-      }
+      if (errors.photo) setErrors((prev) => ({ ...prev, photo: "" }));
     }
   };
 
@@ -71,19 +65,19 @@ const CreatePhotoPage = () => {
     e.preventDefault();
 
     const newErrors = {};
-    if (!photoName.trim())
-      newErrors.photoName = "포토카드 이름을 입력해주세요.";
+    if (!photoName.trim()) newErrors.photoName = "포토카드 이름을 입력해주세요.";
     if (!grade) newErrors.grade = "등급을 선택해주세요.";
     if (!genre) newErrors.genre = "장르를 선택해주세요.";
     if (!price.trim()) newErrors.price = "가격을 입력해주세요.";
     if (!quantity.trim()) newErrors.quantity = "총 발행량을 입력해주세요.";
+
     const quantityNum = Number(quantity);
     if (quantity && (!Number.isFinite(quantityNum) || quantityNum < 1)) {
       newErrors.quantity = "총 발행량을 입력해주세요.";
-    }
-    if (quantity && quantityNum > 10) {
+    } else if (quantityNum > 10) {
       newErrors.quantity = "총 발행량은 10장 이하로 선택 가능합니다.";
     }
+
     if (!photo) newErrors.photo = "사진을 업로드해주세요.";
 
     setErrors(newErrors);
@@ -126,9 +120,7 @@ const CreatePhotoPage = () => {
                 value={photoName}
                 onChange={(e) => setPhotoName(e.target.value)}
                 placeholder="포토카드 이름을 입력해주세요"
-                className="flex w-[520px] h-[60px] px-[20px] py-[18px] items-center
-                           rounded-[2px] border border-[#DDD] bg-[#0F0F0F] text-white outline-none
-                           placeholder:text-[#A4A4A4]"
+                className="w-[520px] h-[60px] px-[20px] py-[18px] rounded-[2px] border border-[#DDD] bg-[#0F0F0F] text-white outline-none placeholder:text-[#A4A4A4]"
               />
               {errors.photoName && (
                 <p className="text-red-500 text-sm mt-2">{errors.photoName}</p>
@@ -138,23 +130,24 @@ const CreatePhotoPage = () => {
             {/* 등급 */}
             <div className="flex flex-col">
               <label className="text-[16px] mb-[8px]">등급</label>
-              <div
-                className="flex w-[520px] h-[60px] items-center justify-between 
-                              rounded-[2px] border border-[#DDD] bg-[#0F0F0F] px-[20px] text-white"
-              >
+              <div className="flex w-[520px] h-[60px] items-center justify-between rounded-[2px] border border-[#DDD] bg-[#0F0F0F] px-[20px] text-white">
                 <p className="text-[#A4A4A4] text-[16px]">
                   {grade || "등급을 선택해주세요"}
                 </p>
                 <Dropdown
-                  options={["COMMON", "RARE", "SUPER RARE", "LEGENDARY"]}
+                  options={[
+                    GRADE.COMMON,
+                    GRADE.RARE,
+                    GRADE.SUPER_RARE,
+                    GRADE.LEGENDARY,
+                  ]}
                   placeholder=""
                   width="auto"
                   height="24px"
                   onChange={(opt) => {
                     setGrade(opt);
-                    if (errors.grade) {
+                    if (errors.grade)
                       setErrors((prev) => ({ ...prev, grade: "" }));
-                    }
                   }}
                 />
               </div>
@@ -166,10 +159,7 @@ const CreatePhotoPage = () => {
             {/* 장르 */}
             <div className="flex flex-col">
               <label className="text-[16px] mb-[8px]">장르</label>
-              <div
-                className="flex w-[520px] h-[60px] items-center justify-between 
-                              rounded-[2px] border border-[#DDD] bg-[#0F0F0F] px-[20px] text-white"
-              >
+              <div className="flex w-[520px] h-[60px] items-center justify-between rounded-[2px] border border-[#DDD] bg-[#0F0F0F] px-[20px] text-white">
                 <p className="text-[#A4A4A4] text-[16px]">
                   {genre || "장르를 선택해주세요"}
                 </p>
@@ -180,9 +170,8 @@ const CreatePhotoPage = () => {
                   height="24px"
                   onChange={(opt) => {
                     setGenre(opt);
-                    if (errors.genre) {
+                    if (errors.genre)
                       setErrors((prev) => ({ ...prev, genre: "" }));
-                    }
                   }}
                 />
               </div>
@@ -199,9 +188,7 @@ const CreatePhotoPage = () => {
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
                 placeholder="가격을 입력해주세요"
-                className="flex w-[520px] h-[60px] px-[20px] py-[18px] items-center
-                           rounded-[2px] border border-[#DDD] bg-[#0F0F0F] text-white outline-none
-                           placeholder:text-[#A4A4A4]"
+                className="w-[520px] h-[60px] px-[20px] py-[18px] rounded-[2px] border border-[#DDD] bg-[#0F0F0F] text-white outline-none placeholder:text-[#A4A4A4]"
               />
               {errors.price && (
                 <p className="text-red-500 text-sm mt-2">{errors.price}</p>
@@ -214,11 +201,26 @@ const CreatePhotoPage = () => {
               <input
                 type="number"
                 value={quantity}
-                onChange={(e) => setQuantity(e.target.value)}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setQuantity(val);
+                  const num = Number(val);
+                  if (num > 10)
+                    setErrors((prev) => ({
+                      ...prev,
+                      quantity: "총 발행량은 10장 이하로 선택 가능합니다.",
+                    }));
+                  else if (num < 1)
+                    setErrors((prev) => ({
+                      ...prev,
+                      quantity: "최소 1장 이상 입력해주세요.",
+                    }));
+                  else setErrors((prev) => ({ ...prev, quantity: "" }));
+                }}
+                min="1"
+                max="10"
                 placeholder="총 발행량을 입력해 주세요"
-                className="flex w-[520px] h-[60px] px-[20px] py-[18px] items-center
-                           rounded-[2px] border border-[#DDD] bg-[#0F0F0F] text-white outline-none
-                           placeholder:text-[#A4A4A4]"
+                className="w-[520px] h-[60px] px-[20px] py-[18px] rounded-[2px] border border-[#DDD] bg-[#0F0F0F] text-white outline-none placeholder:text-[#A4A4A4]"
               />
               {errors.quantity && (
                 <p className="text-red-500 text-sm mt-2">{errors.quantity}</p>
@@ -230,13 +232,9 @@ const CreatePhotoPage = () => {
               <label className="text-[16px] mb-[8px]">사진 업로드</label>
               <div className="flex gap-[8px] w-[520px]">
                 <div
-                  className={`flex flex-1 h-[60px] px-[20px] py-[18px] items-center gap-[10px] 
-                              rounded-[2px] border bg-[#0F0F0F] cursor-pointer overflow-hidden
-                              ${
-                                isDragOver
-                                  ? "border-yellow-300"
-                                  : "border-[#DDD]"
-                              }`}
+                  className={`flex flex-1 h-[60px] px-[20px] py-[18px] items-center gap-[10px] rounded-[2px] border bg-[#0F0F0F] cursor-pointer overflow-hidden ${
+                    isDragOver ? "border-yellow-300" : "border-[#DDD]"
+                  }`}
                   onDragOver={handleDragOver}
                   onDragLeave={handleDragLeave}
                   onDrop={handleDrop}
@@ -258,7 +256,9 @@ const CreatePhotoPage = () => {
                 </div>
                 <button
                   type="button"
-                  onClick={() => document.getElementById("photoUpload").click()}
+                  onClick={() =>
+                    document.getElementById("photoUpload").click()
+                  }
                   className="flex justify-center items-center bg-[var(--color-main)] text-black rounded-[2px]"
                   style={{
                     width: "120px",
@@ -279,9 +279,7 @@ const CreatePhotoPage = () => {
             <div className="flex flex-col">
               <label className="text-[16px] mb-[8px]">포토카드 설명</label>
               <textarea
-                className="flex w-[520px] min-h-[150px] px-[20px] py-[18px] items-center
-                           rounded-[2px] border border-[#DDD] bg-[#0F0F0F] text-white outline-none
-                           resize-none placeholder:text-[#A4A4A4]"
+                className="w-[520px] min-h-[150px] px-[20px] py-[18px] rounded-[2px] border border-[#DDD] bg-[#0F0F0F] text-white outline-none resize-none placeholder:text-[#A4A4A4]"
                 placeholder="포토카드에 대한 설명을 입력해주세요"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}

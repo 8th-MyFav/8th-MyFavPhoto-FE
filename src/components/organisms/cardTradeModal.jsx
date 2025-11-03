@@ -4,6 +4,7 @@ import React, { useState, useMemo } from "react";
 import Search from "../molecules/search";
 import Dropdown from "../molecules/dropDown";
 import Card from "../organisms/card";
+import { GRADE } from "@/constants";
 
 const CardTradeModal = ({ isOpen, onClose, onCardSelect }) => {
   if (!isOpen) return null;
@@ -13,7 +14,14 @@ const CardTradeModal = ({ isOpen, onClose, onCardSelect }) => {
     id: i,
     topImage: "/images/sample.svg",
     title: `내 포토카드 ${i + 1}`,
-    rarity: i % 4 === 0 ? "COMMON" : i % 4 === 1 ? "RARE" : i % 4 === 2 ? "SUPER RARE" : "LEGENDARY",
+    rarity:
+      i % 4 === 0
+        ? "COMMON"
+        : i % 4 === 1
+        ? "RARE"
+        : i % 4 === 2
+        ? "SUPER RARE"
+        : "LEGENDARY",
     category: i % 3 === 0 ? "풍경" : i % 3 === 1 ? "인물" : "동물",
     author: "나 자신",
     remaining: 3,
@@ -28,8 +36,12 @@ const CardTradeModal = ({ isOpen, onClose, onCardSelect }) => {
       const matchesSearch =
         card.title.toLowerCase().includes(searchText.toLowerCase()) ||
         card.author.toLowerCase().includes(searchText.toLowerCase());
-      const matchesRarity = selectedRarity ? card.rarity === selectedRarity : true;
-      const matchesCategory = selectedCategory ? card.category === selectedCategory : true;
+      const matchesRarity = selectedRarity
+        ? card.rarity === selectedRarity
+        : true;
+      const matchesCategory = selectedCategory
+        ? card.category === selectedCategory
+        : true;
       return matchesSearch && matchesRarity && matchesCategory;
     });
   }, [myCardList, searchText, selectedRarity, selectedCategory]);
@@ -94,7 +106,12 @@ const CardTradeModal = ({ isOpen, onClose, onCardSelect }) => {
           </div>
           <div className="flex gap-[45px]">
             <Dropdown
-              options={["COMMON", "RARE", "SUPER RARE", "LEGENDARY"]}
+              options={[
+                GRADE.COMMON,
+                GRADE.RARE,
+                GRADE.SUPER_RARE,
+                GRADE.LEGENDARY,
+              ]}
               placeholder="등급"
               height="48px"
               maxWidth="300px"
@@ -127,7 +144,7 @@ const CardTradeModal = ({ isOpen, onClose, onCardSelect }) => {
               >
                 <Card
                   {...card}
-                  rarityIcon={card.rarity} 
+                  rarityIcon={card.rarity}
                   quantity={card.remaining || 0}
                   showRemainingAsFraction={false}
                 />

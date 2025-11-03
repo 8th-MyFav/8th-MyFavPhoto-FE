@@ -74,7 +74,7 @@ const LoginPage = () => {
   if (authLoading) return <div></div>;
 
   return (
-    <div className="bg-black min-h-screen px-[80px] flex justify-center">
+    <div className="bg-black min-h-screen px-xl flex justify-center">
       {modalOpen && (
         <Modal
           title={modalContent.title}
@@ -88,7 +88,7 @@ const LoginPage = () => {
         <Link href={PATHNAME.MARKET}>
           <img
             src="/images/favorite.svg"
-            className="flex justify-center px-[95px] mt-[277px] mb-[80px] h-[60px]"
+            className="flex justify-center px-[95px] mt-[277px] mb-xl h-lg"
             alt="logo"
           />
         </Link>
@@ -116,7 +116,7 @@ const LoginPage = () => {
             showPasswordToggle={true}
           />
 
-          <div className="text-[18px] pb-[40px] flex justify-center">
+          <div className="text-noto-xs pb-md flex justify-center">
             <Button
               text="로그인"
               width="520px"

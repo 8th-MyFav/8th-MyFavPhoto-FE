@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Button from "../atoms/button";
+import { GRADE } from "@/constants";
 
 const CardDetailEdit = ({ isOpen, onClose, card }) => {
   if (!isOpen || !card) return null;
@@ -14,13 +15,13 @@ const CardDetailEdit = ({ isOpen, onClose, card }) => {
 
   const getRarityColor = (rarity) => {
     switch (rarity?.toUpperCase()) {
-      case "COMMON":
+      case GRADE.COMMON:
         return "#EFFF04";
-      case "RARE":
+      case GRADE.RARE:
         return "#29C9F9";
-      case "SUPER RARE":
+      case GRADE.SUPER_RARE:
         return "#A77EFF";
-      case "LEGENDARY":
+      case GRADE.LEGENDARY:
         return "#FF2A6A";
       default:
         return "#A4A4A4";
@@ -86,7 +87,7 @@ const CardDetailEdit = ({ isOpen, onClose, card }) => {
         {/* 메인 정보 */}
         <div className="flex justify-start gap-[20px] mb-[30px]">
           <img
-            src={card.imageUrl} 
+            src={card.imageUrl}
             alt={card.title}
             className="w-[380px] h-[260px] object-cover rounded"
           />
@@ -132,28 +133,56 @@ const CardDetailEdit = ({ isOpen, onClose, card }) => {
 
             {/* 총 판매 수량 */}
             <div className="flex items-center mb-[20px]">
-              <span className="font-bold text-[16px] mr-[108px]">총 판매 수량</span>
+              <span className="font-bold text-[16px] mr-[108px]">
+                총 판매 수량
+              </span>
               <div className="flex items-center">
                 <div className="flex items-center justify-between w-[176px] h-[50px] border border-gray-300 bg-[#161616] rounded-[2px] flex-shrink-0 px-[10px]">
-                  <button className="text-white text-[20px]" onClick={decreaseQuantity}>-</button>
+                  <button
+                    className="text-white text-[20px]"
+                    onClick={decreaseQuantity}
+                  >
+                    -
+                  </button>
                   <span className="text-[18px]">{quantity}</span>
-                  <button className="text-white text-[20px]" onClick={increaseQuantity}>+</button>
+                  <button
+                    className="text-white text-[20px]"
+                    onClick={increaseQuantity}
+                  >
+                    +
+                  </button>
                 </div>
                 <div className="flex flex-col items-center justify-center ml-[10px] leading-tight">
-                  <span className="text-[20px]" style={{ color: "#FFF" }}>/ {card.remaining}</span>
-                  <span className="text-[12px]" style={{ color: "#DDD" }}>최대 {card.remaining}장</span>
+                  <span className="text-[20px]" style={{ color: "#FFF" }}>
+                    / {card.remaining}
+                  </span>
+                  <span className="text-[12px]" style={{ color: "#DDD" }}>
+                    최대 {card.remaining}장
+                  </span>
                 </div>
               </div>
             </div>
 
             {/* 장당 가격 */}
             <div className="flex items-center mb-[30px]">
-              <span className="font-bold text-[16px] mr-[126px]">장당 가격</span>
+              <span className="font-bold text-[16px] mr-[126px]">
+                장당 가격
+              </span>
               <div className="flex items-center">
                 <div className="flex items-center justify-between w-[176px] h-[50px] border border-gray-300 bg-[#161616] rounded-[2px] flex-shrink-0 px-[10px]">
-                  <button className="text-white text-[20px]" onClick={decreasePrice}>-</button>
+                  <button
+                    className="text-white text-[20px]"
+                    onClick={decreasePrice}
+                  >
+                    -
+                  </button>
                   <span className="text-[18px]">{price}</span>
-                  <button className="text-white text-[20px]" onClick={increasePrice}>+</button>
+                  <button
+                    className="text-white text-[20px]"
+                    onClick={increasePrice}
+                  >
+                    +
+                  </button>
                 </div>
                 <span className="text-[18px] text-white ml-[10px]">P</span>
               </div>
@@ -173,11 +202,13 @@ const CardDetailEdit = ({ isOpen, onClose, card }) => {
                 value={selectedRarity}
                 onChange={(e) => setSelectedRarity(e.target.value)}
               >
-                <option value="" disabled>등급을 선택해 주세요</option>
-                <option value="COMMON">COMMON</option>
-                <option value="RARE">RARE</option>
-                <option value="SUPER RARE">SUPER RARE</option>
-                <option value="LEGENDARY">LEGENDARY</option>
+                <option value="" disabled>
+                  등급을 선택해 주세요
+                </option>
+                <option value={GRADE.COMMON}>{GRADE.COMMON}</option>
+                <option value={GRADE.RARE}>{GRADE.RARE}</option>
+                <option value={GRADE.SUPER_RARE}>{GRADE.SUPER_RARE}</option>
+                <option value={GRADE.LEGENDARY}>{GRADE.LEGENDARY}</option>
               </select>
             </div>
 
@@ -188,7 +219,9 @@ const CardDetailEdit = ({ isOpen, onClose, card }) => {
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
               >
-                <option value="" disabled>장르를 선택해 주세요</option>
+                <option value="" disabled>
+                  장르를 선택해 주세요
+                </option>
                 <option value="풍경">풍경</option>
                 <option value="인물">인물</option>
                 <option value="동물">동물</option>
@@ -198,7 +231,9 @@ const CardDetailEdit = ({ isOpen, onClose, card }) => {
           </div>
 
           <div className="flex flex-col">
-            <label className="mb-[8px] font-bold text-[16px]">교환 희망 설명</label>
+            <label className="mb-[8px] font-bold text-[16px]">
+              교환 희망 설명
+            </label>
             <textarea
               className="w-full h-[120px] p-3 rounded border border-white/20 bg-transparent text-white placeholder-gray-400 resize-none"
               placeholder="설명을 입력해 주세요"
