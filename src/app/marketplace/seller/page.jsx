@@ -3,11 +3,11 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-
+import { useAuth } from "@/contexts/AuthContext";
 import SellerHeader from "@/components/molecules/sellerHeader";
 import SearchMolecule from "@/components/molecules/search";
 import Dropdown from "@/components/molecules/dropDown";
-import Card from "@/components/organisms/card";
+import Card from "@/components/organisms/sellerCard";
 import SellPhotoModal from "@/components/organisms/sellPhotoModal";
 import CardDetailSellModal from "@/components/organisms/cardDetailSellModal";
 import Tag from "@/components/atoms/tag";
@@ -33,10 +33,25 @@ const cardDataServer = Array.from({ length: 30 }, (_, i) => ({
   favoriteImg: "/images/favorite.svg",
 }));
 
-const ITEMS_PER_PAGE = 6; // 한 번에 로드할 카드 수
 
-const SellerPage = () => {
+const ITEMS_PER_PAGE = 6; // 한 번에 로드할 카드 수
+const POINT_MODAL_KEY = "lastPointModalTime"; // localStorage 키
+const LAST_LOGIN_TOKEN_KEY = "lastLoginToken"; // 마지막 로그인 토큰 체크용
+
+const MarketplacePage = () => {
   const router = useRouter();
+
+  // 로그인 여부 상태
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // 모달 관련 상태
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [modalTitle, setModalTitle] = useState("");
+  const [modalContent, setModalContent] = useState("");
+
+  const [isSellModalOpen, setIsSellModalOpen] = useState(false);
+  const [selectedSellCard, setSelectedSellCard] = useState(null);
+
   const [searchText, setSearchText] = useState("");
   const [selectedRarity, setSelectedRarity] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -45,11 +60,37 @@ const SellerPage = () => {
   const [displayedCards, setDisplayedCards] = useState([]);
   const [hasMore, setHasMore] = useState(true);
 
-  // 판매 모달 관련 상태
-  const [isSellModalOpen, setIsSellModalOpen] = useState(false);
-  const [selectedSellCard, setSelectedSellCard] = useState(null);
+  const [isPointModalOpen, setIsPointModalOpen] = useState(false);
 
   const observer = useRef();
+
+  // ✅ 로그인 상태 확인 및 포인트 모달 처리
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken"); // 실제 로그인 토큰 사용
+    if (token) {
+      setIsLoggedIn(true);
+
+      // 시연용: 로그아웃 후 새 로그인 시 포인트 모달 초기화
+      const lastLoginToken = localStorage.getItem(LAST_LOGIN_TOKEN_KEY);
+      if (lastLoginToken !== token) {
+        localStorage.removeItem(POINT_MODAL_KEY);
+        localStorage.setItem(LAST_LOGIN_TOKEN_KEY, token);
+      }
+
+      // 포인트 모달 처리
+      const lastTime = localStorage.getItem(POINT_MODAL_KEY);
+      const now = Date.now();
+      if (!lastTime || now - parseInt(lastTime, 10) >= 3600 * 1000) {
+        setIsPointModalOpen(true);
+        localStorage.setItem(POINT_MODAL_KEY, now.toString());
+      }
+    } else {
+      setIsLoggedIn(false);
+      setModalTitle("로그인이 필요합니다");
+      setModalContent("마켓플레이스를 이용하시려면 로그인 해주세요.");
+      setIsLoginModalOpen(true);
+    }
+  }, []);
 
   // 필터링 + 정렬 적용
   const filteredCards = cardDataServer
@@ -107,9 +148,7 @@ const SellerPage = () => {
   return (
     <div className="bg-black min-h-screen px-[80px] py-[40px] text-white relative">
       {/* 상단 제목 */}
-      <h1 className="flex items-center justify-between text-white text-[62px] font-normal tracking-[-1.86px] border-b border-white pb-5">
-        나의 판매 포토카드
-      </h1>
+      <SellerHeader onSellClick={handleSellButtonClick} />
 
       {/* 보유 현황 */}
       <p className="text-[24px] text-white mb-[20px] mt-[32px]">
@@ -124,8 +163,6 @@ const SellerPage = () => {
         <Badge type="SUPER RARE" count={3} />
         <Badge type="LEGENDARY" count={5} />
       </div>
-
-      <SellerHeader onSellClick={handleSellButtonClick} />
 
       {/* 필터 및 정렬 */}
       <div className="flex justify-between items-center mt-5 w-full border-t border-gray-400 pt-[20px]">
