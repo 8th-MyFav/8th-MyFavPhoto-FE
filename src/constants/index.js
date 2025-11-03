@@ -26,7 +26,7 @@ export const PAGE_TITLE = {
 
 // 버튼 텍스트 상수
 export const BUTTON_TEXT = {
-  SELL_PHOTO: "내 포토카드 판매하기",
+  SELL_PHOTO: "나의 포토카드 판매하기",
   CREATE_PHOTO: "포토카드 생성하기",
 };
 
