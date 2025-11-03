@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import NotificationUI from "./Notification"; // 알림 UI 컴포넌트
+import { NOTISTATUS } from "@/constants";
 
 const NotificationButton = () => {
   const [showNotifications, setShowNotifications] = useState(false);
@@ -30,17 +31,17 @@ const NotificationButton = () => {
 
   const messageFromCategory = (category) => {
     switch (category) {
-      case "PURCHASED":
+      case NOTISTATUS.PURCHASED:
         return "성공적으로 구매했습니다.";
-      case "SOLD":
+      case NOTISTATUS.SOLD:
         return "판매되었습니다.";
-      case "SOLD_OUT":
+      case NOTISTATUS.SOLD_OUT:
         return "품절되었습니다.";
-      case "TRADE_OFFERED":
+      case NOTISTATUS.TRADE_OFFERED:
         return "포토카드 교환을 제안했습니다.";
-      case "TRADE_ACCEPTED":
+      case NOTISTATUS.TRADE_ACCEPTED:
         return "포토카드 교환이 성사되었습니다.";
-      case "TRADE_REJECTED":
+      case NOTISTATUS.TRADE_REJECTED:
         return "교환을 거절했습니다.";
       default:
         return category || "알림이 도착했습니다.";

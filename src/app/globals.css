@@ -77,7 +77,6 @@ select:focus {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 
-  /* Tailwind v4 theme color tokens */
   --color-black: var(--color-black);
   --color-white: var(--color-white);
   --color-gray-100: var(--color-gray-100);
@@ -110,7 +109,7 @@ select:focus {
   --text-noto-4xs: 12px;
   --text-noto-5xs: 10px;
 
-  /* BR font sizes (family applied via CSS rule) */
+  /* BR 폰트 크기 클래스에 폰트 패밀리 자동 적용 */
   --text-br-3xl: 62px;
   --text-br-2xl: 48px;
   --text-br-lg: 20px;
@@ -120,21 +119,41 @@ select:focus {
   /* 커스텀 border-radius (기본 스타일) */
   --radius-base: 2px;
 
-  /* Spacing tokens to mirror Tailwind config */
-  --spacing-container-mobile: 15px;
-  --spacing-container-tablet: 20px;
-  --spacing-container-desktop: 220px;
+  /* 반응형 컨테이너 패딩 시스템 */
   --spacing-x-mobile: 15px;
   --spacing-x-tablet: 20px;
   --spacing-x-desktop: 220px;
+
+  /* 자주 사용하는 spacing 값들 (명칭 동일 유지) */
+  --spacing-2xs: 10px;
+  --spacing-xs: 20px;
+  --spacing-sm: 30px;
+  --spacing-md: 40px;
+  --spacing-lg: 60px;
+  --spacing-xl: 80px;
+  --spacing-2xl: 90px;
+  --spacing-3xl: 100px;
+
+  /* Size 유틸리티용 (width, height 등) */
+  --size-spacing-2xs: var(--spacing-2xs);
+  --size-spacing-xs: var(--spacing-xs);
+  --size-spacing-sm: var(--spacing-sm);
+  --size-spacing-md: var(--spacing-md);
+  --size-spacing-lg: var(--spacing-lg);
+  --size-spacing-xl: var(--spacing-xl);
+  --size-spacing-2xl: var(--spacing-2xl);
+  --size-spacing-3xl: var(--spacing-3xl);
+  --size-x-mobile: var(--spacing-x-mobile);
+  --size-x-tablet: var(--spacing-x-tablet);
+  --size-x-desktop: var(--spacing-x-desktop);
 }
 
 /* BR 폰트 크기 클래스에 폰트 패밀리 자동 적용 */
-.text-br-3xl,
-.text-br-2xl,
-.text-br-lg,
-.text-br-md,
-.text-br-sm {
+.text-br-3xl, /* 62px */
+.text-br-2xl, /* 48px */
+.text-br-lg,  /* 20px */
+.text-br-md,  /* 18px */
+.text-br-sm   /* 16px */ {
   font-family: var(--font-br);
 }
 

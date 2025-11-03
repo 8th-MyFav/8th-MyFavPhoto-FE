@@ -25,7 +25,7 @@ const GNB = () => {
   return (
     <div className="bg-black">
       <div className="flex justify-center px-x-desktop bg-black">
-        <nav className="w-full h-[60px] flex justify-between items-center bg-black">
+        <nav className="w-full h-lg flex justify-between items-center bg-black">
           {/* 좌측 로고 */}
           <div className="flex items-center cursor-pointer">
             <Link href={PATHNAME.HOME}>
@@ -38,7 +38,7 @@ const GNB = () => {
           </div>
 
           {/* 우측 메뉴 */}
-          <div className="flex items-center gap-[30px]">
+          <div className="flex items-center gap-sm">
             <Navigation />
           </div>
         </nav>

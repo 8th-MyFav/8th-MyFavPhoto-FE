@@ -76,12 +76,12 @@ const JoinPage = () => {
   };
 
   return (
-    <div className="bg-black min-h-screen px-[80px] flex justify-center">
+    <div className="bg-black min-h-screen px-lg flex justify-center">
       <div className="border-gray-200">
         <Link href={PATHNAME.HOME}>
           <img
             src="/images/favorite.svg"
-            className="flex justify-center px-[95px] mt-[151px] mb-[80px] h-[60px]"
+            className="flex justify-center h-lg px-[95px] mt-[151px] mb-lg "
           />
         </Link>
         <form onSubmit={handleJoin} className="text-white" noValidate>
@@ -130,7 +130,7 @@ const JoinPage = () => {
             error={errors.passwordConfirmation}
             showPasswordToggle={true}
           />
-          <div className="text-noto-xs pb-[40px]">
+          <div className="text-noto-xs pb-md">
             <Button
               type="submit"
               text="가입하기"
@@ -142,10 +142,10 @@ const JoinPage = () => {
             />
           </div>
         </form>
-        <div className="flex justify-center gap-4 text-white text-[16px]">
+        <div className="flex justify-center gap-4 text-white text-noto-2xs">
           <p>이미 최애의포토 회원이신가요?</p>
           <Link
-            className="text-[var(--color-main)] underline underline-offset-4"
+            className="text-main underline underline-offset-4"
             href={PATHNAME.LOGIN}
           >
             로그인하기

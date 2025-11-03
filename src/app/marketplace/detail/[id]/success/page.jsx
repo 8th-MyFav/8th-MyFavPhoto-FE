@@ -1,5 +1,6 @@
 "use client";
 import ActionResultPage from "@/components/organisms/actionResultPage";
+import { PATHNAME } from "@/constants";
 import { useSearchParams, useRouter } from "next/navigation";
 
 export default function PurchaseSuccessPage() {
@@ -18,7 +19,7 @@ export default function PurchaseSuccessPage() {
       title={title}
       quantity={quantity}
       buttonText="마이갤러리에서 확인하기"
-      buttonAction={() => router.push("/myGallery")}
+      buttonAction={() => router.push(PATHNAME.MYGAL)}
     />
   );
 }
