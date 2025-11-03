@@ -35,7 +35,7 @@ const HomePage = () => {
                     </span>
                     가 여기에!
                   </h1>
-                  <div className="flex justify-center">
+                  <div className="flex justify-center transition hover:shadow-lg">
                     <Button
                       text="최애 찾으러 가기"
                       width="235px"
@@ -45,12 +45,13 @@ const HomePage = () => {
                       fontSize="16px"
                       padding="0"
                       onClick={handleFindFav}
+                      className="transition transform hover:scale-105"
                     />
                   </div>
                 </div>
               </div>
             </div>
-            <div className="mt-[30px]">
+            <div className="mt-sm">
               <img
                 src="/images/hpMain001.svg"
                 alt="배경"
@@ -58,7 +59,7 @@ const HomePage = () => {
               />
             </div>
             <div>
-              <div className="pl-[428px] pt-[133px] pb-[40px]">
+              <div className="pl-[428px] pt-[133px] pb-md">
                 <h1 className="text-noto-lg font-bold text-white align-center">
                   포인트로
                   <span className="text-main text-bold text-noto-lg">
@@ -75,7 +76,7 @@ const HomePage = () => {
                 <img src="/images/hpMain002.svg" alt="배경" className="z-0" />
               </div>
               <div>
-                <div className="pl-[428px] pt-[133px] pb-[40px]">
+                <div className="pl-[428px] pt-[133px] pb-md">
                   <h1 className="text-noto-lg font-bold text-white align-center">
                     알림으로 보다
                     <span className="text-blue text-bold text-noto-lg">
@@ -93,7 +94,7 @@ const HomePage = () => {
               <img src="/images/hpMain003.png" alt="배경" className="z-0" />
             </div>
             <div>
-              <div className="pl-[428px] pt-[133px] pb-[40px]">
+              <div className="pl-[428px] pt-[133px] pb-md">
                 <h1 className="text-noto-lg font-bold text-white align-center">
                   랜덤 상자로
                   <span className="text-main text-bold text-noto-lg">
@@ -127,6 +128,7 @@ const HomePage = () => {
                     fontSize="16px"
                     padding="0"
                     onClick={handleFindFav}
+                    className="transition transform hover:scale-105"
                   />
                 </div>
               </div>

@@ -7,7 +7,16 @@ import React from "react";
 // - pageSize: number
 // - totalCount: number
 // - onChange: (nextPage:number) => void
-const Pagination = ({ page = 1, pageSize = 15, totalCount = 0, onChange }) => {
+// - variant: 'default' | 'simple' (default: 'default')
+//   - 'default': 숫자 페이지네이션 (dots 포함)
+//   - 'simple': 간단한 이전/다음 버튼 + 현재페이지/전체페이지 표시
+const Pagination = ({
+  page = 1,
+  pageSize = 15,
+  totalCount = 0,
+  onChange,
+  variant = "default",
+}) => {
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
   const go = (p) => {
@@ -55,6 +64,32 @@ const Pagination = ({ page = 1, pageSize = 15, totalCount = 0, onChange }) => {
 
   const pages = buildPages();
 
+  // Simple variant: 간단한 이전/다음 버튼 + 현재페이지/전체페이지 표시
+  if (variant === "simple") {
+    return (
+      <div className="flex justify-center items-center gap-2 p-3 border-t border-gray-400 rounded-b-base">
+        <button
+          onClick={() => go(page - 1)}
+          disabled={page === 1}
+          className="px-2 py-1 text-noto-3xs text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:text-white"
+        >
+          이전
+        </button>
+        <span className="text-noto-3xs text-gray-300">
+          {page} / {totalPages}
+        </span>
+        <button
+          onClick={() => go(page + 1)}
+          disabled={page >= totalPages}
+          className="px-2 py-1 text-noto-3xs text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:text-white"
+        >
+          다음
+        </button>
+      </div>
+    );
+  }
+
+  // Default variant: 숫자 페이지네이션
   return (
     <div className="w-full flex justify-center items-center gap-xs select-none my-lg">
       {/* Prev */}

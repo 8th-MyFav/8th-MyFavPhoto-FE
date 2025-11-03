@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import NotificationUI from "./Notification"; // 알림 UI 컴포넌트
+import NotificationIcon from "@/components/atoms/notificationIcon";
 import { NOTISTATUS } from "@/constants";
 
 const NotificationButton = () => {
@@ -152,12 +153,7 @@ const NotificationButton = () => {
         aria-label="알림"
         aria-expanded={showNotifications}
       >
-        <img
-          src={unreadCount > 0 ? "/icons/alarmUnread.svg" : "/icons/alarm.svg"}
-          alt="알림"
-          width={24}
-          height={24}
-        />
+        <NotificationIcon hasUnread={unreadCount > 0} />
       </button>
 
       <NotificationUI
