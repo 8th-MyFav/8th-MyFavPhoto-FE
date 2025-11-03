@@ -50,19 +50,19 @@ const PointModal = ({
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-center items-start pointer-events-none">
+    <div className="fixed inset-0 z-50 flex justify-center items-center overflow-y-auto pointer-events-none">
       {/* 배경 블러 */}
-      <div className=" absolute inset-0 bg-[#000000] opacity-80 pointer-events-none"></div>
+      <div className="absolute inset-0 bg-[#000000] opacity-80 pointer-events-none"></div>
 
       {/* 모달 박스 */}
       <div
         className={`relative flex flex-col justify-between items-center ${
           isConfirmed
-            ? "w-[455px] h-[678px]"
+            ? "w-full max-w-[455px] h-full max-h-[678px]"
             : selectedBox !== null
-            ? "w-[1034px] h-[765px]"
-            : "w-[1034px] h-[646px]"
-        } mt-[217px] rounded-[2px] bg-[#161616] z-10 pointer-events-auto transition-all duration-200`}
+            ? "w-full max-w-[1034px] h-full max-h-[765px]"
+            : "w-full max-w-[1034px] h-full max-h-[646px]"
+        } rounded-[2px] bg-[#161616] z-10 pointer-events-auto transition-all duration-200`}
       >
         {/* X 버튼 */}
         <button
