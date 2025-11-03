@@ -112,9 +112,20 @@ select:focus {
   /* BR 폰트 크기 클래스에 폰트 패밀리 자동 적용 */
   --text-br-3xl: 62px;
   --text-br-2xl: 48px;
+  --text-br-base: 46px;
   --text-br-lg: 20px;
   --text-br-md: 18px;
   --text-br-sm: 16px;
+
+/* BR 폰트 크기 클래스에 폰트 패밀리 자동 적용 */
+.text-br-3xl, /* 62px */
+.text-br-2xl, /* 48px */
+.text-br-base, /* 46px */
+.text-br-lg,  /* 20px */
+.text-br-md,  /* 18px */
+.text-br-sm   /* 16px */ {
+  font-family: var(--font-br);
+}
 
   /* 커스텀 border-radius (기본 스타일) */
   --radius-base: 2px;
@@ -146,15 +157,6 @@ select:focus {
   --size-x-mobile: var(--spacing-x-mobile);
   --size-x-tablet: var(--spacing-x-tablet);
   --size-x-desktop: var(--spacing-x-desktop);
-}
-
-/* BR 폰트 크기 클래스에 폰트 패밀리 자동 적용 */
-.text-br-3xl, /* 62px */
-.text-br-2xl, /* 48px */
-.text-br-lg,  /* 20px */
-.text-br-md,  /* 18px */
-.text-br-sm   /* 16px */ {
-  font-family: var(--font-br);
 }
 
 /* 숫자 입력 스피너 제거 (Chrome, Safari, Edge) */
