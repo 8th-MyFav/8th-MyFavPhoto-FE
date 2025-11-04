@@ -63,7 +63,7 @@ select:-webkit-autofill:focus {
   transition: background-color 9999s ease-in-out 0s;
 }
 
-/* ✅ Tailwind theme 변수만 정의 */
+/* Tailwind theme 변수만 정의 */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -134,7 +134,7 @@ select:-webkit-autofill:focus {
   --size-x-desktop: var(--spacing-x-desktop);
 }
 
-/* ✅ 여기에 따로 BR 폰트 전용 클래스 정의 */
+/* 여기에 따로 BR 폰트 전용 클래스 정의 */
 .text-br-3xl, /* 62px */
 .text-br-2xl, /* 48px */
 .text-br-base, /* 46px */

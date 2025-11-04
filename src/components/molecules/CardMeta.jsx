@@ -2,27 +2,19 @@
 
 import React from "react";
 
-// UI-only molecule extracted from card.jsx (69-74)
-// Props:
-// - rarityText: string (e.g., "SUPER RARE")
-// - rarityStyle: React.CSSProperties (style object for rarity badge)
-// - category: string (e.g., "풍경")
-// - variant: one of ['5xs','4xs','3xs','2xs','xs','sm','base']
-// - showRarity?: boolean (default true)
-// - showCategory?: boolean (default true)
-// - showDivider?: boolean (default true)
-
 const CardMeta = ({
   rarityText,
   rarityStyle,
   category,
-  variant = "2xs",
+  point,
+  purchaseText = "에 구매",
+  author,
+  variant = "default", // "default" | "withAuthor" | "full"
+  sizeVariant = "2xs", // fontSize variant
   className = "",
-  showRarity = true,
-  showCategory = true,
-  showDivider = true,
 }) => {
-  const allowed = new Set([
+  // fontSize variant 설정
+  const allowedSizes = new Set([
     "5xs", // 10
     "4xs", // 12
     "3xs", // 14
@@ -31,29 +23,61 @@ const CardMeta = ({
     "sm", // 20
     "base", // 24
   ]);
-  const safeVariant = allowed.has(variant) ? variant : "2xs";
-  const sizeClass = `text-noto-${safeVariant}`;
+  const safeSizeVariant = allowedSizes.has(sizeVariant) ? sizeVariant : "2xs";
+  const sizeClass = `text-noto-${safeSizeVariant}`;
+
+  // 왼쪽 섹션: grade | genre (항상) | point P 에 구매 (full일 때만)
+  const leftItems = [];
+  // 항상 표시: rarity와 category
+  leftItems.push({ type: "rarity", content: rarityText, style: rarityStyle });
+  if (category) {
+    leftItems.push({ type: "category", content: category });
+  }
+  // full variant일 때만 표시
+  if (variant === "full" && point !== undefined) {
+    leftItems.push({ type: "point", content: `${point} P` });
+  }
+  if (variant === "full" && purchaseText) {
+    leftItems.push({ type: "purchase", content: purchaseText });
+  }
+
   return (
     <div
-      className={`w-[360px] flex justify-between items-center mt-2xs h-[23px] ${className}`}
+      className={`w-full flex items-center justify-between gap-2xs mt-2xs h-[23px] ${className}`}
     >
-      <div className="flex items-center gap-[10px] h-[23px]">
-        {showRarity && <span style={rarityStyle}>{rarityText}</span>}
-        {showDivider && showRarity && showCategory && (
-          <span
-            className={`text-gray-400 flex items-center h-[23px] ${sizeClass}`}
-          >
-            |
-          </span>
-        )}
-        {showCategory && (
-          <span
-            className={`text-gray-300 flex items-center h-[23px] ${sizeClass}`}
-          >
-            {category}
-          </span>
-        )}
+      <div className="flex items-center gap-2xs h-[23px]">
+        {leftItems.map((item, index) => (
+          <React.Fragment key={index}>
+            {item.type === "rarity" ? (
+              <span style={item.style}>{item.content}</span>
+            ) : (
+              <span
+                className={`${
+                  item.type === "point"
+                    ? "text-white font-bold"
+                    : "text-gray-300"
+                } flex items-center h-[23px] ${sizeClass}`}
+              >
+                {item.content}
+              </span>
+            )}
+            {index < leftItems.length - 1 && (
+              <span
+                className={`text-gray-400 flex items-center h-[23px] ${sizeClass}`}
+              >
+                |
+              </span>
+            )}
+          </React.Fragment>
+        ))}
       </div>
+      {(variant === "withAuthor" || variant === "full") && author && (
+        <span
+          className={`flex underline underline-offset-4 h-[23px] ${sizeClass} text-white justify-end`}
+        >
+          {author}
+        </span>
+      )}
     </div>
   );
 };

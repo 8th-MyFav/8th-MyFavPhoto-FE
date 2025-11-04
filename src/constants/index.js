@@ -17,6 +17,24 @@ export const PATHNAME = {
   SELL_FAIL: "/marketplace/sell/fail",
   EXCHANGE_SUCCESS: "/marketplace/exchange/success",
   EXCHANGE_FAIL: "/marketplace/exchange/fail",
+
+  CREATE_SUCCESS: "/myGallery/create/success",
+  CREATE_FAIL: "/myGallery/create/fail",
+};
+
+// 쿼리 파라미터를 포함한 URL 생성 헬퍼 함수
+export const buildUrlWithParams = (baseUrl, params = {}) => {
+  const queryString = Object.entries(params)
+    .filter(
+      ([_, value]) => value !== null && value !== undefined && value !== ""
+    )
+    .map(
+      ([key, value]) =>
+        `${encodeURIComponent(key)}=${encodeURIComponent(value)}`
+    )
+    .join("&");
+
+  return queryString ? `${baseUrl}?${queryString}` : baseUrl;
 };
 
 // 페이지 헤더 제목 상수
