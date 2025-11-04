@@ -38,7 +38,7 @@ const ITEMS_PER_PAGE = 6; // 한 번에 로드할 카드 수
 const POINT_MODAL_KEY = "lastPointModalTime"; // localStorage 키
 const LAST_LOGIN_TOKEN_KEY = "lastLoginToken"; // 마지막 로그인 토큰 체크용
 
-const MarketplacePage = () => {
+const SellerPage = () => {
   const router = useRouter();
 
   // 로그인 여부 상태
