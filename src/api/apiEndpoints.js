@@ -4,3 +4,11 @@ export const MARKET_ENDPOINTS = {
   TRADES: "/market/trades",
   PURCHASE: "/market/purchase",
 };
+
+export const NOTIFICATION_ENDPOINTS = {
+  NOTIF: "/notifications",
+};
+
+export const POINT_ENDPOINTS = {
+  POITNT: "users/points",
+};

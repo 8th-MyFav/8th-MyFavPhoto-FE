@@ -19,4 +19,12 @@ export const ERROR_MESSAGES = {
 
   // 구매 관련
   PURCHASE_FAIL: "구매 실패",
+
+  // 알림 관련
+  NOTIFICATION_FAIL: "알림 조회 실패",
+  NOTFICATION_READ_RAIL: "알림 읽음 처리 실패",
+
+  // 포인트 관련
+  POINT_FAIL: "포인트 조회 실패",
+  POINT_GAIN_FAIL: "포인트 획득 실패"
 };
