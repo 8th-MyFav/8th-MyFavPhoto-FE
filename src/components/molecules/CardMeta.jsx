@@ -13,27 +13,49 @@ const CardMeta = ({
   sizeVariant = "2xs", // fontSize variant
   className = "",
 }) => {
+  // rarity 색상 계산
+  const getRarityStyle = (rarity) => {
+    if (!rarity) return {};
+    const normalized = rarity.replace(/\s+/g, "_").toUpperCase();
+    const base = { fontFamily: "var(--font-noto)", fontWeight: 700 };
+
+    switch (normalized) {
+      case "COMMON":
+        return { ...base, color: "var(--yellow-yellow, #EFFF04)" };
+      case "RARE":
+        return { ...base, color: "var(--blue-blue, #29C9F9)" };
+      case "SUPER_RARE":
+        return { ...base, color: "var(--purple-purple, #A77EFF)" };
+      case "LEGENDARY":
+        return { ...base, color: "var(--pink-pink, #FF2A6A)" };
+      default:
+        return { ...base, color: "var(--color-white)" };
+    }
+  };
+
   // fontSize variant 설정
   const allowedSizes = new Set([
     "5xs", // 10
     "4xs", // 12
     "3xs", // 14
     "2xs", // 16
-    "xs", // 18
-    "sm", // 20
+    "xs",  // 18
+    "sm",  // 20
     "base", // 24
   ]);
   const safeSizeVariant = allowedSizes.has(sizeVariant) ? sizeVariant : "2xs";
   const sizeClass = `text-noto-${safeSizeVariant}`;
 
-  // 왼쪽 섹션: grade | genre (항상) | point P 에 구매 (full일 때만)
+  // 왼쪽 섹션: rarity | category (항상) | point P 에 구매 (full일 때만)
   const leftItems = [];
-  // 항상 표시: rarity와 category
-  leftItems.push({ type: "rarity", content: rarityText, style: rarityStyle });
+  leftItems.push({
+    type: "rarity",
+    content: rarityText,
+    style: rarityStyle || getRarityStyle(rarityText),
+  });
   if (category) {
     leftItems.push({ type: "category", content: category });
   }
-  // full variant일 때만 표시
   if (variant === "full" && point !== undefined) {
     leftItems.push({ type: "point", content: `${point} P` });
   }
@@ -49,7 +71,10 @@ const CardMeta = ({
         {leftItems.map((item, index) => (
           <React.Fragment key={index}>
             {item.type === "rarity" ? (
-              <span style={item.style}>{item.content}</span>
+              // rarity에도 sizeClass 적용됨
+              <span style={item.style} className={`${sizeClass}`}>
+                {item.content}
+              </span>
             ) : (
               <span
                 className={`${
@@ -71,6 +96,7 @@ const CardMeta = ({
           </React.Fragment>
         ))}
       </div>
+
       {(variant === "withAuthor" || variant === "full") && author && (
         <span
           className={`flex underline underline-offset-4 h-[23px] ${sizeClass} text-white justify-end`}
