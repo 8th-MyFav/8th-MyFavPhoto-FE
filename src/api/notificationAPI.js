@@ -1,6 +1,6 @@
 // NOTE: /notification 하위 api 작성
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiClient } from "./apiClient";
 import { NOTIFICATION_ENDPOINTS } from "./apiEndpoints";
 import { ERROR_MESSAGES } from "./constants";

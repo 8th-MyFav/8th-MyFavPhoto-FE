@@ -56,7 +56,18 @@ const fetchMyCards = async ({
   );
 
   if (!res.ok) {
-    throw new Error(`카드 목록 조회 실패 (${res.status})`);
+    // 상태 코드별 에러 메시지
+    if (res.status === 401) {
+      throw new Error("인증이 필요합니다. 다시 로그인해주세요.");
+    } else if (res.status === 403) {
+      throw new Error("접근 권한이 없습니다.");
+    } else if (res.status === 404) {
+      throw new Error("요청한 페이지를 찾을 수 없습니다.");
+    } else if (res.status >= 500) {
+      throw new Error("서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+    } else {
+      throw new Error(`카드 목록 조회 실패 (${res.status})`);
+    }
   }
 
   const data = await res.json();
@@ -92,6 +103,7 @@ export default function MyGalleryPage() {
   const [totalCount, setTotalCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [retryCount, setRetryCount] = useState(0);
 
   // 로그인 체크
   useEffect(() => {
@@ -128,7 +140,30 @@ export default function MyGalleryPage() {
           return; // 요청 취소는 무시
         }
         console.error("카드 목록 조회 실패:", e);
-        setError(e.message);
+
+        // 에러 타입별 처리
+        let errorMessage = "카드 목록을 불러오는데 실패했습니다.";
+
+        if (e.message.includes("401") || e.message.includes("인증")) {
+          // 인증 에러 시 로그인 페이지로 리다이렉트
+          router.push(PATHNAME.LOGIN);
+          return;
+        } else if (e.message.includes("403")) {
+          errorMessage = "접근 권한이 없습니다.";
+        } else if (e.message.includes("404")) {
+          errorMessage = "요청한 페이지를 찾을 수 없습니다.";
+        } else if (e.message.includes("500") || e.message.includes("서버")) {
+          errorMessage = "서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
+        } else if (
+          e.message.includes("네트워크") ||
+          e.message.includes("fetch")
+        ) {
+          errorMessage = "네트워크 연결을 확인해주세요.";
+        } else if (e.message) {
+          errorMessage = e.message;
+        }
+
+        setError(errorMessage);
       } finally {
         setIsLoading(false);
       }
@@ -146,6 +181,7 @@ export default function MyGalleryPage() {
     selectedRarity,
     selectedCategory,
     searchText,
+    retryCount, // 재시도 시 다시 실행
   ]);
 
   // 필터/검색 변경 시 페이지 1로 초기화
@@ -189,14 +225,16 @@ export default function MyGalleryPage() {
     return <div>로딩중...</div>;
   }
 
-  // 에러 상태
-  if (error) {
-    return (
-      <div className="bg-black text-white p-4">
-        <p>오류가 발생했습니다: {error}</p>
-      </div>
-    );
-  }
+  // 재시도 핸들러
+  const handleRetry = () => {
+    setError(null);
+    setRetryCount((prev) => prev + 1);
+    // useEffect가 다시 실행되도록 상태 변경
+    setPage((prev) => prev);
+  };
+
+  // 에러 상태 (에러가 있어도 이전 데이터가 있으면 표시)
+  const hasData = ownedItems.length > 0;
 
   return (
     <div className="bg-black">
@@ -208,34 +246,76 @@ export default function MyGalleryPage() {
           gradeCounts={gradeCounts}
         />
 
-        <CardSearchContainer
-          searchText={searchText}
-          selectedRarity={selectedRarity}
-          selectedCategory={selectedCategory}
-          sortOrder={sortOrder}
-          showStatusFilter={false}
-          showSortDropdown={false}
-          categoryOptions={GENRE_OPTIONS}
-          onSearchChange={setSearchText}
-          onRarityChange={setSelectedRarity}
-          onCategoryChange={setSelectedCategory}
-          onSortOrderChange={setSortOrder}
-          cards={sortedCards.map((card) => ({
-            ...card,
-            showRemainingAsFraction: true,
-          }))}
-          cardGridClass="grid grid-cols-3 gap-x-xl gap-y-xl my-3xl"
-          emptyMessage="보유한 카드가 없습니다."
-          showPagination={true}
-          paginationComponent={
-            <Pagination
-              page={page}
-              pageSize={PAGE_SIZE}
-              totalCount={totalCount}
-              onChange={setPage}
-            />
-          }
-        />
+        {/* 에러 메시지 표시 (데이터가 있을 때는 상단에 표시) */}
+        {error && (
+          <div
+            className="mb-4 p-4 rounded"
+            style={{
+              backgroundColor: "rgba(255, 72, 61, 0.1)",
+              border: "1px solid rgba(255, 72, 61, 0.3)",
+            }}
+          >
+            <div className="flex items-center justify-between">
+              <p className="text-red-400 text-sm">{error}</p>
+              <button
+                onClick={handleRetry}
+                className="ml-4 px-4 py-2 rounded text-sm font-medium"
+                style={{
+                  backgroundColor: "var(--color-main, #EFFF04)",
+                  color: "var(--color-black)",
+                }}
+              >
+                다시 시도
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* 에러가 있고 데이터가 없을 때만 전체 에러 화면 표시 */}
+        {error && !hasData ? (
+          <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
+            <p className="text-red-400 text-lg mb-4">{error}</p>
+            <button
+              onClick={handleRetry}
+              className="px-6 py-3 rounded font-medium"
+              style={{
+                backgroundColor: "var(--color-main, #EFFF04)",
+                color: "var(--color-black)",
+              }}
+            >
+              다시 시도
+            </button>
+          </div>
+        ) : (
+          <CardSearchContainer
+            searchText={searchText}
+            selectedRarity={selectedRarity}
+            selectedCategory={selectedCategory}
+            sortOrder={sortOrder}
+            showStatusFilter={false}
+            showSortDropdown={false}
+            categoryOptions={GENRE_OPTIONS}
+            onSearchChange={setSearchText}
+            onRarityChange={setSelectedRarity}
+            onCategoryChange={setSelectedCategory}
+            onSortOrderChange={setSortOrder}
+            cards={sortedCards.map((card) => ({
+              ...card,
+              showRemainingAsFraction: true,
+            }))}
+            cardGridClass="grid grid-cols-3 gap-x-xl gap-y-xl my-3xl"
+            emptyMessage="보유한 카드가 없습니다."
+            showPagination={true}
+            paginationComponent={
+              <Pagination
+                page={page}
+                pageSize={PAGE_SIZE}
+                totalCount={totalCount}
+                onChange={setPage}
+              />
+            }
+          />
+        )}
       </div>
     </div>
   );
