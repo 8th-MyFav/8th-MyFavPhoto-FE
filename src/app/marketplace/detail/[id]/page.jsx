@@ -6,6 +6,7 @@ import Modal from "@/components/molecules/modal";
 import CardTradeModal from "@/components/organisms/cardTradeModal";
 import ExchangeModal from "@/components/organisms/exchangeModal";
 import TradeCard from "@/components/organisms/tradeCard";
+import CardMeta from "@/components/molecules/CardMeta";
 import { PATHNAME } from "@/constants";
 
 // 더미 카드 데이터
@@ -42,7 +43,6 @@ export default function DetailPage() {
   const [isExchangeModalOpen, setIsExchangeModalOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState(null);
 
-  // 취소 모달
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [cancelTargetCard, setCancelTargetCard] = useState(null);
 
@@ -53,12 +53,6 @@ export default function DetailPage() {
 
   if (!card)
     return <div className="text-white p-8">카드를 찾을 수 없습니다.</div>;
-
-  // 등급 색상 설정
-  let rarityColor = "var(--color-main)";
-  if (card.rarity === "RARE") rarityColor = "var(--color-blue)";
-  else if (card.rarity === "SUPER RARE") rarityColor = "var(--color-purple)";
-  else if (card.rarity === "LEGENDARY") rarityColor = "var(--color-pink)";
 
   // 구매 버튼 클릭 시 처리
   const handlePurchase = () => {
@@ -73,18 +67,15 @@ export default function DetailPage() {
     }
   };
 
-  // TradeCard purchase 모드 취소 버튼 클릭
   const handleCancelTradeCard = (targetCard) => {
     setCancelTargetCard(targetCard);
     setIsCancelModalOpen(true);
   };
 
-  // 취소 확인 버튼 클릭
   const handleConfirmCancel = () => {
     console.log("교환 제시 취소 완료:", cancelTargetCard);
     setIsCancelModalOpen(false);
     setCancelTargetCard(null);
-    // 실제 로직: 선택 카드 제거 등
   };
 
   return (
@@ -133,25 +124,15 @@ export default function DetailPage() {
           </div>
 
           <div style={{ width: "440px" }}>
-            <div className="flex justify-between items-center mb-8">
-              <div className="flex gap-4 items-center">
-                <span style={{ color: rarityColor, fontWeight: 700 }}>
-                  {card.rarity}
-                </span>
-                <span style={{ color: "var(--color-gray-300)" }}>|</span>
-                <span style={{ color: "var(--color-gray-300)" }}>
-                  {card.category}
-                </span>
-              </div>
-              <span
-                style={{
-                  color: "var(--color-white)",
-                  textDecorationLine: "underline",
-                }}
-              >
-                {card.author}
-              </span>
-            </div>
+            {/* CardMeta 적용 */}
+            <CardMeta
+              rarityText={card.rarity}
+              category={card.category}
+              author={card.author}
+              variant="withAuthor"
+              sizeVariant="base"
+              className="mb-[30px]"
+            />
 
             <hr className="border-gray-700 mb-4" />
             <p className="text-white mb-6">{card.content}</p>
@@ -221,36 +202,27 @@ export default function DetailPage() {
 
           <hr className="border-white mb-[60px]" />
 
+          {/* CardMeta 적용*/}
+          <CardMeta
+            rarityText={card.rarity}
+            category={card.category}
+            variant="default"
+            sizeVariant="base"
+            className="mb-[30px]"
+          />
+
           <p
             style={{
               color: "var(--color-white)",
               fontFamily: "var(--font-noto)",
-              fontSize: "24px",
-              fontWeight: 700,
-              marginTop: "60px",
-            }}
-          >
-            {card.exchangeInfo}
-          </p>
-
-          <div
-            className="flex items-center"
-            style={{
-              gap: "15px",
+              fontSize: "18px",
+              fontWeight: 400,
               marginTop: "20px",
               marginBottom: "120px",
             }}
           >
-            <span style={{ color: rarityColor, fontWeight: 700 }}>
-              {card.rarity}
-            </span>
-            <span style={{ color: "var(--color-gray-400)", fontWeight: 700 }}>
-              |
-            </span>
-            <span style={{ color: "var(--color-gray-300)", fontWeight: 700 }}>
-              {card.category}
-            </span>
-          </div>
+            {card.exchangeInfo}
+          </p>
 
           {/* 내가 제시한 교환 목록 */}
           <h3
@@ -258,9 +230,7 @@ export default function DetailPage() {
               color: "var(--white-white, #FFF)",
               fontFamily: "Noto Sans KR",
               fontSize: "40px",
-              fontStyle: "normal",
               fontWeight: 700,
-              lineHeight: "normal",
               marginBottom: "20px",
             }}
           >
@@ -327,7 +297,6 @@ export default function DetailPage() {
         />
       )}
 
-      {/* 취소 확인 모달 */}
       {isCancelModalOpen && cancelTargetCard && (
         <Modal
           title="교환 제시 취소"

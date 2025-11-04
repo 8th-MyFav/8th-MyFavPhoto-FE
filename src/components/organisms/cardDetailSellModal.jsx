@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Button from "../atoms/button";
+import CardMeta from "../molecules/CardMeta";
 import { PATHNAME, GRADE } from "@/constants";
 
 const CardDetailSellModal = ({ isOpen, onClose, card }) => {
@@ -14,21 +15,7 @@ const CardDetailSellModal = ({ isOpen, onClose, card }) => {
   const [description, setDescription] = useState("");
   const [quantity, setQuantity] = useState(0);
 
-  const getRarityColor = (rarity) => {
-    switch (rarity?.toUpperCase()) {
-      case GRADE.COMMON:
-        return "#EFFF04";
-      case GRADE.RARE:
-        return "#29C9F9";
-      case GRADE.SUPER_RARE:
-        return "#A77EFF";
-      case GRADE.LEGENDARY:
-        return "#FF2A6A";
-      default:
-        return "#A4A4A4";
-    }
-  };
-
+  /** 수량 조절 */
   const increase = () => {
     if (quantity < card.remaining) setQuantity(quantity + 1);
   };
@@ -37,6 +24,7 @@ const CardDetailSellModal = ({ isOpen, onClose, card }) => {
     if (quantity > 1) setQuantity(quantity - 1);
   };
 
+  /** 판매 처리 */
   const handleSell = () => {
     const isValid =
       quantity > 0 &&
@@ -113,46 +101,15 @@ const CardDetailSellModal = ({ isOpen, onClose, card }) => {
 
           {/* 정보 텍스트 */}
           <div className="flex flex-col text-white items-start">
-            {/* 등급 | 장르 | 글쓴이 */}
-            <div className="flex justify-between items-center mb-[36px] w-full">
-              <div className="flex items-center gap-[15px]">
-                <span
-                  style={{
-                    color: getRarityColor(card.rarity),
-                    fontFamily: "Noto Sans KR",
-                    fontSize: "24px",
-                    fontWeight: 700,
-                  }}
-                >
-                  {card.rarity}
-                </span>
-
-                <span className="text-gray-400">|</span>
-
-                <span
-                  style={{
-                    color: "#A4A4A4",
-                    fontFamily: "Noto Sans KR",
-                    fontSize: "24px",
-                    fontWeight: 700,
-                  }}
-                >
-                  {card.category}
-                </span>
-              </div>
-
-              <div
-                style={{
-                  color: "#FFF",
-                  fontFamily: "Noto Sans KR",
-                  fontSize: "24px",
-                  fontWeight: 700,
-                  textDecorationLine: "underline",
-                  textDecorationStyle: "solid",
-                }}
-              >
-                {card.author}
-              </div>
+            {/* CardMeta 적용 */}
+            <div className="mb-[36px] w-full">
+              <CardMeta
+                rarityText={card.rarity || "COMMON"} 
+                category={card.category}
+                author={card.author}
+                variant="withAuthor"
+                sizeVariant="base"
+              />
             </div>
 
             {/* 하단 회색 구분선 */}

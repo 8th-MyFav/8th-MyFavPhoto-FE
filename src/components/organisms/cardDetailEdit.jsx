@@ -3,30 +3,19 @@
 import React, { useState } from "react";
 import Button from "../atoms/button";
 import { GRADE } from "@/constants";
+import CardMeta from "../molecules/CardMeta";
 
 const CardDetailEdit = ({ isOpen, onClose, card }) => {
   if (!isOpen || !card) return null;
+
+  // 임시 author (하드코딩)
+  const TEMP_AUTHOR = "코드잇";
 
   const [selectedRarity, setSelectedRarity] = useState(card.rarity || "");
   const [selectedCategory, setSelectedCategory] = useState(card.category || "");
   const [description, setDescription] = useState(card.description || "");
   const [quantity, setQuantity] = useState(1);
   const [price, setPrice] = useState(card.price || 1);
-
-  const getRarityColor = (rarity) => {
-    switch (rarity?.toUpperCase()) {
-      case GRADE.COMMON:
-        return "#EFFF04";
-      case GRADE.RARE:
-        return "#29C9F9";
-      case GRADE.SUPER_RARE:
-        return "#A77EFF";
-      case GRADE.LEGENDARY:
-        return "#FF2A6A";
-      default:
-        return "#A4A4A4";
-    }
-  };
 
   const increaseQuantity = () => {
     if (quantity < card.remaining) setQuantity(quantity + 1);
@@ -48,7 +37,7 @@ const CardDetailEdit = ({ isOpen, onClose, card }) => {
       selectedCategory &&
       description.trim().length > 0;
 
-    // router.push 제거: 성공/실패 페이지 이동 없이 모달만 닫기
+    // TODO: 나중에 API 요청 추가
     onClose();
   };
 
@@ -91,44 +80,19 @@ const CardDetailEdit = ({ isOpen, onClose, card }) => {
             alt={card.title}
             className="w-[380px] h-[260px] object-cover rounded"
           />
-          <div className="flex flex-col text-white items-start">
-            <div className="flex justify-between items-center mb-[36px] w-full">
-              <div className="flex items-center gap-[15px]">
-                <span
-                  style={{
-                    color: getRarityColor(selectedRarity),
-                    fontFamily: "Noto Sans KR",
-                    fontSize: "24px",
-                    fontWeight: 700,
-                  }}
-                >
-                  {selectedRarity}
-                </span>
-                <span className="text-gray-400">|</span>
-                <span
-                  style={{
-                    color: "#A4A4A4",
-                    fontFamily: "Noto Sans KR",
-                    fontSize: "24px",
-                    fontWeight: 700,
-                  }}
-                >
-                  {selectedCategory}
-                </span>
-              </div>
-              <div
-                style={{
-                  color: "#FFF",
-                  fontFamily: "Noto Sans KR",
-                  fontSize: "24px",
-                  fontWeight: 700,
-                  textDecorationLine: "underline",
-                }}
-              >
-                {card.author}
-              </div>
-            </div>
+          <div className="flex flex-col text-white items-start w-full">
+            {/* CardMeta 적용 */}
+            <CardMeta
+              rarityText={selectedRarity}
+              category={selectedCategory}
+              point={price}
+              author={TEMP_AUTHOR}
+              variant="withAuthor"
+              sizeVariant="base"
+              className="mb-[30px]" 
+            />
 
+            {/* 회색선 */}
             <div className="w-full border-b border-gray-600 mb-[30px]" />
 
             {/* 총 판매 수량 */}
@@ -165,9 +129,7 @@ const CardDetailEdit = ({ isOpen, onClose, card }) => {
 
             {/* 장당 가격 */}
             <div className="flex items-center mb-[30px]">
-              <span className="font-bold text-[16px] mr-[126px]">
-                장당 가격
-              </span>
+              <span className="font-bold text-[16px] mr-[126px]">장당 가격</span>
               <div className="flex items-center">
                 <div className="flex items-center justify-between w-[176px] h-[50px] border border-gray-300 bg-[#161616] rounded-[2px] flex-shrink-0 px-[10px]">
                   <button
@@ -194,6 +156,7 @@ const CardDetailEdit = ({ isOpen, onClose, card }) => {
         <div className="text-white mb-[30px] pt-[30px]">
           <h4 className="text-[20px] font-bold mb-[20px]">교환 희망 정보</h4>
           <div className="border-b-[2px] border-[#EEE] mb-[20px]" />
+
           <div className="flex gap-[30px] mb-[20px]">
             <div className="flex-1 flex flex-col">
               <label className="text-white font-bold mb-[8px]">등급</label>
