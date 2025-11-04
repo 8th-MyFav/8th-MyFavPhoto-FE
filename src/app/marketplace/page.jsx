@@ -11,6 +11,7 @@ import SellPhotoModal from "@/components/organisms/sellPhotoModal";
 import CardDetailSellModal from "@/components/organisms/cardDetailSellModal";
 import PointModal from "@/components/molecules/pointModal";
 import { PATHNAME, GRADE } from "@/constants";
+import { useMarketList } from "@/api/marketListings";
 
 // 더미 카드 데이터
 const cardDataServer = Array.from({ length: 30 }, (_, i) => ({
@@ -62,8 +63,13 @@ const MarketplacePage = () => {
 
   const observer = useRef();
 
+  const [initialized, setInitialized] = useState(false);
+
   // ✅ 로그인 상태 확인 및 포인트 모달 처리
   useEffect(() => {
+
+    if (!initialized) setInitialized(true);
+
     const token = localStorage.getItem("accessToken"); // 실제 로그인 토큰 사용
     if (token) {
       setIsLoggedIn(true);
@@ -88,59 +94,28 @@ const MarketplacePage = () => {
       setModalContent("마켓플레이스를 이용하시려면 로그인 해주세요.");
       setIsLoginModalOpen(true);
     }
-  }, []);
+  }, [initialized]);
 
-  // 필터링 + 정렬 적용
-  const filteredCards = cardDataServer
-    .filter((card) => {
-      const matchesSearch =
-        card.title.toLowerCase().includes(searchText.toLowerCase()) ||
-        card.author.toLowerCase().includes(searchText.toLowerCase());
-      const matchesRarity = selectedRarity
-        ? card.rarityIcon === selectedRarity
-        : true;
-      const matchesCategory = selectedCategory
-        ? card.category === selectedCategory
-        : true;
-      const matchesStatus =
-        selectedStatus === "판매중"
-          ? card.remaining > 0
-          : selectedStatus === "매진"
-          ? card.remaining === 0
-          : true;
-      return matchesSearch && matchesRarity && matchesCategory && matchesStatus;
-    })
-    .sort((a, b) => {
-      if (sortOrder === "낮은 가격순") return a.price - b.price;
-      if (sortOrder === "높은 가격순") return b.price - a.price;
-      if (sortOrder === "최신순") return b.title.localeCompare(a.title);
-      return 0;
-    });
 
-  // 초기 카드 로딩
-  useEffect(() => {
-    setDisplayedCards(filteredCards.slice(0, ITEMS_PER_PAGE));
-    setHasMore(filteredCards.length > ITEMS_PER_PAGE);
-  }, [searchText, selectedRarity, selectedCategory, selectedStatus, sortOrder]);
-
-  // 무한 스크롤 마지막 카드 감지
-  const lastCardRef = (node) => {
-    if (observer.current) observer.current.disconnect();
-    observer.current = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting && hasMore) loadMore();
-    });
-    if (node) observer.current.observe(node);
-  };
-
-  const loadMore = () => {
-    const currentLength = displayedCards.length;
-    const more = filteredCards.slice(
-      currentLength,
-      currentLength + ITEMS_PER_PAGE
-    );
-    setDisplayedCards((prev) => [...prev, ...more]);
-    if (currentLength + more.length >= filteredCards.length) setHasMore(false);
-  };
+  const { data, isLoading, isError } = useMarketList({
+    take: 12,         // 한 번에 가져올 개수
+    cursor: null,     // 다음 페이지 커서
+    grade: selectedRarity || undefined,
+    genre: selectedCategory || undefined,
+    isSoldOut:
+      selectedStatus === "판매중"
+        ? false
+        : selectedStatus === "매진"
+        ? true
+        : undefined,
+    orderBy:
+      sortOrder === "낮은 가격순"
+        ? "PRICE_ASC"
+        : sortOrder === "높은 가격순"
+        ? "PRICE_DESC"
+        : "CREATED_DESC",
+    keyword: searchText || undefined,
+  });
 
   const handleCardClick = (index) => {
     router.push(PATHNAME.MARKET_DETAIL(index));

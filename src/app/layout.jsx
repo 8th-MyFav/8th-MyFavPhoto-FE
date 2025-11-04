@@ -42,7 +42,7 @@ export default function RootLayout({ children }) {
         <AuthProvider>
           <TanStackQueryProvider>
             <header>
-              <GNB />
+              {/* <GNB /> */}
             </header>
             {children}
           </TanStackQueryProvider>

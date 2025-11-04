@@ -14,13 +14,19 @@ export const apiClient = async (
 ) => {
   const headers = { "Content-Type": "application/json" };
   const token = auth ? getToken() : null;
-  if (token) headers.Authorization = `Bearer ${token}`;
-  // refresh token 
+  if (token) { 
+    headers.Authorization = `Bearer ${token}`;
+  }
+  // refresh token
 
   const url = new URL(`${API_URL}${endpoint}`);
+  console.log("endpoint : "+endpoint);
+  console.log("url : "+url);
+  console.log("data : "+data);
 
   // GET 요청일 경우, data를 query string으로 변환
   if (method === "GET" && data) {
+    console.log("get");
     Object.entries(data).forEach(([key, value]) => {
       if (value !== undefined && value !== null)
         url.searchParams.append(key, value);
@@ -32,6 +38,10 @@ export const apiClient = async (
     headers,
     body: method !== "GET" && data ? JSON.stringify(data) : undefined,
   });
+
+  // body 확인
+  const resBody = await res.clone().json().catch(async () => await res.clone().text());
+  console.log("body:", resBody);
 
   if (!res.ok) {
     const text = await res.text();

@@ -25,9 +25,12 @@ export const useMarketList = ({
       keyword,
     ],
     queryFn: async () => {
+      console.log("useMarketList 실행");
+      console.log(MARKET_ENDPOINTS.LISTINGS);
       try {
         return await apiClient(MARKET_ENDPOINTS.LISTINGS, {
           data: { take, cursor, grade, genre, isSoldOut, orderBy, keyword },
+          auth : true,
         });
       } catch {
         throw new Error(ERROR_MESSAGES.LIST_FAIL);
