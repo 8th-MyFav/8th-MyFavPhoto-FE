@@ -159,14 +159,17 @@ input[type="number"] {
 .notification-icon {
   transition: all 0.2s ease;
 }
+
 .notification-icon .alarm-path {
   fill: white !important;
   transition: fill 0.2s ease;
 }
+
 .notification-icon:hover .alarm-path,
 button:hover .notification-icon .alarm-path {
   fill: var(--color-main, #efff04) !important;
 }
+
 .notification-icon .badge-circle {
   fill: #ff483d !important;
 }
