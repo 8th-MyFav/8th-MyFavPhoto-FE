@@ -121,8 +121,7 @@ const LoginPage = () => {
               text="로그인"
               width="520px"
               height="60px"
-              backgroundColor="var(--color-main)"
-              color="var(--color-black)"
+              className="bg-main text-black"
               fontSize="18px"
               type="submit"
             />
