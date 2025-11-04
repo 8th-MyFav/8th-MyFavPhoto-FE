@@ -70,24 +70,17 @@ const Card = ({
         {title}
       </h2>
 
-      {/* 레어도 영역 */}
+      {/* 레어도 영역 : CardMeta.jsx 사용 */}
       <div className="w-[360px] flex justify-between items-center mt-[10px] h-[23px]">
         <CardMeta
           rarityText={rarityText}
           rarityStyle={rarityStyle}
           category={category}
-          variant="2xs"
+          author={author}
+          variant="withAuthor"
+          sizeVariant="2xs"
           className="w-auto"
         />
-        <span
-          className="underline text-[16px]"
-          style={{
-            color: "var(--color-white)",
-            fontFamily: "var(--font-noto-regular-16)",
-          }}
-        >
-          {author}
-        </span>
       </div>
 
       <div

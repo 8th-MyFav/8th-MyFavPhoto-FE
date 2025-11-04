@@ -28,7 +28,7 @@ const CardSearchContainer = ({
   onCardClick,
   lastCardRef,
   // 레이아웃 옵션
-  cardGridClass = "grid grid-cols-3 gap-x-[80px] gap-y-[80px] mt-[80px]", // 카드 그리드 클래스
+  cardGridClass = "grid grid-cols-3 gap-x-xl gap-y-xl mt-xl", // 카드 그리드 클래스
   emptyMessage = "조건에 맞는 포토카드가 없습니다.", // 빈 리스트 메시지
   // 페이지네이션
   showPagination = false,

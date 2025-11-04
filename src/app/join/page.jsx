@@ -134,11 +134,7 @@ const JoinPage = () => {
             <Button
               type="submit"
               text="가입하기"
-              width="520px"
-              height="60px"
-              backgroundColor="var(--color-main)"
-              color="var(--color-black)"
-              fontSize="18px"
+              className="w-[520px] h-lg bg-main text-black text-noto-xs"
             />
           </div>
         </form>
