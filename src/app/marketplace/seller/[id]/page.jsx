@@ -3,10 +3,12 @@
 import React, { useState } from "react";
 import TradeCard from "@/components/organisms/tradeCard";
 import Modal from "@/components/molecules/modal";
-import CardDetailEditModal from "@/components/organisms/cardDetailEdit"; 
+import CardDetailEditModal from "@/components/organisms/cardDetailEdit";
+import CardMeta from "@/components/molecules/CardMeta"; 
+
 const SellerDetailPage = () => {
   const [modalOpen, setModalOpen] = useState(false);
-  const [editModalOpen, setEditModalOpen] = useState(false); 
+  const [editModalOpen, setEditModalOpen] = useState(false);
   const [modalData, setModalData] = useState({
     title: "",
     content: "",
@@ -15,7 +17,7 @@ const SellerDetailPage = () => {
   });
   const [cursorStyle, setCursorStyle] = useState("default");
 
-  // --------- 카드 정보 하드코딩 ---------
+  // --------- 카드 정보 하드코딩 (auth 없이 하드코딩) ---------
   const card = {
     title: "우리집 앞마당",
     rarity: "LEGENDARY",
@@ -158,58 +160,22 @@ const SellerDetailPage = () => {
         {/* 오른쪽 상세 */}
         <div className="flex flex-col justify-between w-full lg:w-[440px] h-auto lg:h-[600px] mx-auto">
           <div>
-            {/* 등급 | 카테고리 | 이름 */}
-            <div className="flex justify-between items-center mb-[15px]">
-              <div className="flex items-center gap-[10px]">
-                <span
-                  style={{
-                    color: "var(--color-pink)",
-                    fontFamily: "var(--font-noto)",
-                    fontSize: "24px",
-                    fontWeight: 700,
-                  }}
-                >
-                  {card.rarity}
-                </span>
-                <span
-                  style={{
-                    color: "var(--color-gray-300)",
-                    fontSize: "24px",
-                    fontWeight: 700,
-                  }}
-                >
-                  |
-                </span>
-                <span
-                  style={{
-                    color: "var(--color-gray-300)",
-                    fontFamily: "var(--font-noto)",
-                    fontSize: "24px",
-                    fontWeight: 700,
-                  }}
-                >
-                  {card.category}
-                </span>
-              </div>
-              <span
-                style={{
-                  color: "var(--color-white)",
-                  fontFamily: "var(--font-noto)",
-                  fontSize: "24px",
-                  fontWeight: 700,
-                }}
-                className="underline"
-              >
-                {card.sellerName}
-              </span>
-            </div>
+            {/* CardMeta 적용 */}
+            <CardMeta
+              rarityText={card.rarity}
+              category={card.category}
+              author={card.sellerName}
+              variant="withAuthor"
+              sizeVariant="base"
+              className="mb-[30px]"
+            />
 
-            {/* 선 */}
+            {/* 회색 선 */}
             <div
               style={{
                 width: "100%",
                 height: "1px",
-                marginBottom: "15px",
+                marginBottom: "30px",
                 backgroundColor: "#5A5A5A",
               }}
             />
@@ -230,53 +196,22 @@ const SellerDetailPage = () => {
             {/* 가격 & 잔여 */}
             <div className="flex flex-col gap-[10px] mb-[30px]">
               <div className="flex justify-between">
-                <span
-                  style={{
-                    color: "var(--color-gray-300)",
-                    fontSize: "20px",
-                    fontWeight: 400,
-                  }}
-                >
+                <span className="text-[20px] font-normal text-gray-300">
                   가격
                 </span>
-                <span
-                  style={{
-                    color: "var(--color-white)",
-                    fontSize: "24px",
-                    fontWeight: 700,
-                    textAlign: "right",
-                  }}
-                >
+                <span className="text-[24px] font-bold text-white">
                   {card.price} P
                 </span>
               </div>
               <div className="flex justify-between">
-                <span
-                  style={{
-                    color: "var(--color-gray-300)",
-                    fontSize: "20px",
-                    fontWeight: 400,
-                  }}
-                >
+                <span className="text-[20px] font-normal text-gray-300">
                   잔여
                 </span>
                 <div className="flex items-end gap-[4px]">
-                  <span
-                    style={{
-                      color: "var(--color-white)",
-                      fontSize: "24px",
-                      fontWeight: 700,
-                    }}
-                  >
+                  <span className="text-[24px] font-bold text-white">
                     {card.remaining}
                   </span>
-                  <span
-                    style={{
-                      color: "var(--color-gray-300)",
-                      fontSize: "24px",
-                      fontWeight: 400,
-                    }}
-                  >
+                  <span className="text-[24px] font-normal text-gray-300">
                     / {card.total}
                   </span>
                 </div>
@@ -290,19 +225,11 @@ const SellerDetailPage = () => {
                 alt="refresh"
                 style={{ width: "28px", height: "28px" }}
               />
-              <span
-                style={{
-                  color: "var(--color-white)",
-                  fontFamily: "var(--font-noto)",
-                  fontSize: "28px",
-                  fontWeight: 700,
-                }}
-              >
+              <span className="text-[28px] font-bold text-white">
                 교환 희망 정보
               </span>
             </div>
 
-            <div style={{ marginBottom: "10px" }} />
             <div
               style={{
                 width: "100%",
@@ -312,48 +239,16 @@ const SellerDetailPage = () => {
               }}
             />
 
-            <div className="flex items-center gap-[10px] mb-[15px]">
-              <span
-                style={{
-                  color: "var(--color-blue)",
-                  fontFamily: "var(--font-noto)",
-                  fontSize: "24px",
-                  fontWeight: 700,
-                }}
-              >
-                {card.desiredCard.rarity}
-              </span>
-              <span
-                style={{
-                  color: "var(--color-gray-300)",
-                  fontFamily: "var(--font-noto)",
-                  fontSize: "24px",
-                  fontWeight: 700,
-                }}
-              >
-                |
-              </span>
-              <span
-                style={{
-                  color: "var(--color-gray-300)",
-                  fontFamily: "var(--font-noto)",
-                  fontSize: "24px",
-                  fontWeight: 700,
-                }}
-              >
-                {card.desiredCard.category}
-              </span>
-            </div>
-
-            <div
-              style={{
-                width: "100%",
-                height: "1px",
-                backgroundColor: "#5A5A5A",
-                marginBottom: "15px",
-              }}
+            {/* CardMeta 적용 */}
+            <CardMeta
+              rarityText={card.desiredCard.rarity}
+              category={card.desiredCard.category}
+              variant="default"
+              sizeVariant="base"
+              className="mb-[30px]"
             />
 
+            {/* 설명 */}
             <p
               style={{
                 color: "var(--color-white)",
@@ -370,43 +265,14 @@ const SellerDetailPage = () => {
           {/* 버튼 영역 */}
           <div className="flex flex-col gap-[20px] mt-[30px]">
             <button
-              onClick={openEditModal} // 수정 모달 열기
-              style={{
-                display: "flex",
-                width: "100%",
-                height: "80px",
-                justifyContent: "center",
-                alignItems: "center",
-                gap: "10px",
-                borderRadius: "2px",
-                background: "var(--color-main)",
-                color: "var(--color-black)",
-                fontFamily: "var(--font-noto)",
-                fontSize: "20px",
-                fontWeight: 700,
-                cursor: "pointer",
-              }}
+              onClick={openEditModal}
+              className="flex w-full h-[80px] justify-center items-center gap-[10px] rounded-[2px] bg-[var(--color-main)] text-[var(--color-black)] font-noto text-[20px] font-bold cursor-pointer"
             >
               수정하기
             </button>
             <button
               onClick={handleStopSale}
-              style={{
-                display: "flex",
-                width: "100%",
-                height: "80px",
-                justifyContent: "center",
-                alignItems: "center",
-                gap: "10px",
-                borderRadius: "2px",
-                border: "1px solid var(--color-gray-100)",
-                background: "var(--color-black)",
-                color: "var(--color-white)",
-                fontFamily: "var(--font-noto)",
-                fontSize: "20px",
-                fontWeight: 500,
-                cursor: "pointer",
-              }}
+              className="flex w-full h-[80px] justify-center items-center gap-[10px] rounded-[2px] border border-[var(--color-gray-100)] bg-[var(--color-black)] text-[var(--color-white)] font-noto text-[20px] font-medium cursor-pointer"
             >
               판매 내리기
             </button>
@@ -416,16 +282,7 @@ const SellerDetailPage = () => {
 
       {/* 교환 제시 목록 */}
       <section className="w-full max-w-[1200px] mt-[100px] px-[20px]">
-        <h2
-          style={{
-            color: "var(--color-white)",
-            fontFamily: "var(--font-noto)",
-            fontSize: "40px",
-            fontWeight: 700,
-            marginTop: "120px",
-          }}
-          className="mb-[15px]"
-        >
+        <h2 className="text-[40px] font-bold text-white font-noto mt-[120px] mb-[15px]">
           교환 제시 목록
         </h2>
         <div className="border-t border-white mb-[70px]" />

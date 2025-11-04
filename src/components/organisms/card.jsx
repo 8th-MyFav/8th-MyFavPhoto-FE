@@ -14,6 +14,10 @@ const Card = ({
   total = 5,
   favoriteImg = "/images/favorite.svg",
   quantity = null, // Sell 모달 전용
+  variant = "withAuthor", // CardMeta variant: "default" | "withAuthor" | "full"
+  sizeVariant = "2xs", // CardMeta sizeVariant
+  point, // CardMeta full variant용
+  purchaseText, // CardMeta full variant용
 }) => {
   // 레어도 텍스트 스타일 결정
   let rarityText = rarityIcon.toUpperCase();
@@ -77,8 +81,10 @@ const Card = ({
           rarityStyle={rarityStyle}
           category={category}
           author={author}
-          variant="withAuthor"
-          sizeVariant="2xs"
+          variant={variant}
+          sizeVariant={sizeVariant}
+          point={point}
+          purchaseText={purchaseText}
           className="w-auto"
         />
       </div>
