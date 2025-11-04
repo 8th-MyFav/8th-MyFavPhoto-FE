@@ -1,8 +1,9 @@
 // NOTE: /users/points 하위 api 작성
 
-import { data } from "autoprefixer";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { POINT_ENDPOINTS } from "./apiEndpoints";
 import { ERROR_MESSAGES } from "./constants";
+import { apiClient } from "./apiClient";
 
 // NOTE: 포인트 조회
 export const usePoints = () => {
@@ -10,10 +11,11 @@ export const usePoints = () => {
     queryKey: ["points"],
     queryFn: async () => {
       try {
-        return await apiClient(POINT_ENDPOINTS.POITNT, {
+        return await apiClient(POINT_ENDPOINTS.POTINT, {
           auth: true,
         });
-      } catch {
+      } catch (error) {
+        console.log(error);
         throw new Error(ERROR_MESSAGES.POINT_FAIL);
       }
     },
@@ -21,14 +23,14 @@ export const usePoints = () => {
 };
 
 // NOTE: 포인트 획득
-export const useGainPoints = (randomPoint) => {
+export const useGainPoints = () => {
   return useMutation({
     mutationFn: async (randomPoint) => {
       try {
         // randomPoint가 숫자로 들어옴
         const data = { point: randomPoint };
 
-        return await apiClient(POINT_ENDPOINTS.POITNT, {
+        return await apiClient(POINT_ENDPOINTS.POTINT, {
           method: "POST",
           auth: true,
           data,

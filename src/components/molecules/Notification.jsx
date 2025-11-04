@@ -16,7 +16,7 @@ const NotificationUI = ({
     return Array.from({ length: 8 }, (_, i) => ({
       id: i + 1,
       message: `알림 메시지 ${i + 1}: 새로운 포토카드 거래가 완료되었습니다.`,
-      time: `${i + 1}분 전`,
+      time: `${i + 1}분 전`, 
       isRead: i % 3 === 0, // 일부는 읽음 처리
     }));
   }, []);

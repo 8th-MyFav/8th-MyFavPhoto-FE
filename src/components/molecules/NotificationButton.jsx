@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import NotificationUI from "./Notification"; // 알림 UI 컴포넌트
 import NotificationIcon from "@/components/atoms/notificationIcon";
 import { NOTISTATUS } from "@/constants";
+import { useQueryClient } from "@tanstack/react-query";
+import { useNotification, useReadNotification } from "@/api/notificationAPI";
 
 const NotificationButton = () => {
   const [showNotifications, setShowNotifications] = useState(false);
@@ -12,6 +14,40 @@ const NotificationButton = () => {
   const [totalPages, setTotalPages] = useState(1);
   const ITEMS_PER_PAGE = 5;
   const notiModal = useRef();
+
+  const [page, setPage] = useState(1);
+
+  const queryClient = useQueryClient();
+  const { data, isLoading } = useNotification(page, 5); // GET <- 선언하면 useQuery 실행
+  const { mutate: readNotification, isPending } = useReadNotification(); //PATCH
+
+  const handleRead = (id, page) => {
+    console.log("id=> ", id);
+    readNotification(id, {
+      onSuccess: () => {
+        console.log("read 성공:", res);
+        // tanstack query chach 변경
+        queryClient.invalidateQueries({ queryKey: ["points", page] });
+      },
+      // 오류 확인
+      onError: (err) => {
+        console.error("read 실패:", err);
+      },
+    });
+  };
+
+  // mutate 확인용 코드 
+  useEffect(() => {
+    (async () => {
+      console.log("🔍 테스트용 handleRead 실행 시작");
+      try {
+        const res = await handleRead(30, 1);
+        console.log("✅ handleRead 성공:", res);
+      } catch (err) {
+        console.error("❌ handleRead 실패:", err);
+      }
+    })();
+  }, []); // 한 번만 실행
 
   const formatTime = (iso) => {
     if (!iso) return "";
@@ -112,8 +148,11 @@ const NotificationButton = () => {
   }, [notifications]);
 
   // 버튼 클릭 핸들러
-  const handleClick = () => {
+  const handleClick = async () => {
     setShowNotifications(!showNotifications);
+
+    // tanstack query 확인
+    console.log("get data=> ", data);
   };
 
   // 모달 닫기 핸들러

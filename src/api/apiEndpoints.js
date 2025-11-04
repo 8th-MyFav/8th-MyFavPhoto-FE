@@ -10,5 +10,5 @@ export const NOTIFICATION_ENDPOINTS = {
 };
 
 export const POINT_ENDPOINTS = {
-  POITNT: "users/points",
+  POTINT: "/users/points",
 };

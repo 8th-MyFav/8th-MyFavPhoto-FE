@@ -1,3 +1,5 @@
+import { useGainPoints, usePoints } from "@/api/pointAPI";
+import { useQueryClient } from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
 
 const PointModal = ({
@@ -10,6 +12,10 @@ const PointModal = ({
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [reward, setReward] = useState(0);
   const [timeLeft, setTimeLeft] = useState(3600);
+
+  const queryClient = useQueryClient();
+  const { data, isLoading } = usePoints();
+  const { mutate: gainPoints, isPending } = useGainPoints();
 
   useEffect(() => {
     if (timeLeft <= 0) {
@@ -34,10 +40,26 @@ const PointModal = ({
     setSelectedBox(index);
   };
 
-  const handleConfirm = () => {
+  // const handleConfirm = () => {
+  //   if (selectedBox === null) return;
+
+  //   const randomPoint = Math.floor(Math.random() * 91) + 10;
+
+  //   setReward(randomPoint);
+  //   setIsConfirmed(true);
+  // };
+
+  const handleGain = () => {
     if (selectedBox === null) return;
 
     const randomPoint = Math.floor(Math.random() * 91) + 10;
+
+    gainPoints(randomPoint, {
+      onSuccess: () => {
+        // ✅ 포인트 적립 성공 시, 포인트 데이터 새로고침
+        queryClient.invalidateQueries(["points"]);
+      },
+    });
 
     setReward(randomPoint);
     setIsConfirmed(true);
@@ -48,6 +70,12 @@ const PointModal = ({
     "/images/random_box-2.svg",
     "/images/random_box-3.svg",
   ];
+
+  useEffect(() => {
+    console.log(data);
+  }, [data]);
+
+  if (isLoading) return <p>불러오는 중...</p>;
 
   return (
     <div className="fixed inset-0 z-50 flex justify-center items-center overflow-y-auto pointer-events-none">
@@ -158,7 +186,7 @@ const PointModal = ({
           <div className="flex justify-center mb-[63px]">
             <button
               className="w-[520px] h-[60px] bg-[#EFFF04] hover:bg-[#d8e400] active:scale-95 transition-all cursor-pointer rounded-[2px] font-extrabold text-black"
-              onClick={handleConfirm}
+              onClick={handleGain}
             >
               {buttonText}
             </button>
