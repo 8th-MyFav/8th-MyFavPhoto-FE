@@ -37,9 +37,11 @@ module.exports = {
       fontSize: {
         "br-3xl": ["62px", { fontFamily: "var(--font-br)" }],
         "br-2xl": ["48px", { fontFamily: "var(--font-br)" }],
+        "br-base": ["46px", { fontFamily: "var(--font-br)" }],
         "br-lg": ["20px", { fontFamily: "var(--font-br)" }],
         "br-md": ["18px", { fontFamily: "var(--font-br)" }],
         "br-sm": ["16px", { fontFamily: "var(--font-br)" }],
+
         "noto-3xl": ["62px", { fontFamily: "var(--font-noto)" }],
         "noto-2xl": ["48px", { fontFamily: "var(--font-noto)" }],
         "noto-xl": ["40px", { fontFamily: "var(--font-noto)" }],
