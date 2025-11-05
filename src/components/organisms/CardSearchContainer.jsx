@@ -19,6 +19,7 @@ const CardSearchContainer = ({
   categoryOptions = ["풍경", "인물", "동물", "추상"], // 장르/카테고리 옵션
   // 핸들러
   onSearchChange,
+  onSearchSubmit,
   onRarityChange,
   onCategoryChange,
   onStatusChange,
@@ -44,7 +45,10 @@ const CardSearchContainer = ({
       >
         <div className="flex items-center">
           <div className="mr-lg">
-            <SearchMolecule onSearch={onSearchChange} />
+            <SearchMolecule
+              onSearch={onSearchChange}
+              onSearchSubmit={onSearchSubmit || onSearchChange}
+            />
           </div>
           <div className="flex gap-[45px]">
             <Dropdown

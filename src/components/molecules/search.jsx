@@ -2,22 +2,22 @@
 
 import React, { useState } from "react";
 
-const Search = ({ onSearch }) => { 
+const Search = ({ onSearch }) => {
   const [searchText, setSearchText] = useState("");
 
   const handleChange = (e) => {
     const value = e.target.value;
     setSearchText(value);
-    if (onSearch) onSearch(value); 
+    if (onSearch) onSearch(value);
   };
 
   return (
     <div
       className="w-[320px] rounded-[2px] border"
       style={{
-        borderColor: 'var(--gray-gray200, #DDD)',
-        backgroundColor: 'var(--black-black, #0F0F0F)',
-        padding: '13px 20px',
+        borderColor: "var(--gray-gray200, #DDD)",
+        backgroundColor: "var(--black-black, #0F0F0F)",
+        padding: "13px 20px",
       }}
     >
       <div className="flex items-center w-full gap-2">
@@ -30,10 +30,10 @@ const Search = ({ onSearch }) => {
           className="flex-1 bg-transparent border-none outline-none"
           style={{
             color: searchText
-              ? 'var(--white-white, #FFF)'
-              : 'var(--gray-gray200, #DDD)',
+              ? "var(--white-white, #FFF)"
+              : "var(--gray-gray200, #DDD)",
             fontFamily: '"Noto Sans KR"',
-            fontSize: '16px',
+            fontSize: "16px",
             fontWeight: searchText ? 400 : 300,
           }}
         />

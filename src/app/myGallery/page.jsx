@@ -1,13 +1,15 @@
 "use client";
 import { useAuth } from "@/contexts/AuthContext";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import PagesHeader from "@/components/organisms/PagesHeader";
 import CardSearchContainer from "@/components/organisms/CardSearchContainer";
 import Pagination from "@/components/molecules/Pagination";
 import { PATHNAME, GENRE } from "@/constants";
+import { useMyCards } from "@/api/myGalleryAPI";
 
 const PAGE_SIZE = 15;
+const DEBOUNCE_DELAY = 500; // 디바운스 지연 시간 (500ms)
 const GENRE_OPTIONS = [
   GENRE.KPOP,
   GENRE.ACTOR,
@@ -16,94 +18,20 @@ const GENRE_OPTIONS = [
   GENRE.ANIMATION,
 ];
 
-/**
- * 내 포토카드 목록 조회 API
- */
-const fetchMyCards = async ({
-  page,
-  pageSize,
-  grade,
-  genre,
-  keyword,
-  signal,
-} = {}) => {
-  const token = localStorage.getItem("accessToken");
-  if (!token) {
-    throw new Error("인증 토큰이 없습니다.");
-  }
-
-  const gradeParam = grade
-    ? grade.replace("SUPER RARE", "SUPER_RARE").toUpperCase()
-    : "";
-
-  const params = new URLSearchParams({
-    page: String(page),
-    pageSize: String(pageSize),
-    grade: gradeParam,
-    genre: genre || "",
-    keyword: keyword || "",
-  });
-
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/cards/me?${params.toString()}`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      signal,
-    }
-  );
-
-  if (!res.ok) {
-    // 상태 코드별 에러 메시지
-    if (res.status === 401) {
-      throw new Error("인증이 필요합니다. 다시 로그인해주세요.");
-    } else if (res.status === 403) {
-      throw new Error("접근 권한이 없습니다.");
-    } else if (res.status === 404) {
-      throw new Error("요청한 페이지를 찾을 수 없습니다.");
-    } else if (res.status >= 500) {
-      throw new Error("서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
-    } else {
-      throw new Error(`카드 목록 조회 실패 (${res.status})`);
-    }
-  }
-
-  const data = await res.json();
-  return {
-    items: Array.isArray(data.lists) ? data.lists : [],
-    totalCount: Number(data.totalCount) || 0,
-    gradeCounts: {
-      COMMON: Number(data.gradeCounts?.COMMON) || 0,
-      RARE: Number(data.gradeCounts?.RARE) || 0,
-      SUPER_RARE: Number(data.gradeCounts?.SUPER_RARE) || 0,
-      LEGENDARY: Number(data.gradeCounts?.LEGENDARY) || 0,
-    },
-  };
-};
-
 export default function MyGalleryPage() {
   const router = useRouter();
   const { isAuthenticated, loading, user } = useAuth();
 
   // 상태 관리
-  const [ownedItems, setOwnedItems] = useState([]);
   const [searchText, setSearchText] = useState("");
+  const [debouncedSearchText, setDebouncedSearchText] = useState("");
   const [selectedRarity, setSelectedRarity] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("");
   const [sortOrder, setSortOrder] = useState("낮은 가격순");
   const [page, setPage] = useState(1);
-  const [gradeCounts, setGradeCounts] = useState({
-    COMMON: 0,
-    RARE: 0,
-    SUPER_RARE: 0,
-    LEGENDARY: 0,
-  });
-  const [totalCount, setTotalCount] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [retryCount, setRetryCount] = useState(0);
+  const debounceTimerRef = useRef(null);
 
   // 로그인 체크
   useEffect(() => {
@@ -112,82 +40,105 @@ export default function MyGalleryPage() {
     }
   }, [isAuthenticated, loading, router]);
 
-  // 포토카드 목록 조회
+  // 검색어 디바운싱 (타이핑 시)
   useEffect(() => {
-    if (!isAuthenticated || loading) return;
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
 
-    const controller = new AbortController();
+    debounceTimerRef.current = setTimeout(() => {
+      setDebouncedSearchText(searchText);
+    }, DEBOUNCE_DELAY);
 
-    const loadCards = async () => {
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const result = await fetchMyCards({
-          page,
-          pageSize: PAGE_SIZE,
-          grade: selectedRarity,
-          genre: selectedCategory,
-          keyword: searchText,
-          signal: controller.signal,
-        });
-
-        setOwnedItems(result.items);
-        setTotalCount(result.totalCount);
-        setGradeCounts(result.gradeCounts);
-      } catch (e) {
-        if (e.name === "AbortError") {
-          return; // 요청 취소는 무시
-        }
-        console.error("카드 목록 조회 실패:", e);
-
-        // 에러 타입별 처리
-        let errorMessage = "카드 목록을 불러오는데 실패했습니다.";
-
-        if (e.message.includes("401") || e.message.includes("인증")) {
-          // 인증 에러 시 로그인 페이지로 리다이렉트
-          router.push(PATHNAME.LOGIN);
-          return;
-        } else if (e.message.includes("403")) {
-          errorMessage = "접근 권한이 없습니다.";
-        } else if (e.message.includes("404")) {
-          errorMessage = "요청한 페이지를 찾을 수 없습니다.";
-        } else if (e.message.includes("500") || e.message.includes("서버")) {
-          errorMessage = "서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
-        } else if (
-          e.message.includes("네트워크") ||
-          e.message.includes("fetch")
-        ) {
-          errorMessage = "네트워크 연결을 확인해주세요.";
-        } else if (e.message) {
-          errorMessage = e.message;
-        }
-
-        setError(errorMessage);
-      } finally {
-        setIsLoading(false);
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
       }
     };
+  }, [searchText]);
 
-    const timer = setTimeout(loadCards, 300);
-    return () => {
-      clearTimeout(timer);
-      controller.abort();
-    };
-  }, [
-    isAuthenticated,
-    loading,
+  // 검색 제출 핸들러 (엔터/검색 버튼 클릭 시)
+  const handleSearchSubmit = (value) => {
+    // 디바운싱 타이머 취소 후 즉시 검색
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    setDebouncedSearchText(value);
+  };
+
+  // 매진여부 필터 변환 (판매중 -> false, 매진 -> true)
+  const isSoldOut = useMemo(() => {
+    if (selectedStatus === "매진") return true;
+    if (selectedStatus === "판매중") return false;
+    return undefined;
+  }, [selectedStatus]);
+
+  // React Query를 사용한 포토카드 목록 조회
+  const {
+    data,
+    isLoading,
+    error: queryError,
+    refetch,
+  } = useMyCards({
     page,
-    selectedRarity,
-    selectedCategory,
-    searchText,
-    retryCount, // 재시도 시 다시 실행
-  ]);
+    pageSize: PAGE_SIZE,
+    grade: selectedRarity,
+    genre: selectedCategory,
+    keyword: debouncedSearchText,
+    isSoldOut,
+  });
+
+  // 에러 처리
+  useEffect(() => {
+    if (queryError) {
+      const errorMessage =
+        queryError?.message || "카드 목록을 불러오는데 실패했습니다.";
+
+      // 401 에러 시 로그인 페이지로 리다이렉트
+      if (errorMessage.includes("401") || errorMessage.includes("인증")) {
+        router.push(PATHNAME.LOGIN);
+        return;
+      }
+
+      setError(errorMessage);
+    } else {
+      setError(null);
+    }
+  }, [queryError, router]);
+
+  // 데이터 추출
+  const ownedItems = data?.items || [];
+  const totalCount = data?.totalCount || 0;
+  const gradeCounts = data?.gradeCounts || {
+    COMMON: 0,
+    RARE: 0,
+    SUPER_RARE: 0,
+    LEGENDARY: 0,
+  };
+
+  // 디버깅: 페이지네이션 정보 확인
+  useEffect(() => {
+    console.log("🟡 Page State:", {
+      currentPage: page,
+      totalCount,
+      itemsCount: ownedItems.length,
+      items: ownedItems.map((item) => ({
+        id: item.id,
+        name: item.name,
+      })),
+    });
+  }, [page, totalCount, ownedItems]);
 
   // 필터/검색 변경 시 페이지 1로 초기화
   useEffect(() => {
     setPage(1);
-  }, [selectedRarity, selectedCategory, searchText]);
+  }, [selectedRarity, selectedCategory, debouncedSearchText, selectedStatus]);
+
+  // 재시도 핸들러
+  const handleRetry = () => {
+    setError(null);
+    refetch();
+  };
 
   // 카드 데이터 정규화
   const normalizedCards = useMemo(() => {
@@ -200,7 +151,7 @@ export default function MyGalleryPage() {
         category: item.genre || "",
         author: user?.nickname || "",
         price: item.price || 0,
-        remaining: item.total_count || 0,
+        remaining: item.count || item.total_count || 0,
         total: item.total_count || 0,
         favoriteImg: "/images/favorite.svg",
         createdAt: item.createdAt,
@@ -222,16 +173,8 @@ export default function MyGalleryPage() {
 
   // 로딩 상태
   if (loading || isLoading) {
-    return <div>로딩중...</div>;
+    return <div>불러오는 중</div>;
   }
-
-  // 재시도 핸들러
-  const handleRetry = () => {
-    setError(null);
-    setRetryCount((prev) => prev + 1);
-    // useEffect가 다시 실행되도록 상태 변경
-    setPage((prev) => prev);
-  };
 
   // 에러 상태 (에러가 있어도 이전 데이터가 있으면 표시)
   const hasData = ownedItems.length > 0;
@@ -291,13 +234,16 @@ export default function MyGalleryPage() {
             searchText={searchText}
             selectedRarity={selectedRarity}
             selectedCategory={selectedCategory}
+            selectedStatus={selectedStatus}
             sortOrder={sortOrder}
-            showStatusFilter={false}
+            showStatusFilter={true}
             showSortDropdown={false}
             categoryOptions={GENRE_OPTIONS}
             onSearchChange={setSearchText}
+            onSearchSubmit={handleSearchSubmit}
             onRarityChange={setSelectedRarity}
             onCategoryChange={setSelectedCategory}
+            onStatusChange={setSelectedStatus}
             onSortOrderChange={setSortOrder}
             cards={sortedCards.map((card) => ({
               ...card,
