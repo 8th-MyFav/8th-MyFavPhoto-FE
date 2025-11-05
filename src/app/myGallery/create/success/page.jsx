@@ -1,6 +1,6 @@
 "use client";
 
-import ActionResultPage from "@/components/organisms/actionResultPage";
+import ActionResultPage from "@/components/organisms/ActionResultPage";
 import { useSearchParams, useRouter } from "next/navigation";
 
 export default function CreatePhotoSuccessPage() {

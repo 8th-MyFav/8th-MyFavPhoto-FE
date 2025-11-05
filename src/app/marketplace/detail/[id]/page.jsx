@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import Modal from "@/components/molecules/modal";
-import CardTradeModal from "@/components/organisms/cardTradeModal";
-import ExchangeModal from "@/components/organisms/exchangeModal";
-import TradeCard from "@/components/organisms/tradeCard";
+import Modal from "@/components/molecules/Modal";
+import CardTradeModal from "@/components/organisms/CardTradeModal";
+import ExchangeModal from "@/components/organisms/ExchangeModal";
+import TradeCard from "@/components/organisms/TradeCard";
 import CardMeta from "@/components/molecules/CardMeta";
 import { PATHNAME } from "@/constants";
 

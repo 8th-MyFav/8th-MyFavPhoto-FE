@@ -1,7 +1,7 @@
 "use client";
 import React, { useMemo } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import Button from "../atoms/button";
+import Button from "../atoms/Button";
 import PhotoCardSummary from "../molecules/PhotoCardSummary";
 import { PATHNAME, PAGE_TITLE, BUTTON_TEXT } from "@/constants";
 

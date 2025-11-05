@@ -1,4 +1,4 @@
-import GNB from "@/components/organisms/gnb";
+import GNB from "@/components/organisms/Gnb";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { Geist, Geist_Mono, Noto_Sans_KR } from "next/font/google";

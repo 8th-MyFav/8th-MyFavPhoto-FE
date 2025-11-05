@@ -1,5 +1,5 @@
 "use client";
-import ActionResultPage from "@/components/organisms/actionResultPage";
+import ActionResultPage from "@/components/organisms/ActionResultPage";
 import { useSearchParams } from "next/navigation";
 
 export default function CreatePhotoFailPage() {

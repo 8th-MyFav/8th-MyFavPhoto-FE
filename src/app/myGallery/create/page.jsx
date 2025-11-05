@@ -2,8 +2,8 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import Button from "@/components/atoms/button";
-import Dropdown from "@/components/molecules/dropDown";
+import Button from "@/components/atoms/Button";
+import Dropdown from "@/components/molecules/DropDown";
 import { GRADE } from "@/constants";
 
 const CreatePhotoPage = () => {

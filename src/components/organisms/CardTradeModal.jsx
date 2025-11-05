@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import Search from "../molecules/search";
-import Dropdown from "../molecules/dropDown";
-import Card from "../organisms/card";
+import Search from "../molecules/Search";
+import Dropdown from "../molecules/DropDown";
+import Card from "../organisms/Card";
 import { GRADE } from "@/constants";
 
 const CardTradeModal = ({ isOpen, onClose, onCardSelect }) => {

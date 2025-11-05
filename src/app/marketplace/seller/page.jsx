@@ -4,14 +4,14 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
-import SellerHeader from "@/components/molecules/sellerHeader";
-import SearchMolecule from "@/components/molecules/search";
-import Dropdown from "@/components/molecules/dropDown";
-import Card from "@/components/organisms/sellerCard";
-import SellPhotoModal from "@/components/organisms/sellPhotoModal";
-import CardDetailSellModal from "@/components/organisms/cardDetailSellModal";
-import Tag from "@/components/atoms/tag";
-import Badge from "@/components/atoms/badge";
+import SellerHeader from "@/components/molecules/SellerHeader";
+import SearchMolecule from "@/components/molecules/Search";
+import Dropdown from "@/components/molecules/DropDown";
+import Card from "@/components/organisms/SellerCard";
+import SellPhotoModal from "@/components/organisms/SellPhotoModal";
+import CardDetailSellModal from "@/components/organisms/CardDetailSellModal";
+import Tag from "@/components/atoms/Tag";
+import Badge from "@/components/atoms/Badge";
 
 // 더미 카드 데이터
 const cardDataServer = Array.from({ length: 30 }, (_, i) => ({

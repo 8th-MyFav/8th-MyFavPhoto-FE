@@ -4,10 +4,10 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import PagesHeader from "@/components/organisms/PagesHeader";
 import CardSearchContainer from "@/components/organisms/CardSearchContainer";
-import Modal from "@/components/molecules/modal";
-import SellPhotoModal from "@/components/organisms/sellPhotoModal";
-import CardDetailSellModal from "@/components/organisms/cardDetailSellModal";
-import PointModal from "@/components/molecules/pointModal";
+import Modal from "@/components/molecules/Modal";
+import SellPhotoModal from "@/components/organisms/SellPhotoModal";
+import CardDetailSellModal from "@/components/organisms/CardDetailSellModal";
+import PointModal from "@/components/molecules/PointModal";
 import { PATHNAME } from "@/constants";
 import { useMarketList } from "@/api/marketListings";
 

@@ -1,9 +1,9 @@
 "use client";
 
 import React from "react";
-import SearchMolecule from "../molecules/search";
-import Dropdown from "../molecules/dropDown";
-import Card from "./card";
+import SearchMolecule from "../molecules/Search";
+import Dropdown from "../molecules/DropDown";
+import Card from "./Card";
 import { GRADE } from "@/constants";
 
 const CardSearchContainer = ({

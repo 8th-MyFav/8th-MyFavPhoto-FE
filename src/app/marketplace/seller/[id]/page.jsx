@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import TradeCard from "@/components/organisms/tradeCard";
-import Modal from "@/components/molecules/modal";
-import CardDetailEditModal from "@/components/organisms/cardDetailEdit";
+import TradeCard from "@/components/organisms/TradeCard";
+import Modal from "@/components/molecules/Modal";
+import CardDetailEditModal from "@/components/organisms/CardDetailEdit";
 import CardMeta from "@/components/molecules/CardMeta"; 
 
 const SellerDetailPage = () => {
