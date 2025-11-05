@@ -3,8 +3,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useReducer, useState } from "react";
-import FormGroup from "@/components/molecules/formGroup";
-import Button from "@/components/atoms/button";
+import FormGroup from "@/components/molecules/FormGroup";
+import Button from "@/components/atoms/Button";
 import { PATHNAME } from "@/constants";
 
 const JoinPage = () => {

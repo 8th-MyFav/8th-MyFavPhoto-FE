@@ -4,9 +4,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
-import Button from "@/components/atoms/button";
-import FormGroup from "@/components/molecules/formGroup";
-import Modal from "@/components/molecules/modal";
+import Button from "@/components/atoms/Button";
+import FormGroup from "@/components/molecules/FormGroup";
+import Modal from "@/components/molecules/Modal";
 import { PATHNAME } from "@/constants";
 
 const LoginPage = () => {

@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import Button from "../atoms/button";
+import Button from "../atoms/Button";
 import CardMeta from "../molecules/CardMeta";
 import { PATHNAME, GRADE } from "@/constants";
 

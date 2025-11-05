@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import Button from "../atoms/button";
+import Button from "../atoms/Button";
 import { GRADE } from "@/constants";
 import CardMeta from "../molecules/CardMeta";
 
@@ -89,7 +89,7 @@ const CardDetailEdit = ({ isOpen, onClose, card }) => {
               author={TEMP_AUTHOR}
               variant="withAuthor"
               sizeVariant="base"
-              className="mb-[30px]" 
+              className="mb-[30px]"
             />
 
             {/* 회색선 */}
@@ -129,7 +129,9 @@ const CardDetailEdit = ({ isOpen, onClose, card }) => {
 
             {/* 장당 가격 */}
             <div className="flex items-center mb-[30px]">
-              <span className="font-bold text-[16px] mr-[126px]">장당 가격</span>
+              <span className="font-bold text-[16px] mr-[126px]">
+                장당 가격
+              </span>
               <div className="flex items-center">
                 <div className="flex items-center justify-between w-[176px] h-[50px] border border-gray-300 bg-[#161616] rounded-[2px] flex-shrink-0 px-[10px]">
                   <button

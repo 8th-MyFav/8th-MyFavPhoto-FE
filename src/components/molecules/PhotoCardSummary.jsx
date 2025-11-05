@@ -1,7 +1,7 @@
 "use client";
 import { GRADE } from "@/constants";
 import React from "react";
-import Badge from "@/components/atoms/badge";
+import Badge from "@/components/atoms/Badge";
 
 const PhotoCardSummary = ({
   ownerName = "",
