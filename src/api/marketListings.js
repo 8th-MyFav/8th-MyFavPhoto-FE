@@ -3,17 +3,17 @@ import { apiClient } from "./apiClient";
 import { MARKET_ENDPOINTS } from "./apiEndpoints";
 import { ERROR_MESSAGES } from "./constants";
 
-/* 판매 리스트 (페이지네이션 + 필터링) */
+/* 🛒 판매 리스트 (페이지네이션 + 필터링) */
 export const useMarketList = ({
-  take,
+  take = 15,
   cursor,
   grade,
   genre,
   isSoldOut,
   orderBy,
   keyword,
-} = {}) =>
-  useQuery({
+} = {}) => {
+  return useQuery({
     queryKey: [
       "marketList",
       take,
@@ -26,18 +26,27 @@ export const useMarketList = ({
     ],
     queryFn: async () => {
       try {
-        return await apiClient(MARKET_ENDPOINTS.LISTINGS, {
+        const response = await apiClient(MARKET_ENDPOINTS.LISTINGS, {
           data: { take, cursor, grade, genre, isSoldOut, orderBy, keyword },
+          auth: true,
         });
+
+        // ✅ 수정된 부분 (response.lists → list로 매핑)
+        return {
+          list: response.lists || [], // ← 여기 핵심
+          nextCursor: response.nextCursor,
+          hasMore: response.hasMore,
+        };
       } catch {
         throw new Error(ERROR_MESSAGES.LIST_FAIL);
       }
     },
   });
+};
 
-/* 판매 상세 조회 */
-export const useMarketListingDetail = (listingId) =>
-  useQuery({
+/* 🧾 판매 상세 조회 */
+export const useMarketListingDetail = (listingId) => {
+  return useQuery({
     queryKey: ["marketDetail", listingId],
     queryFn: async () => {
       try {
@@ -48,18 +57,19 @@ export const useMarketListingDetail = (listingId) =>
     },
     enabled: !!listingId,
   });
+};
 
-/* 내 판매 목록 (명세서 버전: take/cursor/orderBy) */
+/* 👤 내 판매 목록 */
 export const useMarketMyListings = ({
-  take,
+  take = 15,
   cursor,
   orderBy,
   grade,
   genre,
   keyword,
   isSoldOut,
-} = {}) =>
-  useQuery({
+} = {}) => {
+  return useQuery({
     queryKey: [
       "marketMyListings",
       take,
@@ -72,19 +82,26 @@ export const useMarketMyListings = ({
     ],
     queryFn: async () => {
       try {
-        return await apiClient(MARKET_ENDPOINTS.MY_LISTINGS, {
+        const response = await apiClient(MARKET_ENDPOINTS.MY_LISTINGS, {
           auth: true,
           data: { take, cursor, orderBy, grade, genre, keyword, isSoldOut },
         });
+
+        return {
+          list: response.lists || [], // ✅ 동일하게 수정 (API 응답 구조 일관성 유지)
+          nextCursor: response.nextCursor,
+          hasMore: response.hasMore,
+        };
       } catch {
         throw new Error(ERROR_MESSAGES.MY_LIST_FAIL);
       }
     },
   });
+};
 
-/* 판매 등록 */
-export const useMarketCreateListing = () =>
-  useMutation({
+/* 🆕 판매 등록 */
+export const useMarketCreateListing = () => {
+  return useMutation({
     mutationFn: async (data) => {
       try {
         return await apiClient(MARKET_ENDPOINTS.LISTINGS, {
@@ -97,10 +114,11 @@ export const useMarketCreateListing = () =>
       }
     },
   });
+};
 
-/* 판매 수정 */
-export const useMarketUpdateListing = () =>
-  useMutation({
+/* ✏️ 판매 수정 */
+export const useMarketUpdateListing = () => {
+  return useMutation({
     mutationFn: async ({ listingId, data }) => {
       try {
         return await apiClient(`${MARKET_ENDPOINTS.LISTINGS}/${listingId}`, {
@@ -113,10 +131,11 @@ export const useMarketUpdateListing = () =>
       }
     },
   });
+};
 
-/* 판매 삭제 */
-export const useMarketDeleteListing = () =>
-  useMutation({
+/* ❌ 판매 삭제 */
+export const useMarketDeleteListing = () => {
+  return useMutation({
     mutationFn: async (listingId) => {
       try {
         return await apiClient(`${MARKET_ENDPOINTS.LISTINGS}/${listingId}`, {
@@ -128,3 +147,4 @@ export const useMarketDeleteListing = () =>
       }
     },
   });
+};
