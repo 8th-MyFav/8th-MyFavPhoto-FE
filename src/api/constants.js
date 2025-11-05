@@ -26,5 +26,8 @@ export const ERROR_MESSAGES = {
 
   // 포인트 관련
   POINT_FAIL: "포인트 조회 실패",
-  POINT_GAIN_FAIL: "포인트 획득 실패"
+  POINT_GAIN_FAIL: "포인트 획득 실패",
+
+  // 마이갤러리 관련
+  MY_CARDS_FAIL: "카드 목록 조회 실패",
 };
