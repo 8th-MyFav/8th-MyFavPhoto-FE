@@ -1,23 +1,73 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import { useAuth } from "@/contexts/AuthContext"; // ✅ 로그인 유저 닉네임 사용
+import { useMyCards } from "@/api/myGalleryAPI";
 import Search from "../molecules/Search";
 import Dropdown from "../molecules/DropDown";
 import Card from "../organisms/Card";
-import { GRADE } from "@/constants";
+import { GRADE, GENRE } from "@/constants";
 
-const SellPhotoModal = ({ isOpen, onClose, cards = [], onCardSelect }) => {
-  if (!isOpen) return null;
+const GENRE_OPTIONS = [
+  GENRE.KPOP,
+  GENRE.ACTOR,
+  GENRE.ESPORTS,
+  GENRE.KBO,
+  GENRE.ANIMATION,
+];
 
+const SellPhotoModal = ({ isOpen, onClose, onCardSelect }) => {
+  // ✅ 훅들은 항상 실행되어야 함 (조건부 X)
+  const { user } = useAuth();
   const [searchText, setSearchText] = useState("");
   const [selectedRarity, setSelectedRarity] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
 
+  // ✅ React Query - enabled 옵션으로 모달이 열렸을 때만 실행
+  const { data, isLoading } = useMyCards(
+    {
+      page: 1,
+      pageSize: 50,
+      grade: selectedRarity || undefined,
+      genre: selectedCategory || undefined,
+      keyword: searchText || undefined,
+    },
+    { enabled: isOpen } // ✅ 모달이 열렸을 때만 API 호출
+  );
+
+  const cards = data?.items || [];
+
+  // ✅ 카드 데이터 정규화
+  const mappedCards = useMemo(() => {
+    return cards.map((item) => {
+      const grade = String(item.grade || "").toUpperCase();
+
+      return {
+        id: item.id,
+        topImage: item.image_url || "/images/sample.svg",
+        title: item.name || "포토카드",
+        rarityIcon:
+          grade === "SUPER_RARE"
+            ? "SUPER RARE"
+            : grade === "LEGENDARY"
+            ? "LEGENDARY"
+            : grade,
+        category: item.genre || "",
+        author: user?.nickname || "익명",
+        price: item.price || 0,
+        remaining: item.count || item.total_count || 0,
+        total: item.total_count || 0,
+        favoriteImg: "/images/favorite.svg",
+      };
+    });
+  }, [cards, user?.nickname]);
+
+  // ✅ 필터링
   const filteredCards = useMemo(() => {
-    return cards.filter((card) => {
+    return mappedCards.filter((card) => {
       const matchesSearch =
-        card.title.toLowerCase().includes(searchText.toLowerCase()) ||
-        card.author.toLowerCase().includes(searchText.toLowerCase());
+        card.title?.toLowerCase()?.includes(searchText.toLowerCase()) ||
+        card.author?.toLowerCase()?.includes(searchText.toLowerCase());
 
       const matchesRarity = selectedRarity
         ? card.rarityIcon === selectedRarity
@@ -28,7 +78,10 @@ const SellPhotoModal = ({ isOpen, onClose, cards = [], onCardSelect }) => {
 
       return matchesSearch && matchesRarity && matchesCategory;
     });
-  }, [cards, searchText, selectedRarity, selectedCategory]);
+  }, [mappedCards, searchText, selectedRarity, selectedCategory]);
+
+  // ✅ 모달이 닫혀 있으면 렌더링만 스킵
+  if (!isOpen) return null;
 
   return (
     <>
@@ -102,7 +155,7 @@ const SellPhotoModal = ({ isOpen, onClose, cards = [], onCardSelect }) => {
               onChange={(value) => setSelectedRarity(value)}
             />
             <Dropdown
-              options={["풍경", "인물", "추상", "동물"]}
+              options={GENRE_OPTIONS}
               placeholder="장르"
               height="48px"
               maxWidth="300px"
@@ -116,25 +169,27 @@ const SellPhotoModal = ({ isOpen, onClose, cards = [], onCardSelect }) => {
           className="grid gap-[24px] justify-center"
           style={{ gridTemplateColumns: "repeat(2, 1fr)", width: "100%" }}
         >
-          {filteredCards.length > 0 ? (
+          {isLoading ? (
+            <div className="text-center text-gray-300 col-span-2 mt-[100px] text-[18px]">
+              불러오는 중...
+            </div>
+          ) : filteredCards.length > 0 ? (
             filteredCards.map((card, index) => (
               <div
                 key={index}
                 onClick={() => {
-                  onClose(); // Sell 모달 닫기
-                  onCardSelect &&
-                    onCardSelect({
-                      ...card,
-                      rarity: card.rarityIcon, // 중요: CardDetailSellModal용 필드 추가
-                    });
+                  onClose();
+                  onCardSelect?.({
+                    ...card,
+                    rarity: card.rarityIcon,
+                  });
                 }}
                 className="cursor-pointer"
               >
-                {/* Sell 모달에서는 실제 보유 수량을 표시 */}
                 <Card
                   {...card}
-                  quantity={card.remaining || 0} // 보유 수량 기준
-                  showRemainingAsFraction={false} // 숫자만 표시
+                  quantity={card.remaining || 0}
+                  showRemainingAsFraction={true}
                 />
               </div>
             ))

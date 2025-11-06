@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { useMarketListingDetail } from "@/api/marketListings";
 import Modal from "@/components/molecules/Modal";
 import CardTradeModal from "@/components/organisms/CardTradeModal";
 import ExchangeModal from "@/components/organisms/ExchangeModal";
@@ -9,33 +10,17 @@ import TradeCard from "@/components/organisms/TradeCard";
 import CardMeta from "@/components/molecules/CardMeta";
 import { PATHNAME } from "@/constants";
 
-// 더미 카드 데이터
-const cardDataServer = Array.from({ length: 30 }, (_, i) => ({
-  topImage: "/images/sample.svg",
-  title: `아름다운 풍경 ${i + 1}`,
-  rarity:
-    i % 4 === 0
-      ? "COMMON"
-      : i % 4 === 1
-      ? "RARE"
-      : i % 4 === 2
-      ? "SUPER RARE"
-      : "LEGENDARY",
-  category: i % 3 === 0 ? "풍경" : i % 3 === 1 ? "인물" : "동물",
-  author: `글쓴이 ${i + 1}`,
-  content: "포토카드 상세 설명입니다.",
-  price: (i + 1) * 10,
-  remaining: i % 3 === 0 ? 0 : 2,
-  total: 5,
-  exchangeInfo:
-    "푸릇푸릇한 여름 풍경, 눈 많이 내린 겨울 풍경 사진에 관심이 많습니다.",
-}));
-
 export default function DetailPage() {
   const params = useParams();
   const router = useRouter();
-  const cardId = parseInt(params.id);
-  const card = cardDataServer[cardId];
+  const listingId = parseInt(params.id);
+
+  // ✅ API 연동
+  const {
+    data: listing,
+    isLoading,
+    isError,
+  } = useMarketListingDetail(listingId);
 
   const [count, setCount] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -46,24 +31,53 @@ export default function DetailPage() {
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [cancelTargetCard, setCancelTargetCard] = useState(null);
 
-  const total = card ? count * card.price : 0;
+  // ✅ 로딩 / 에러 처리
+  if (isLoading) {
+    return (
+      <div className="text-white p-8 min-h-screen bg-[#111]">
+        포토카드 정보를 불러오는 중입니다...
+      </div>
+    );
+  }
+
+  if (isError || !listing) {
+    return (
+      <div className="text-white p-8 min-h-screen bg-[#111]">
+        카드를 불러올 수 없습니다.
+      </div>
+    );
+  }
+
+  // ✅ API 데이터 구조 매핑
+  const card = {
+    id: listing.photocard?.id,
+    title: listing.photocard?.name,
+    rarity: listing.photocard?.grade,
+    category: listing.photocard?.genre,
+    author: listing.photocard?.nickname,
+    content: listing.photocard?.description,
+    price: listing.price,
+    remaining: listing.left_count,
+    total: listing.total_count,
+    topImage: listing.photocard?.image_url,
+    exchangeInfo: listing.trade_note,
+  };
+
+  const total = count * (card.price ?? 0);
 
   const decrease = () => count > 1 && setCount(count - 1);
-  const increase = () => count < card.remaining && setCount(count + 1);
+  const increase = () => count < (card.remaining ?? 0) && setCount(count + 1);
 
-  if (!card)
-    return <div className="text-white p-8">카드를 찾을 수 없습니다.</div>;
-
-  // 구매 버튼 클릭 시 처리
+  // ✅ 구매 버튼 클릭 시 처리
   const handlePurchase = () => {
     setIsModalOpen(false);
     const query = `?rarity=${card.rarity}&title=${encodeURIComponent(
       card.title
     )}&quantity=${count}`;
     if (count <= card.remaining) {
-      router.push(`${PATHNAME.MARKET_DETAIL_SUCCESS(cardId)}${query}`);
+      router.push(`${PATHNAME.MARKET_DETAIL_SUCCESS(card.id)}${query}`);
     } else {
-      router.push(`${PATHNAME.MARKET_DETAIL_FAIL(cardId)}${query}`);
+      router.push(`${PATHNAME.MARKET_DETAIL_FAIL(card.id)}${query}`);
     }
   };
 
@@ -124,7 +138,6 @@ export default function DetailPage() {
           </div>
 
           <div style={{ width: "440px" }}>
-            {/* CardMeta 적용 */}
             <CardMeta
               rarityText={card.rarity}
               category={card.category}
@@ -202,7 +215,6 @@ export default function DetailPage() {
 
           <hr className="border-white mb-[60px]" />
 
-          {/* CardMeta 적용*/}
           <CardMeta
             rarityText={card.rarity}
             category={card.category}
@@ -221,10 +233,10 @@ export default function DetailPage() {
               marginBottom: "120px",
             }}
           >
-            {card.exchangeInfo}
+            {card.exchangeInfo || "교환 희망 정보가 없습니다."}
           </p>
 
-          {/* 내가 제시한 교환 목록 */}
+          {/* 내가 제시한 교환 목록 (아직 API 없음 → 더미 유지 or 이후 연동) */}
           <h3
             style={{
               color: "var(--white-white, #FFF)",
@@ -244,29 +256,11 @@ export default function DetailPage() {
             }}
           />
 
-          <div className="flex flex-col md:flex-row gap-6">
-            {cardDataServer.slice(0, 2).map((dummyCard, index) => (
-              <TradeCard
-                key={index}
-                proposal={{
-                  id: index,
-                  imageUrl: dummyCard.topImage,
-                  title: dummyCard.title,
-                  rarity: dummyCard.rarity,
-                  category: dummyCard.category,
-                  price: dummyCard.price,
-                  description: dummyCard.content,
-                  sellerName: dummyCard.author,
-                }}
-                mode="purchase"
-                onCancel={() => handleCancelTradeCard(dummyCard)}
-              />
-            ))}
-          </div>
+          <div className="text-gray-400">아직 제시한 교환 목록이 없습니다.</div>
         </div>
       </div>
 
-      {/* 모달 */}
+      {/* 모달 영역 */}
       {isTradeModalOpen && (
         <CardTradeModal
           isOpen={isTradeModalOpen}
