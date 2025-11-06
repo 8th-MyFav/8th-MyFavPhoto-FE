@@ -12,6 +12,8 @@ const CardMeta = ({
   variant = "default", // "default" | "withAuthor" | "full"
   sizeVariant = "2xs", // fontSize variant
   className = "",
+  sellStatus, // 판매 상태 텍스트 (예: "판매중", "매진")
+  showSellStatus = false, // <-- 추가 (기본 false)
 }) => {
   // rarity 색상 계산
   const getRarityStyle = (rarity) => {
@@ -104,7 +106,12 @@ const CardMeta = ({
           {author}
         </span>
       )}
-    </div>
+      {showSellStatus && sellStatus && ( // 👈 판매 상태 표시
+        <span className="text-sm text-gray-400 ml-2">
+          {sellStatus}
+        </span>
+      )}
+    </div>  
   );
 };
 
