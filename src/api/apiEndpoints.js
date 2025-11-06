@@ -10,9 +10,13 @@ export const NOTIFICATION_ENDPOINTS = {
 };
 
 export const POINT_ENDPOINTS = {
-  POITNT: "users/points",
+  POITNT: "/users/points",
 };
 
 export const MY_GALLERY_ENDPOINTS = {
   MY_CARDS: "/cards/me",
+};
+
+export const CARDS_ENDPOINTS = {
+  CARDS: "/cards",
 };

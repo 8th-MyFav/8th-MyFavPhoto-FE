@@ -1,9 +1,13 @@
 "use client";
+
 import ActionResultPage from "@/components/organisms/ActionResultPage";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
+import { PATHNAME } from "@/constants";
 
 export default function CreatePhotoFailPage() {
+  const router = useRouter();
   const searchParams = useSearchParams();
+
   const rarity = searchParams.get("rarity");
   const title = searchParams.get("title");
   const quantity = searchParams.get("quantity");
@@ -15,8 +19,8 @@ export default function CreatePhotoFailPage() {
       rarity={rarity}
       title={title}
       quantity={quantity}
-      buttonText="마이 갤러리로 돌아가기"
-      buttonAction={() => router.push("/myGallery")}
+      buttonText="마이갤러리로 돌아가기"
+      buttonAction={() => router.push(PATHNAME.MYGAL)}
     />
   );
 }

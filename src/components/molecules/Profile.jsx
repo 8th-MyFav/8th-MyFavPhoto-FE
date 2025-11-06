@@ -13,40 +13,40 @@ const ProfileModal = ({ show, name, point }) => {
   if (!show) return null;
 
   return (
-    <div className="absolute right-0 mt-2 w-[260px] bg-[#161616] rounded-none overflow-hidden shadow-md transition z-50">
+    <div className="absolute right-0 mt-2 w-[260px] rounded-none bg-gray-500 text-white shadow-md transition z-50">
       {/* 상단 영역 */}
-      <div className="w-[260px] h-[103px] flex justify-center items-center border-b border-[#383838]">
-        <div className="w-[220px] h-[63px] relative text-white text-sm flex flex-col justify-between">
+      <div className="flex h-[103px] w-[260px] items-center justify-center border-b border-gray-400">
+        <div className="relative flex h-[63px] w-[220px] flex-col justify-between text-[14px] font-noto">
           <p className="absolute top-0 left-0 text-left text-[18px] font-bold">
             안녕하세요, {name}님!
           </p>
           <p className="absolute bottom-0 left-0 text-[12px] font-light text-gray-300">
             보유 포인트
           </p>
-          <p className="absolute bottom-0 right-0 text-[12px] font-regular text-yellow-300">
+          <p className="absolute bottom-0 right-0 text-[12px] font-medium text-main">
             {point} P
           </p>
         </div>
       </div>
 
       {/* 링크 영역 */}
-      <div className="w-[260px] h-[120px] flex justify-start items-start bg-[#161616]">
-        <div className="w-[110px] h-[87px] flex flex-col justify-between items-start text-white text-sm ml-[20px] mt-[18px] text-left">
+      <div className="flex h-[120px] w-[260px] items-start justify-start bg-gray-500">
+        <div className="ml-[20px] mt-[18px] flex h-[87px] w-[110px] flex-col items-start justify-between text-left text-[14px] font-bold font-noto">
           <button
-            onClick={() => handleNavigate("/marketplace")}
-            className="text-[14px] font-bold hover:text-yellow-300 transition"
+            onClick={() => handleNavigate(PATHNAME.MARKET)}
+            className="transition hover:text-main"
           >
             마켓플레이스
           </button>
           <button
-            onClick={() => handleNavigate("/myGallery")}
-            className="text-[14px] font-bold hover:text-yellow-300 transition"
+            onClick={() => handleNavigate(PATHNAME.MYGAL)}
+            className="transition hover:text-main"
           >
             마이갤러리
           </button>
           <button
             onClick={() => handleNavigate(PATHNAME.MPSELLER)}
-            className="text-[14px] font-bold hover:text-yellow-300 transition whitespace-nowrap"
+            className="whitespace-nowrap transition hover:text-main"
           >
             판매 중인 포토카드
           </button>
