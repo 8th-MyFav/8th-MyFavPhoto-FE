@@ -6,12 +6,15 @@ import React, { useEffect, useState } from "react";
 import NotificationButton from "./notificationButton";
 import { PATHNAME } from "@/constants";
 import ProfileModal from "./profile";
+import { usePoints } from "@/api/pointAPI";
 
 const Navigation = () => {
   const { isAuthenticated, loading, user, logout } = useAuth();
-  const [points, setPoints] = useState(0);
+  // const [points, setPoints] = useState(0);
+  const { data: points } = usePoints();
   const [showProfile, setShowProfile] = useState(false);
 
+  console.log("points", points);
   // 포인트 상태 변경 디버깅
   useEffect(() => {
     console.log("포인트 상태 변경:", points);
@@ -35,7 +38,7 @@ const Navigation = () => {
 
             if (res.ok) {
               const data = await res.json();
-              setPoints(Number(data?.acc_point) || 0);
+              // setPoints(Number(data?.acc_point) || 0);
             }
           } catch (error) {
             console.error("포인트 불러오기 실패:", error);
@@ -73,7 +76,7 @@ const Navigation = () => {
     <div className="relative">
       <nav className="flex justify-center items-center gap-[30px] text-gray-200 text-noto-3x">
         {/* 포인트 */}
-        <p className="font-br font-bold">{points} P</p>
+        <p className="font-br font-bold">{points?.acc_point} P</p>
 
         {/* 알림 버튼 */}
         <NotificationButton />
@@ -91,7 +94,7 @@ const Navigation = () => {
           <ProfileModal
             show={showProfile}
             name={user.nickname}
-            point={points}
+            point={points?.acc_point}
           />
         </div>
 

@@ -1,4 +1,10 @@
+// components/molecules/pointModal.jsx
+"use client";
+
 import React, { useEffect, useState } from "react";
+import { usePoints, useGainPoints } from "@/api/pointAPI";
+import { useQueryClient } from "@tanstack/react-query";
+import Button from "@/components/atoms/button";
 
 const PointModal = ({
   title1 = "랜덤",
@@ -8,21 +14,22 @@ const PointModal = ({
 }) => {
   const [selectedBox, setSelectedBox] = useState(null);
   const [isConfirmed, setIsConfirmed] = useState(false);
-  const [reward, setReward] = useState(0);
+  const [earned, setEarned] = useState(0); // 이번에 획득한 포인트(로컬)
   const [timeLeft, setTimeLeft] = useState(3600);
+
+  const queryClient = useQueryClient();
+  const { data: points, isLoading } = usePoints();
+  const { mutate: gainPoints, isPending } = useGainPoints();
 
   useEffect(() => {
     if (timeLeft <= 0) {
       setSelectedBox(null);
       setIsConfirmed(false);
+      setEarned(0);
       setTimeLeft(3600);
       return;
     }
-
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => prev - 1);
-    }, 1000);
-
+    const timer = setInterval(() => setTimeLeft((prev) => prev - 1), 1000);
     return () => clearInterval(timer);
   }, [timeLeft]);
 
@@ -30,16 +37,22 @@ const PointModal = ({
   const seconds = timeLeft % 60;
 
   const handleBoxClick = (index) => {
-    if (isConfirmed) return;
+    if (isConfirmed || isPending) return;
     setSelectedBox(index);
   };
 
-  const handleConfirm = () => {
-    if (selectedBox === null) return;
+  const handleGain = () => {
+    if (selectedBox === null || isPending) return;
 
     const randomPoint = Math.floor(Math.random() * 91) + 10;
 
-    setReward(randomPoint);
+    gainPoints(randomPoint, {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["points"] });
+      },
+    });
+
+    setEarned(randomPoint); // UI 즉시 반영
     setIsConfirmed(true);
   };
 
@@ -49,10 +62,12 @@ const PointModal = ({
     "/images/random_box-3.svg",
   ];
 
+  if (isLoading) return <div>로딩중...</div>;
+
   return (
     <div className="fixed inset-0 z-50 flex justify-center items-center overflow-y-auto pointer-events-none">
       {/* 배경 블러 */}
-      <div className="absolute inset-0 bg-[#000000] opacity-80 pointer-events-none"></div>
+      <div className="absolute inset-0 bg-black/80 pointer-events-none"></div>
 
       {/* 모달 박스 */}
       <div
@@ -62,23 +77,24 @@ const PointModal = ({
             : selectedBox !== null
             ? "w-full max-w-[1034px] h-full max-h-[765px]"
             : "w-full max-w-[1034px] h-full max-h-[646px]"
-        } rounded-[2px] bg-[#161616] z-10 pointer-events-auto transition-all duration-200`}
+        } rounded-[var(--radius-base)] bg-gray-500 z-10 pointer-events-auto transition-all duration-200`}
       >
         {/* X 버튼 */}
         <button
           onClick={onClose}
           className="absolute top-[30px] right-[30px] cursor-pointer"
+          aria-label="닫기"
         >
           <img src="/images/close.svg" alt="Close" className="w-full h-full" />
         </button>
 
-        <div className="font-brba text-center w-full">
+        <div className="text-center w-full">
           {/* 제목 */}
           <div className="flex items-center justify-center mt-[80px] mb-[40px]">
-            <h1 className="text-white text-center font-['BR_B'] text-[46px] font-normal leading-normal tracking-[-1.38px]">
+            <h1 className="text-br-base text-foreground text-[46px] tracking-[-1.38px]">
               {title1}
             </h1>
-            <h1 className="text-[#EFF004] text-center font-['BR_B'] text-[46px] font-normal leading-normal tracking-[-1.38px]">
+            <h1 className="text-br-base text-main text-[46px] tracking-[-1.38px]">
               {" "}
               {title2}
             </h1>
@@ -88,17 +104,18 @@ const PointModal = ({
           {!isConfirmed ? (
             <>
               <div className="mb-[40px]">
-                <h2 className="text-white text-[20px] font-[700] mt-[20px] leading-relaxed text-center">
+                <h2 className="text-foreground text-[20px] font-[700] mt-[20px] leading-relaxed text-center">
                   1시간마다 돌아오는 기회!
                   <br />
                   랜덤 상자 뽑기를 통해 포인트를 획득하세요!
                 </h2>
               </div>
+
               <div className="flex items-center justify-center gap-[10px]">
-                <p className="text-[#A4A4A4] text-center font-['Noto_Sans_KR'] text-[16px] font-normal leading-normal">
-                  다음 기회까지 남은 시간{" "}
+                <p className="text-gray-300 text-center">
+                  다음 기회까지 남은 시간
                 </p>
-                <p className="text-[#EFFF04] text-center font-['Noto_Sans_KR'] text-[16px] font-normal leading-normal">
+                <p className="text-main text-center">
                   {minutes}분 {seconds}초
                 </p>
               </div>
@@ -123,10 +140,10 @@ const PointModal = ({
                         : selectedBox === index
                         ? "opacity-100 scale-105"
                         : "opacity-40"
-                    }`}
+                    } ${isPending ? "pointer-events-none" : ""}`}
                     style={{
-                      imageRendering: "crisp-edges", // 렌더링 경계 부드럽게
-                      backfaceVisibility: "hidden", // 확대 시 깜빡임 방지
+                      imageRendering: "crisp-edges",
+                      backfaceVisibility: "hidden",
                     }}
                   />
                 ))}
@@ -141,10 +158,8 @@ const PointModal = ({
                   className="w-[340px] h-[324.12px]"
                 />
                 <div className="flex items-center justify-center gap-[10px] mb-[20px]">
-                  <h2 className="text-[#EFFF04] text-[36px] font-bold">
-                    {reward}P
-                  </h2>
-                  <h2 className="font-['Noto Sans KR']text-white text-[36px] font-bold">
+                  <h2 className="text-main text-[36px] font-bold">{earned}P</h2>
+                  <h2 className="text-foreground text-[36px] font-bold">
                     획득!
                   </h2>
                 </div>
@@ -156,22 +171,32 @@ const PointModal = ({
         {/* 선택완료 - 상자 선택 시 노출 */}
         {!isConfirmed && selectedBox !== null && (
           <div className="flex justify-center mb-[63px]">
-            <button
-              className="w-[520px] h-[60px] bg-[#EFFF04] hover:bg-[#d8e400] active:scale-95 transition-all cursor-pointer rounded-[2px] font-extrabold text-black"
-              onClick={handleConfirm}
-            >
-              {buttonText}
-            </button>
+            <Button
+              text={isPending ? "처리중..." : buttonText}
+              width="520px"
+              height="60px"
+              padding="0"
+              backgroundColor="var(--color-main)"
+              color="var(--color-black)"
+              fontFamily="var(--font-noto)"
+              fontSize="20px"
+              fontWeight={800}
+              borderRadius="var(--radius-base)"
+              className={`active:scale-95 disabled:opacity-50 ${
+                isPending ? "pointer-events-none" : ""
+              }`}
+              onClick={handleGain}
+            />
           </div>
         )}
 
         {isConfirmed && (
-          <div className="absolute bottom-[73px] text-gray-400 text-[16px]">
+          <div className="absolute bottom-[73px] text-[16px]">
             <div className="flex items-center justify-center gap-[10px]">
-              <p className="text-[#A4A4A4] text-center font-['Noto_Sans_KR'] text-[16px] font-normal leading-normal">
-                다음 기회까지 남은 시간{" "}
+              <p className="text-gray-300 text-center">
+                다음 기회까지 남은 시간
               </p>
-              <p className="text-[#EFFF04] text-center font-['Noto_Sans_KR'] text-[16px] font-normal leading-normal">
+              <p className="text-main text-center">
                 {minutes}분 {seconds}초
               </p>
             </div>
