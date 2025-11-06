@@ -82,24 +82,24 @@ const NotificationUI = ({ show, onClose, onUnreadCountChange }) => {
         const sorted = sortNotifications(apiNotifications);
         setNotifications(sorted);
         setTotalPages(Math.max(1, Math.ceil(sorted.length / ITEMS_PER_PAGE)));
-
-        // unreadCount 업데이트 (모달이 열렸을 때도 부모에게 알림)
-        if (onUnreadCountChange) {
-          const unread = sorted.filter((n) => !n.isRead).length;
-          console.log("📊 모달에서 unreadCount 업데이트:", unread);
-          onUnreadCountChange(unread);
-        }
       } else {
         setNotifications([]);
         setTotalPages(1);
-        if (onUnreadCountChange) onUnreadCountChange(0);
       }
     } else {
       setNotifications([]);
       setTotalPages(1);
-      if (onUnreadCountChange) onUnreadCountChange(0);
     }
-  }, [data, isLoading, isError, show, onUnreadCountChange]);
+  }, [data, isLoading, isError, show]);
+
+  // notifications 변경 시 unreadCount를 부모에게 전달
+  useEffect(() => {
+    if (!show || !onUnreadCountChange) return;
+
+    const unread = notifications.filter((n) => !n.isRead).length;
+    console.log("📊 notifications 변경 시 unreadCount 업데이트:", unread);
+    onUnreadCountChange(unread);
+  }, [notifications, show, onUnreadCountChange]);
 
   const handleRead = (id) => {
     if (!queryClient) {
@@ -127,18 +127,10 @@ const NotificationUI = ({ show, onClose, onUnreadCountChange }) => {
     // PATCH API 호출
     readNotification(id, {
       onSuccess: () => {
-        // 읽음 처리 성공 후 unreadCount 업데이트
-        if (onUnreadCountChange) {
-          setNotifications((prev) => {
-            const updated = prev.map((n) =>
-              n.id === id ? { ...n, isRead: true } : n
-            );
-            const unread = updated.filter((n) => !n.isRead).length;
-            console.log("✅ 읽음 처리 후 unreadCount:", unread);
-            onUnreadCountChange(unread);
-            return updated;
-          });
-        }
+        // 읽음 처리 성공 후 상태 업데이트
+        setNotifications((prev) => {
+          return prev.map((n) => (n.id === id ? { ...n, isRead: true } : n));
+        });
         queryClient.invalidateQueries({ queryKey: ["notification"] });
       },
       onError: (err) => {
