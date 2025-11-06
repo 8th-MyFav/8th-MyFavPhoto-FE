@@ -28,12 +28,11 @@ export const useMarketList = ({
       try {
         const response = await apiClient(MARKET_ENDPOINTS.LISTINGS, {
           data: { take, cursor, grade, genre, isSoldOut, orderBy, keyword },
-          auth: true,
+          auth: true, // ✅ 토큰 포함
         });
 
-        // ✅ 수정된 부분 (response.lists → list로 매핑)
         return {
-          list: response.lists || [], // ← 여기 핵심
+          list: response.lists || [],
           nextCursor: response.nextCursor,
           hasMore: response.hasMore,
         };
@@ -50,7 +49,9 @@ export const useMarketListingDetail = (listingId) => {
     queryKey: ["marketDetail", listingId],
     queryFn: async () => {
       try {
-        return await apiClient(`${MARKET_ENDPOINTS.LISTINGS}/${listingId}`);
+        return await apiClient(`${MARKET_ENDPOINTS.LISTINGS}/${listingId}`, {
+          auth: true, // ✅ 토큰 포함 (추가됨)
+        });
       } catch {
         throw new Error(ERROR_MESSAGES.DETAIL_FAIL);
       }
@@ -83,12 +84,12 @@ export const useMarketMyListings = ({
     queryFn: async () => {
       try {
         const response = await apiClient(MARKET_ENDPOINTS.MY_LISTINGS, {
-          auth: true,
+          auth: true, // ✅ 토큰 포함
           data: { take, cursor, orderBy, grade, genre, keyword, isSoldOut },
         });
 
         return {
-          list: response.lists || [], // ✅ 동일하게 수정 (API 응답 구조 일관성 유지)
+          list: response.lists || [],
           nextCursor: response.nextCursor,
           hasMore: response.hasMore,
         };
@@ -107,7 +108,7 @@ export const useMarketCreateListing = () => {
         return await apiClient(MARKET_ENDPOINTS.LISTINGS, {
           method: "POST",
           data,
-          auth: true,
+          auth: true, // ✅ 토큰 포함
         });
       } catch {
         throw new Error(ERROR_MESSAGES.CREATE_FAIL);
@@ -124,7 +125,7 @@ export const useMarketUpdateListing = () => {
         return await apiClient(`${MARKET_ENDPOINTS.LISTINGS}/${listingId}`, {
           method: "PATCH",
           data,
-          auth: true,
+          auth: true, // ✅ 토큰 포함
         });
       } catch {
         throw new Error(ERROR_MESSAGES.UPDATE_FAIL);
@@ -140,7 +141,7 @@ export const useMarketDeleteListing = () => {
       try {
         return await apiClient(`${MARKET_ENDPOINTS.LISTINGS}/${listingId}`, {
           method: "DELETE",
-          auth: true,
+          auth: true, // ✅ 토큰 포함
         });
       } catch {
         throw new Error(ERROR_MESSAGES.DELETE_FAIL);
