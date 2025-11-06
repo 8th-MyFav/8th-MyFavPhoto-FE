@@ -1,255 +1,273 @@
-// 나의 판매 포토카드 페이지 (판매 중인 포토카드 페이지)
 "use client";
-
-import React, { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
-import SellerHeader from "@/components/molecules/SellerHeader";
-import SearchMolecule from "@/components/molecules/Search";
-import Dropdown from "@/components/molecules/DropDown";
-import Card from "@/components/organisms/SellerCard";
-import SellPhotoModal from "@/components/organisms/SellPhotoModal";
-import CardDetailSellModal from "@/components/organisms/CardDetailSellModal";
-import Tag from "@/components/atoms/Tag";
-import Badge from "@/components/atoms/Badge";
+import { useEffect, useMemo, useState, useRef } from "react";
+import { useRouter } from "next/navigation";
+import PagesHeader from "@/components/organisms/PagesHeader";
+import CardSearchContainer from "@/components/organisms/CardSearchContainer";
+import Pagination from "@/components/molecules/Pagination";
+import { PATHNAME, GENRE } from "@/constants";
+import { useMyCards } from "@/api/myGalleryAPI";
 
-// 더미 카드 데이터
-const cardDataServer = Array.from({ length: 30 }, (_, i) => ({
-  topImage: "/images/sample.svg",
-  title: `아름다운 풍경 ${i + 1}`,
-  rarityIcon:
-    i % 4 === 0
-      ? "COMMON"
-      : i % 4 === 1
-      ? "RARE"
-      : i % 4 === 2
-      ? "SUPER RARE"
-      : "LEGENDARY",
-  category: i % 3 === 0 ? "풍경" : i % 3 === 1 ? "인물" : "동물",
-  author: `글쓴이 ${i + 1}`,
-  price: (i + 1) * 10,
-  remaining: i % 3 === 0 ? 0 : 2,
-  total: 5,
-  favoriteImg: "/images/favorite.svg",
-}));
+const PAGE_SIZE = 15;
+const DEBOUNCE_DELAY = 500; // 디바운스 지연 시간 (500ms)
+const GENRE_OPTIONS = [
+  GENRE.KPOP,
+  GENRE.ACTOR,
+  GENRE.ESPORTS,
+  GENRE.KBO,
+  GENRE.ANIMATION,
+];
 
-
-const ITEMS_PER_PAGE = 6; // 한 번에 로드할 카드 수
-const POINT_MODAL_KEY = "lastPointModalTime"; // localStorage 키
-const LAST_LOGIN_TOKEN_KEY = "lastLoginToken"; // 마지막 로그인 토큰 체크용
-
-const SellerPage = () => {
+export default function SellerPage() {
   const router = useRouter();
+  const { isAuthenticated, loading, user } = useAuth();
 
-  // 로그인 여부 상태
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  // 모달 관련 상태
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const [modalTitle, setModalTitle] = useState("");
-  const [modalContent, setModalContent] = useState("");
-
-  const [isSellModalOpen, setIsSellModalOpen] = useState(false);
-  const [selectedSellCard, setSelectedSellCard] = useState(null);
-
+  // 상태 관리
   const [searchText, setSearchText] = useState("");
+  const [debouncedSearchText, setDebouncedSearchText] = useState("");
   const [selectedRarity, setSelectedRarity] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
   const [sortOrder, setSortOrder] = useState("낮은 가격순");
-  const [displayedCards, setDisplayedCards] = useState([]);
-  const [hasMore, setHasMore] = useState(true);
+  const [page, setPage] = useState(1);
+  const [error, setError] = useState(null);
+  const debounceTimerRef = useRef(null);
 
-  const [isPointModalOpen, setIsPointModalOpen] = useState(false);
-
-  const observer = useRef();
-
-  // ✅ 로그인 상태 확인 및 포인트 모달 처리
+  // 로그인 체크
   useEffect(() => {
-    const token = localStorage.getItem("accessToken"); // 실제 로그인 토큰 사용
-    if (token) {
-      setIsLoggedIn(true);
-
-      // 시연용: 로그아웃 후 새 로그인 시 포인트 모달 초기화
-      const lastLoginToken = localStorage.getItem(LAST_LOGIN_TOKEN_KEY);
-      if (lastLoginToken !== token) {
-        localStorage.removeItem(POINT_MODAL_KEY);
-        localStorage.setItem(LAST_LOGIN_TOKEN_KEY, token);
-      }
-
-      // 포인트 모달 처리
-      const lastTime = localStorage.getItem(POINT_MODAL_KEY);
-      const now = Date.now();
-      if (!lastTime || now - parseInt(lastTime, 10) >= 3600 * 1000) {
-        setIsPointModalOpen(true);
-        localStorage.setItem(POINT_MODAL_KEY, now.toString());
-      }
-    } else {
-      setIsLoggedIn(false);
-      setModalTitle("로그인이 필요합니다");
-      setModalContent("마켓플레이스를 이용하시려면 로그인 해주세요.");
-      setIsLoginModalOpen(true);
+    if (!isAuthenticated && !loading) {
+      router.push(PATHNAME.LOGIN);
     }
-  }, []);
+  }, [isAuthenticated, loading, router]);
 
-  // 필터링 + 정렬 적용
-  const filteredCards = cardDataServer
-    .filter((card) => {
-      const matchesSearch =
-        card.title.toLowerCase().includes(searchText.toLowerCase()) ||
-        card.author.toLowerCase().includes(searchText.toLowerCase());
-      const matchesRarity = selectedRarity
-        ? card.rarityIcon === selectedRarity
-        : true;
-      const matchesCategory = selectedCategory
-        ? card.category === selectedCategory
-        : true;
-      const matchesStatus =
-        selectedStatus === "판매중"
-          ? card.remaining > 0
-          : selectedStatus === "매진"
-          ? card.remaining === 0
-          : true;
-      return matchesSearch && matchesRarity && matchesCategory && matchesStatus;
-    })
-    .sort((a, b) => {
+  // 검색어 디바운싱 (타이핑 시)
+  useEffect(() => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    debounceTimerRef.current = setTimeout(() => {
+      setDebouncedSearchText(searchText);
+    }, DEBOUNCE_DELAY);
+
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, [searchText]);
+
+  // 검색 제출 핸들러 (엔터/검색 버튼 클릭 시)
+  const handleSearchSubmit = (value) => {
+    // 디바운싱 타이머 취소 후 즉시 검색
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    setDebouncedSearchText(value);
+  };
+
+  // 매진여부 필터 변환 (판매중 -> false, 매진 -> true)
+  const isSoldOut = useMemo(() => {
+    if (selectedStatus === "매진") return true;
+    if (selectedStatus === "판매중") return false;
+    return undefined;
+  }, [selectedStatus]);
+
+  // React Query를 사용한 포토카드 목록 조회
+  const {
+    data,
+    isLoading,
+    error: queryError,
+    refetch,
+  } = useMyCards({
+    page,
+    pageSize: PAGE_SIZE,
+    grade: selectedRarity,
+    genre: selectedCategory,
+    keyword: debouncedSearchText,
+    isSoldOut,
+  });
+
+  // 에러 처리
+  useEffect(() => {
+    if (queryError) {
+      const errorMessage =
+        queryError?.message || "카드 목록을 불러오는데 실패했습니다.";
+
+      // 401 에러 시 로그인 페이지로 리다이렉트
+      if (errorMessage.includes("401") || errorMessage.includes("인증")) {
+        router.push(PATHNAME.LOGIN);
+        return;
+      }
+
+      setError(errorMessage);
+    } else {
+      setError(null);
+    }
+  }, [queryError, router]);
+
+  // 데이터 추출
+  const ownedItems = data?.items || [];
+  const totalCount = data?.totalCount || 0;
+  const gradeCounts = data?.gradeCounts || {
+    COMMON: 0,
+    RARE: 0,
+    SUPER_RARE: 0,
+    LEGENDARY: 0,
+  };
+
+  // 디버깅: 페이지네이션 정보 확인
+  useEffect(() => {
+    console.log("🟡 Page State:", {
+      currentPage: page,
+      totalCount,
+      itemsCount: ownedItems.length,
+      items: ownedItems.map((item) => ({
+        id: item.id,
+        name: item.name,
+      })),
+    });
+  }, [page, totalCount, ownedItems]);
+
+  // 필터/검색 변경 시 페이지 1로 초기화
+  useEffect(() => {
+    setPage(1);
+  }, [selectedRarity, selectedCategory, debouncedSearchText, selectedStatus]);
+
+  // 재시도 핸들러
+  const handleRetry = () => {
+    setError(null);
+    refetch();
+  };
+
+  // 카드 데이터 정규화
+  const normalizedCards = useMemo(() => {
+    return ownedItems.map((item) => {
+      const grade = String(item.grade || "").toUpperCase();
+      return {
+        topImage: item.image_url || "/images/sample.svg",
+        title: item.name || "포토카드",
+        rarityIcon: grade === "SUPER_RARE" ? "SUPER RARE" : grade,
+        category: item.genre || "",
+        author: user?.nickname || "",
+        price: item.price || 0,
+        remaining: item.count || item.total_count || 0,
+        total: item.total_count || 0,
+        favoriteImg: "/images/favorite.svg",
+        createdAt: item.createdAt,
+      };
+    });
+  }, [ownedItems, user?.nickname]);
+
+  // 정렬된 카드 목록
+  const sortedCards = useMemo(() => {
+    return [...normalizedCards].sort((a, b) => {
       if (sortOrder === "낮은 가격순") return a.price - b.price;
       if (sortOrder === "높은 가격순") return b.price - a.price;
-      if (sortOrder === "최신순") return b.title.localeCompare(a.title);
+      if (sortOrder === "최신순" && a.createdAt && b.createdAt) {
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      }
       return 0;
     });
+  }, [normalizedCards, sortOrder]);
 
-  // 초기 카드 로딩
-  useEffect(() => {
-    setDisplayedCards(filteredCards.slice(0, ITEMS_PER_PAGE));
-    setHasMore(filteredCards.length > ITEMS_PER_PAGE);
-  }, [searchText, selectedRarity, selectedCategory, selectedStatus, sortOrder]);
+  // 로딩 상태
+  if (loading || isLoading) {
+    return <div>불러오는 중</div>;
+  }
 
-  // 무한 스크롤
-  const lastCardRef = (node) => {
-    if (observer.current) observer.current.disconnect();
-    observer.current = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting && hasMore) loadMore();
-    });
-    if (node) observer.current.observe(node);
-  };
-
-  // 추가 카드 로드
-  const loadMore = () => {
-    const currentLength = displayedCards.length;
-    const more = filteredCards.slice(
-      currentLength,
-      currentLength + ITEMS_PER_PAGE
-    );
-    setDisplayedCards((prev) => [...prev, ...more]);
-    if (currentLength + more.length >= filteredCards.length) setHasMore(false);
-  };
-
-  // 카드 클릭 시 상세 페이지 이동
-  const handleCardClick = (index) => {
-    router.push(`/marketplace/seller/${index}`);
-  };
-
-  const handleSellButtonClick = () => setIsSellModalOpen(true);
+  // 에러 상태 (에러가 있어도 이전 데이터가 있으면 표시)
+  const hasData = ownedItems.length > 0;
 
   return (
-    <div className="bg-black min-h-screen px-[80px] py-[40px] text-white relative">
-      {/* 상단 제목 */}
-      <SellerHeader onSellClick={handleSellButtonClick} />
-
-      {/* 보유 현황 */}
-      <p className="text-[24px] text-white mb-[20px] mt-[32px]">
-        유디님이 보유한 포토카드{" "}
-        <span className="text-[20px] text-gray-300">
-          ({filteredCards.length}장)
-        </span>
-      </p>
-
-      {/* 등급별 뱃지 */}
-      <div className="flex gap-4 mb-[28px]">
-        <Badge type="COMMON" count={20} />
-        <Badge type="RARE" count={8} />
-        <Badge type="SUPER RARE" count={3} />
-        <Badge type="LEGENDARY" count={5} />
-      </div>
-
-      {/* 필터 및 정렬 */}
-      <div className="flex justify-between items-center mt-5 w-full border-t border-gray-400 pt-[20px]">
-        <div className="flex items-center">
-          <div className="mr-[60px]">
-            <SearchMolecule onSearch={(text) => setSearchText(text)} />
-          </div>
-
-          <div className="flex gap-[45px]">
-            <Dropdown
-              placeholder="등급"
-              options={["COMMON", "RARE", "SUPER RARE", "LEGENDARY"]}
-              onChange={(value) => setSelectedRarity(value)}
-            />
-            <Dropdown
-              placeholder="장르"
-              options={["풍경", "인물", "동물", "추상"]}
-              onChange={(value) => setSelectedCategory(value)}
-            />
-            <Dropdown
-              placeholder="판매 상태"
-              options={["판매중", "매진"]}
-              onChange={(value) => setSelectedStatus(value)}
-            />
-          </div>
-        </div>
-
-        <Dropdown
-          placeholder="낮은 가격순"
-          options={["낮은 가격순", "높은 가격순", "최신순"]}
-          height="50px"
-          width="123px"
-          onChange={(value) => setSortOrder(value)}
-          customStyles={{
-            container: { border: "1px solid #FFF", padding: "12px" },
-            optionList: { padding: "10px 24px" },
-          }}
+    <div className="bg-black">
+      <div className="bg-black mx-x-desktop">
+        <PagesHeader
+          title="나의 판매 포토카드"
+          showPhotoCardSummary={true}
+          ownerName={user?.nickname || ""}
+          totalCount={totalCount}
+          gradeCounts={gradeCounts}
+          showButton={false}
         />
-      </div>
 
-      {/* 카드 리스트 */}
-      <div className="grid grid-cols-3 gap-x-[80px] gap-y-[80px] mt-[80px]">
-        {displayedCards.length > 0 ? (
-          displayedCards.map((card, index) => (
-            <div
-              key={index}
-              ref={index === displayedCards.length - 1 ? lastCardRef : null}
-              onClick={() => handleCardClick(index)}
-              className="cursor-pointer"
-            >
-              <Card {...card} showRemainingAsFraction={true} />
+        {/* 에러 메시지 표시 (데이터가 있을 때는 상단에 표시) */}
+        {error && (
+          <div
+            className="mb-4 p-4 rounded"
+            style={{
+              backgroundColor: "rgba(255, 72, 61, 0.1)",
+              border: "1px solid rgba(255, 72, 61, 0.3)",
+            }}
+          >
+            <div className="flex items-center justify-between">
+              <p className="text-red-400 text-sm">{error}</p>
+              <button
+                onClick={handleRetry}
+                className="ml-4 px-4 py-2 rounded text-sm font-medium"
+                style={{
+                  backgroundColor: "var(--color-main, #EFFF04)",
+                  color: "var(--color-black)",
+                }}
+              >
+                다시 시도
+              </button>
             </div>
-          ))
-        ) : (
-          <div className="col-span-3 text-center text-gray-300 text-[18px] mt-[100px]">
-            조건에 맞는 포토카드가 없습니다.
           </div>
         )}
+
+        {/* 에러가 있고 데이터가 없을 때만 전체 에러 화면 표시 */}
+        {error && !hasData ? (
+          <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
+            <p className="text-red-400 text-lg mb-4">{error}</p>
+            <button
+              onClick={handleRetry}
+              className="px-6 py-3 rounded font-medium"
+              style={{
+                backgroundColor: "var(--color-main, #EFFF04)",
+                color: "var(--color-black)",
+              }}
+            >
+              다시 시도
+            </button>
+          </div>
+        ) : (
+          <CardSearchContainer
+            searchText={searchText}
+            selectedRarity={selectedRarity}
+            selectedCategory={selectedCategory}
+            selectedStatus={selectedStatus}
+            sortOrder={sortOrder}
+            showStatusFilter={true}
+            showSortDropdown={false}
+            categoryOptions={GENRE_OPTIONS}
+            onSearchChange={setSearchText}
+            onSearchSubmit={handleSearchSubmit}
+            onRarityChange={setSelectedRarity}
+            onCategoryChange={setSelectedCategory}
+            onStatusChange={setSelectedStatus}
+            onSortOrderChange={setSortOrder}
+            cards={sortedCards.map((card) => ({
+              ...card,
+              showRemainingAsFraction: true,
+              showRemainingAsFraction: true,
+              showTag: true,
+              
+            }))}
+            cardGridClass="grid grid-cols-3 gap-x-xl gap-y-xl my-3xl"
+            emptyMessage="보유한 카드가 없습니다."
+            showPagination={true}
+            paginationComponent={
+              <Pagination
+                page={page}
+                pageSize={PAGE_SIZE}
+                totalCount={totalCount}
+                onChange={setPage}
+              />
+            }
+          />
+        )}
       </div>
-
-      {/* 판매 등록 모달 */}
-      <SellPhotoModal
-        isOpen={isSellModalOpen}
-        onClose={() => setIsSellModalOpen(false)}
-        cards={cardDataServer}
-        onCardSelect={(card) => setSelectedSellCard(card)}
-      />
-
-      {/* 카드 상세 판매 모달 */}
-      {selectedSellCard && (
-        <CardDetailSellModal
-          isOpen={!!selectedSellCard}
-          onClose={() => setSelectedSellCard(null)}
-          card={selectedSellCard}
-        />
-      )}
     </div>
   );
-};
-
-export default SellerPage;
+}

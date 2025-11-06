@@ -2,6 +2,7 @@
 
 import React from "react";
 import CardMeta from "@/components/molecules/CardMeta";
+import Tag from "@/components/atoms/tag";
 
 const Card = ({
   topImage = "/images/sample.svg",
@@ -13,13 +14,18 @@ const Card = ({
   remaining = 2,
   total = 5,
   favoriteImg = "/images/favorite.svg",
-  quantity = null, // Sell 모달 전용
-  variant = "withAuthor", // CardMeta variant: "default" | "withAuthor" | "full"
-  sizeVariant = "2xs", // CardMeta sizeVariant
-  point, // CardMeta full variant용
-  purchaseText, // CardMeta full variant용
+  quantity = null,
+  variant = "withAuthor",
+  sizeVariant = "2xs",
+  point,
+  purchaseText,
+  showSellStatus = false,
+  sellStatus,
+  showTag = false, // ✅ Tag 노출 여부 (기본값: false)
 }) => {
-  // 레어도 텍스트 스타일 결정
+  const isSoldOut = remaining === 0;
+  const tagType = isSoldOut ? "trade" : "sale";
+
   let rarityText = rarityIcon.toUpperCase();
   let rarityStyle = {
     color: "var(--main-main, #EFFF04)",
@@ -42,16 +48,23 @@ const Card = ({
         backgroundColor: "var(--color-gray-500)",
       }}
     >
-      {/* 상단 이미지 + Sold Out 처리 */}
+      {/* ✅ 상단 이미지 + Tag + Sold Out 처리 */}
       <div className="relative w-[360px] h-[270px]">
+        {/* ✅ Tag (SellerPage에서만 표시됨) */}
+        {showTag && (
+          <div className="absolute top-2 left-2 z-10">
+            <Tag type={tagType} size="small" />
+          </div>
+        )}
+
         <img
           src={topImage}
           alt="Top Image"
           className={`w-full h-full object-cover ${
-            remaining === 0 ? "opacity-40" : ""
+            isSoldOut ? "opacity-40" : ""
           }`}
         />
-        {remaining === 0 && (
+        {isSoldOut && (
           <img
             src="/images/soldOut.svg"
             alt="Sold Out"
@@ -74,7 +87,7 @@ const Card = ({
         {title}
       </h2>
 
-      {/* 레어도 영역 : CardMeta.jsx 사용 */}
+      {/* 레어도 */}
       <div className="w-[360px] flex justify-between items-center mt-[10px] h-[23px]">
         <CardMeta
           rarityText={rarityText}
@@ -86,6 +99,8 @@ const Card = ({
           point={point}
           purchaseText={purchaseText}
           className="w-auto"
+          showSellStatus={showSellStatus}
+          sellStatus={sellStatus}
         />
       </div>
 
@@ -120,12 +135,10 @@ const Card = ({
         </span>
         <div className="flex items-center">
           {quantity !== null ? (
-            // Sell 모달: 수량 그대로
             <span className="text-white text-[18px] font-normal">
               {quantity}
             </span>
           ) : (
-            // 마켓 페이지: remaining / total
             <>
               <span className="text-white text-[18px] font-normal">
                 {remaining}
