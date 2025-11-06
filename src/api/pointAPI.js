@@ -3,6 +3,9 @@
 import { data } from "autoprefixer";
 import { POINT_ENDPOINTS } from "./apiEndpoints";
 import { ERROR_MESSAGES } from "./constants";
+import { useQuery } from "@tanstack/react-query";
+import { apiClient } from "./apiClient";
+import { useMutation } from "@tanstack/react-query";
 
 // NOTE: 포인트 조회
 export const usePoints = () => {
@@ -21,7 +24,7 @@ export const usePoints = () => {
 };
 
 // NOTE: 포인트 획득
-export const useGainPoints = (randomPoint) => {
+export const useGainPoints = () => {
   return useMutation({
     mutationFn: async (randomPoint) => {
       try {

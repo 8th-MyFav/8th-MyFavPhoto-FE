@@ -30,4 +30,7 @@ export const ERROR_MESSAGES = {
 
   // 마이갤러리 관련
   MY_CARDS_FAIL: "카드 목록 조회 실패",
+
+  // 카드 생성 실패
+  CARD_CREATE_FAIL: "카드 생성 실패",
 };
