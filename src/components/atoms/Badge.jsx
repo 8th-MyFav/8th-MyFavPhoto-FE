@@ -23,7 +23,7 @@ export default function Badge({ type = "COMMON", count = 0, size = "large" }) {
 
   return (
     <div
-      className={`flex flex-col items-center justify-center border rounded-none text-center px-[20px] py-[8px] font-light ${fontSize}`}
+      className={`flex flex-col items-center justify-center border rounded-base text-center px-[20px] py-[8px] font-light ${fontSize}`}
       style={{
         borderColor: color,
         color,
