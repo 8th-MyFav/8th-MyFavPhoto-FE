@@ -10,7 +10,7 @@ const PAGESIZE = 5;
 // NOTE: 알림 조회
 export const useNotification = (page = 1, pageSize = 5) => {
   return useQuery({
-    queryKey: ["notification"],
+    queryKey: ["notification", page, pageSize],
     queryFn: async () => {
       try {
         return await apiClient(
@@ -19,8 +19,9 @@ export const useNotification = (page = 1, pageSize = 5) => {
             auth: true,
           }
         );
-      } catch {
-        throw new Error(ERROR_MESSAGES.NOTIFICATION_FAIL);
+      } catch (error) {
+        console.error("알림 조회 실패:", error);
+        throw new Error(error?.message || ERROR_MESSAGES.NOTIFICATION_FAIL);
       }
     },
   });
@@ -35,8 +36,11 @@ export const useReadNotification = () => {
           method: "PATCH",
           auth: true,
         });
-      } catch {
-        throw new Error(ERROR_MESSAGES.NOTFICATION_READ_RAIL);
+      } catch (error) {
+        console.error("알림 읽음 처리 실패:", error);
+        throw new Error(
+          error?.message || ERROR_MESSAGES.NOTIFICATION_READ_FAIL
+        );
       }
     },
   });

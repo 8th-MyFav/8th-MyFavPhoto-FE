@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import NotificationUI from "./Notification";
 import NotificationIcon from "@/components/atoms/NotificationIcon";
 import { useNotification } from "@/api/notificationAPI";
@@ -7,6 +7,11 @@ import { useNotification } from "@/api/notificationAPI";
 const NotificationButton = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+
+  // useCallback으로 메모이제이션하여 불필요한 재렌더링 방지
+  const handleUnreadCountChange = useCallback((count) => {
+    setUnreadCount(count);
+  }, []);
 
   // 전체 알림을 가져와서 unreadCount 계산 (모달이 닫혀있을 때도)
   const { data: countData } = useNotification(1, 100); // 충분히 큰 수로 전체 가져오기
@@ -66,7 +71,7 @@ const NotificationButton = () => {
       <NotificationUI
         show={showNotifications}
         onClose={handleClose}
-        onUnreadCountChange={setUnreadCount}
+        onUnreadCountChange={handleUnreadCountChange}
       />
     </div>
   );

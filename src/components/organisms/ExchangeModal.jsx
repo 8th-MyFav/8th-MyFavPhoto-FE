@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import Card from "./card";
+import Card from "./Card";
 import { PATHNAME } from "@/constants";
 
 const ExchangeModal = ({ selectedCard, onClose, targetCard }) => {

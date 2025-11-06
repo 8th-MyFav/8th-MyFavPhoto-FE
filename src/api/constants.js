@@ -22,7 +22,7 @@ export const ERROR_MESSAGES = {
 
   // 알림 관련
   NOTIFICATION_FAIL: "알림 조회 실패",
-  NOTFICATION_READ_RAIL: "알림 읽음 처리 실패",
+  NOTIFICATION_READ_FAIL: "알림 읽음 처리 실패",
 
   // 포인트 관련
   POINT_FAIL: "포인트 조회 실패",
