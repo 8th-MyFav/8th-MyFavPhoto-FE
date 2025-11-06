@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState, useEffect } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import PagesHeader from "@/components/organisms/PagesHeader";
 import CardSearchContainer from "@/components/organisms/CardSearchContainer";
 import Modal from "@/components/molecules/Modal";
@@ -11,12 +11,12 @@ import PointModal from "@/components/molecules/PointModal";
 import { PATHNAME } from "@/constants";
 import { useMarketList } from "@/api/marketListings";
 
-const ITEMS_PER_PAGE = 6;
 const POINT_MODAL_KEY = "lastPointModalTime";
 const LAST_LOGIN_TOKEN_KEY = "lastLoginToken";
 
-const MarketplacePage = () => {
+export default function MarketplacePage() {
   const router = useRouter();
+  const pathname = usePathname();
 
   /** 로그인 관련 상태 */
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -35,19 +35,13 @@ const MarketplacePage = () => {
   const [selectedStatus, setSelectedStatus] = useState("");
   const [sortOrder, setSortOrder] = useState("price_asc");
 
-  /** 카드 목록 + 페이지네이션 */
-  const [displayedCards, setDisplayedCards] = useState([]);
-  const [hasMore, setHasMore] = useState(true);
-  const [nextCursor, setNextCursor] = useState(undefined);
+  /** 카드 목록 */
+  const [cards, setCards] = useState([]);
 
   /** 포인트 모달 */
   const [isPointModalOpen, setIsPointModalOpen] = useState(false);
 
-  const observer = useRef();
-
-  /* =====================
-     ✅ 로그인 체크 및 포인트 모달 로직
-  ====================== */
+  /* ✅ 로그인 및 포인트 모달 로직 */
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
 
@@ -74,12 +68,10 @@ const MarketplacePage = () => {
     }
   }, []);
 
-  /* =====================
-     ✅ API 호출 (React Query)
-  ====================== */
-  const { data, isLoading, isFetching, refetch } = useMarketList({
-    take: ITEMS_PER_PAGE,
-    cursor: nextCursor,
+  /* ✅ API 호출 (한 번에 전체 데이터 불러오기) */
+  const { data, isLoading, refetch, error } = useMarketList({
+    take: 9999, // 💡 충분히 큰 수로 한 번에 전부 불러옴
+    cursor: undefined,
     grade: selectedRarity || undefined,
     genre: selectedCategory || undefined,
     isSoldOut:
@@ -92,84 +84,50 @@ const MarketplacePage = () => {
     keyword: searchText || undefined,
   });
 
-  /* =====================
-     ✅ 데이터 반영 (무한 스크롤 포함)
-  ====================== */
+  /* ✅ 데이터 반영 */
   useEffect(() => {
-    if (!data) return;
-
-    const list = data.list || [];
-
-    setDisplayedCards((prev) => {
-      // nextCursor가 존재 → 다음 페이지 append
-      if (nextCursor) {
-        const existingIds = new Set(prev.map((item) => item.id));
-        const newItems = list.filter((item) => !existingIds.has(item.id));
-        return [...prev, ...newItems];
-      } else {
-        // 첫 페이지
-        return list;
-      }
-    });
-
-    setHasMore(data.hasMore);
+    if (data?.list) {
+      setCards(data.list);
+    }
   }, [data]);
 
-  /* =====================
-     ✅ 필터/정렬 변경 시 초기화
-  ====================== */
+  /* ✅ 필터나 검색 변경 시 다시 불러오기 */
   useEffect(() => {
-    setDisplayedCards([]);
-    setNextCursor(undefined);
-    setHasMore(true);
     refetch();
-  }, [searchText, selectedRarity, selectedCategory, selectedStatus, sortOrder]);
+  }, [searchText, selectedRarity, selectedCategory, selectedStatus, sortOrder, refetch]);
 
-  /* =====================
-     ✅ 무한 스크롤 옵저버
-  ====================== */
-  const lastCardRef = useCallback(
-    (node) => {
-      if (isFetching) return;
-      if (observer.current) observer.current.disconnect();
+  /* ✅ 페이지 이동 시 리셋 */
+  useEffect(() => {
+    if (pathname === PATHNAME.MARKET) {
+      refetch();
+    }
+  }, [pathname, refetch]);
 
-      observer.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && hasMore && data?.nextCursor) {
-          setNextCursor(data.nextCursor);
-        }
-      });
-
-      if (node) observer.current.observe(node);
-    },
-    [hasMore, isFetching, data?.nextCursor]
-  );
-
-  /* =====================
-     ✅ 카드 데이터 변환 (Card용)
-  ====================== */
-  const mappedCards = displayedCards.map((card) => ({
+  /* ✅ 카드 매핑 */
+  const mappedCards = cards.map((card) => ({
     id: card.id,
     topImage: card.image_url || "/images/sample.svg",
     title: card.name || "제목 없음",
     rarityIcon: card.grade || "COMMON",
     category: card.genre || "기타",
-    author: card.nickname || "익명",
+    author:
+      card.creator?.nickname ||
+      card.nickname ||
+      card.creator_name ||
+      "익명",
     price: card.price ?? 0,
     remaining: card.available ?? 0,
     total: card.total ?? 0,
     favoriteImg: "/images/favorite.svg",
   }));
 
-  /* =====================
-     ✅ 핸들러
-  ====================== */
+  /* ✅ 핸들러 */
   const handleCardClick = (id) => router.push(PATHNAME.MARKET_DETAIL(id));
   const handleSellButtonClick = () => setIsSellModalOpen(true);
   const handleLogin = () => router.push(PATHNAME.LOGIN);
+  const handleRetry = () => refetch();
 
-  /* =====================
-     ✅ 렌더링
-  ====================== */
+  /* ✅ 렌더링 */
   return (
     <div className="bg-black">
       {!isLoggedIn ? (
@@ -184,10 +142,37 @@ const MarketplacePage = () => {
         )
       ) : (
         <div className="bg-black mx-x-desktop">
-          {/* 상단 헤더 */}
+          {/* 헤더 */}
           <PagesHeader buttonOnClick={handleSellButtonClick} />
 
-          {/* 검색/필터/카드 목록 */}
+          {/* 에러 표시 */}
+          {error && (
+            <div
+              className="mb-4 p-4 rounded"
+              style={{
+                backgroundColor: "rgba(255, 72, 61, 0.1)",
+                border: "1px solid rgba(255, 72, 61, 0.3)",
+              }}
+            >
+              <div className="flex items-center justify-between">
+                <p className="text-red-400 text-sm">
+                  {error.message || "카드를 불러오지 못했습니다."}
+                </p>
+                <button
+                  onClick={handleRetry}
+                  className="ml-4 px-4 py-2 rounded text-sm font-medium"
+                  style={{
+                    backgroundColor: "var(--color-main, #EFFF04)",
+                    color: "var(--color-black)",
+                  }}
+                >
+                  다시 시도
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* 카드 검색/필터 영역 */}
           <CardSearchContainer
             searchText={searchText}
             selectedRarity={selectedRarity}
@@ -199,26 +184,21 @@ const MarketplacePage = () => {
             onCategoryChange={setSelectedCategory}
             onStatusChange={setSelectedStatus}
             onSortOrderChange={setSortOrder}
-            cards={mappedCards} // ✅ 변환된 카드 데이터 사용
+            cards={mappedCards}
             onCardClick={handleCardClick}
-            lastCardRef={lastCardRef}
             isLoading={isLoading}
           />
 
-          {/* 로딩 표시 */}
-          {isFetching && hasMore && (
-            <div className="text-white text-center py-4">더 불러오는 중...</div>
+          {isLoading && (
+            <div className="text-white text-center py-4">불러오는 중...</div>
           )}
 
-          {/* 판매 등록 모달 */}
+          {/* 판매 관련 모달 */}
           <SellPhotoModal
             isOpen={isSellModalOpen}
             onClose={() => setIsSellModalOpen(false)}
-            cards={displayedCards}
             onCardSelect={(card) => setSelectedSellCard(card)}
           />
-
-          {/* 카드 상세 판매 모달 */}
           {selectedSellCard && (
             <CardDetailSellModal
               isOpen={!!selectedSellCard}
@@ -235,6 +215,4 @@ const MarketplacePage = () => {
       )}
     </div>
   );
-};
-
-export default MarketplacePage;
+}
