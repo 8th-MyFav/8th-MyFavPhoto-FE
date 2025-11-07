@@ -257,11 +257,11 @@ export default function MyGalleryPage() {
 
       // image_url이 null이거나 없을 때 sample.svg 또는 sample2.svg 사용
       const imageUrl =
-        item.image_url && item.image_url !== null
+        item.image_url && item.image_url !== null && item.image_url !== ""
           ? item.image_url
-          : item.imageUrl && item.imageUrl !== null
+          : item.imageUrl && item.imageUrl !== null && item.imageUrl !== ""
           ? item.imageUrl
-          : item.image && item.image !== null
+          : item.image && item.image !== null && item.image !== ""
           ? item.image
           : // 인덱스 기반으로 sample.svg와 sample2.svg 번갈아 사용
           index % 2 === 0
@@ -281,6 +281,7 @@ export default function MyGalleryPage() {
         price: item.price || 0,
         remaining: remainingCount, // 보유 개수 (count)
         total: totalCountValue, // 총 발행 개수 (total_issued)
+        quantity: remainingCount, // 마이갤러리에서는 수량으로 표시
         favoriteImg: "/images/favorite.svg",
         createdAt: item.createdAt || item.created_at,
         updatedAt:
