@@ -58,7 +58,13 @@ const HomePage = () => {
                 </div>
               </div>
               <div className="absolute top-2xs bottom-0 left-0 right-0 mt-[13px] mx-lg z-0">
-                <div className="w-full h-[1088px] rounded-[30px] bg-gradient-to-tr from-[#445b6d] via-[#3f3f3f]/80 to-[#75426b]" />
+                <div
+                  className="w-full h-[1088px] rounded-[30px] bg-gradient-to-tr from-[#445b6d] via-[#3f3f3f]/80 to-[#75426b]
+                  tablet:h-[722px] 
+                  mobile:h-[412px] 
+                  desktop:h-[1088px] 
+                "
+                />
               </div>
             </div>
             <div>

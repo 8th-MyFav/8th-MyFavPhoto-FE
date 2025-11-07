@@ -7,12 +7,12 @@ import { useNotification, useReadNotification } from "@/api/notificationAPI";
 const NotificationUI = ({ show, onClose, onUnreadCountChange }) => {
   const queryClient = useQueryClient();
   const [currentPage, setCurrentPage] = useState(1);
-  const [notifications, setNotifications] = useState([]);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalCount, setTotalCount] = useState(0); // 전체 알림 수
+  const [allNotifications, setAllNotifications] = useState([]); // 전체 알림
+  const [displayedNotifications, setDisplayedNotifications] = useState([]); // 현재 페이지에 표시할 알림
   const ITEMS_PER_PAGE = 5;
 
-  const { data, isLoading, isError } = useNotification(currentPage, 5);
+  // 전체 알림을 한 번에 가져오기 (충분히 큰 수로 요청)
+  const { data, isLoading, isError } = useNotification(1, 100);
   const { mutate: readNotification } = useReadNotification();
 
   const formatTime = (iso) => {
@@ -32,59 +32,51 @@ const NotificationUI = ({ show, onClose, onUnreadCountChange }) => {
     }
   };
 
+  // 알림을 최신순으로 정렬하는 함수 (방금 전이 제일 위에 오도록)
+  // createdAtMs가 클수록 최신이므로 내림차순 정렬
   const sortNotifications = (list) => {
     return [...list].sort((a, b) => {
-      if (a.isRead !== b.isRead) return a.isRead ? 1 : -1;
       const aTs = a.createdAtMs || 0;
       const bTs = b.createdAtMs || 0;
-      return bTs - aTs;
+      return bTs - aTs; // 최신순 (내림차순) - 방금 전이 제일 위
     });
   };
 
-  // API 데이터를 알림 형태로 변환
+  // API 데이터를 알림 형태로 변환 및 전체 알림 저장
   useEffect(() => {
     if (!show) return; // 모달이 닫혀있으면 데이터 처리 안 함
 
     if (isLoading) return;
 
     if (isError) {
-      setNotifications([]);
-      setTotalCount(0);
-      setTotalPages(1);
+      setAllNotifications([]);
+      setDisplayedNotifications([]);
       return;
     }
 
     if (data) {
       let notificationsData = [];
-      let totalCount = 0;
 
       // API 응답 구조에 따라 알림 배열 추출
       if (Array.isArray(data)) {
         notificationsData = data;
-        // 배열인 경우 totalCount는 배열 길이 (하지만 이건 현재 페이지의 길이일 수 있음)
-        totalCount = data.length;
       } else if (data.data && Array.isArray(data.data)) {
         notificationsData = data.data;
-        // totalCount가 있는지 확인 (API 응답에 포함되어야 함)
-        totalCount = data.totalCount ?? data.total ?? data.data.length;
       } else if (data.notifications && Array.isArray(data.notifications)) {
         notificationsData = data.notifications;
-        totalCount = data.totalCount ?? data.total ?? data.notifications.length;
       } else if (data.items && Array.isArray(data.items)) {
         notificationsData = data.items;
-        totalCount = data.totalCount ?? data.total ?? data.items.length;
-      } else {
-        // 다른 구조일 수도 있으니 확인
-        totalCount = data.totalCount ?? data.total ?? 0;
       }
 
-      // totalCount 저장 (Pagination 컴포넌트에서 사용)
-      setTotalCount(totalCount);
-
       if (notificationsData.length > 0) {
+        // 전체 알림을 map으로 변환
         const apiNotifications = notificationsData.map((notification) => {
-          // is_read가 false면 새로운 알림 (읽지 않음)
-          const isRead = notification.is_read ?? notification.isRead ?? false;
+          // is_read 필드만 사용 (isRead는 없음)
+          const isRead =
+            notification.is_read === true ||
+            notification.is_read === "true" ||
+            notification.is_read === 1 ||
+            notification.is_read === "1";
           const createdAt = notification.createdAt || notification.created_at;
 
           return {
@@ -96,43 +88,33 @@ const NotificationUI = ({ show, onClose, onUnreadCountChange }) => {
           };
         });
 
+        // 전체 알림을 최신순으로 정렬 (방금 전이 제일 위)
         const sorted = sortNotifications(apiNotifications);
-
-        // 현재 페이지의 알림만 저장 (API가 페이지네이션을 지원하므로)
-        setNotifications(sorted);
-
-        // 전체 알림 수를 기준으로 총 페이지 수 계산
-        if (totalCount > 0) {
-          const calculatedTotalPages = Math.max(
-            1,
-            Math.ceil(totalCount / ITEMS_PER_PAGE)
-          );
-          setTotalPages(calculatedTotalPages);
-        } else {
-          // totalCount가 없으면 현재 페이지 데이터로 추정
-          if (sorted.length >= ITEMS_PER_PAGE) {
-            // 현재 페이지에 5개가 모두 있으면 다음 페이지가 있을 수 있음
-            setTotalPages(Math.max(2, currentPage + 1));
-          } else {
-            // 현재 페이지가 마지막 페이지
-            setTotalPages(currentPage);
-          }
-        }
+        setAllNotifications(sorted);
       } else {
-        setNotifications([]);
-        setTotalCount(0);
-        setTotalPages(1);
+        setAllNotifications([]);
+        setDisplayedNotifications([]);
       }
     } else {
-      setNotifications([]);
-      setTotalCount(0);
-      setTotalPages(1);
+      setAllNotifications([]);
+      setDisplayedNotifications([]);
     }
-  }, [data, isLoading, isError, show, currentPage]);
+  }, [data, isLoading, isError, show]);
 
-  // notifications 변경 시 unreadCount를 부모에게 전달하지 않음
-  // NotificationButton에서 API로 전체 알림을 가져와서 직접 계산하는 것이 더 정확함
-  // 현재 페이지 기준으로 계산하면 전체 알림 수와 맞지 않을 수 있음
+  // 전체 알림에서 현재 페이지에 해당하는 알림만 추출
+  useEffect(() => {
+    if (allNotifications.length === 0) {
+      setDisplayedNotifications([]);
+      return;
+    }
+
+    // 현재 페이지에 표시할 알림 계산 (프론트엔드 페이지네이션)
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    const pageNotifications = allNotifications.slice(startIndex, endIndex);
+
+    setDisplayedNotifications(pageNotifications);
+  }, [allNotifications, currentPage]);
 
   const handleRead = (id) => {
     if (!queryClient) {
@@ -150,7 +132,7 @@ const NotificationUI = ({ show, onClose, onUnreadCountChange }) => {
 
       const updated = notificationsData.map((notification) =>
         notification.id === id
-          ? { ...notification, is_read: true, isRead: true }
+          ? { ...notification, is_read: true }
           : notification
       );
 
@@ -160,8 +142,8 @@ const NotificationUI = ({ show, onClose, onUnreadCountChange }) => {
     // PATCH API 호출
     readNotification(id, {
       onSuccess: () => {
-        // 읽음 처리 성공 후 상태 업데이트
-        setNotifications((prev) => {
+        // 읽음 처리 성공 후 전체 알림 상태 업데이트
+        setAllNotifications((prev) => {
           const updated = prev.map((n) =>
             n.id === id ? { ...n, isRead: true } : n
           );
@@ -187,9 +169,9 @@ const NotificationUI = ({ show, onClose, onUnreadCountChange }) => {
     setCurrentPage(newPage);
   };
 
-  // API가 페이지네이션을 지원하므로 현재 페이지의 알림만 표시
-  // notifications는 이미 현재 페이지의 알림만 포함
-  const displayedNotifications = notifications;
+  // 전체 알림 수와 총 페이지 수 계산
+  const totalCount = allNotifications.length;
+  const totalPages = Math.max(1, Math.ceil(totalCount / ITEMS_PER_PAGE));
 
   if (!show) return null;
 
@@ -245,7 +227,7 @@ const NotificationUI = ({ show, onClose, onUnreadCountChange }) => {
           )}
         </div>
 
-        {/* 페이지네이션 - 5개 이상일 때만 표시 */}
+        {/* 페이지네이션 - 전체 알림이 5개보다 많을 때만 표시 */}
         {totalCount > ITEMS_PER_PAGE && (
           <Pagination
             page={currentPage}
