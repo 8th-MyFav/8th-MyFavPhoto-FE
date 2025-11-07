@@ -50,7 +50,7 @@ const CreatePhotoPage = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const newErrors = {};
@@ -60,7 +60,6 @@ const CreatePhotoPage = () => {
     if (!genre) newErrors.genre = "장르를 선택해주세요.";
     if (!price.trim()) newErrors.price = "가격을 입력해주세요.";
     if (!quantity.trim()) newErrors.quantity = "총 발행량을 입력해주세요.";
-    if (!photo) newErrors.photo = "사진을 업로드해주세요.";
 
     const quantityNum = Number(quantity);
     if (quantity && (!Number.isFinite(quantityNum) || quantityNum < 1)) {
@@ -83,19 +82,31 @@ const CreatePhotoPage = () => {
       return;
     }
 
-    // ✅ FormData로 변경 (이미지 업로드 포함)
-    const formData = new FormData();
-    formData.append("name", photoName);
-    formData.append("grade", grade);
-    formData.append("genre", genre);
-    formData.append("price", Number(price));
-    formData.append("total_issued", Number(quantity));
-    formData.append("description", description);
-    formData.append("image", photo);
+    // ✅ 이미지 파일 → base64로 변환
+    let base64Image = null;
+    if (photo) {
+      base64Image = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(photo);
+      });
+    }
 
-    console.log("📤 전송 데이터:", formData.get("name"), formData.get("image"));
+    // ✅ JSON body 형태로 전송
+    const cardData = {
+      name: photoName,
+      grade,
+      genre,
+      price: Number(price),
+      total_issued: Number(quantity),
+      description,
+      //image: base64Image, // 백엔드에서 이미지 URL 대신 base64 받는 경우
+    };
 
-    createCards(formData, {
+    console.log("📤 전송 데이터:", cardData);
+
+    createCards(cardData, {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["myCards"] });
 
