@@ -173,3 +173,10 @@ button:hover .notification-icon .alarm-path {
 .notification-icon .badge-circle {
   fill: #ff483d !important;
 }
+
+@theme {
+  /* Breakpoints - v4는 모바일 퍼스트 방식 사용 */
+  --breakpoint-mobile: 100px; /* 768px */
+  --breakpoint-tablet: 768px; /* 768px */
+  --breakpoint-desktop: 1200px; /* 1200px */
+}
