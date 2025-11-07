@@ -4,7 +4,7 @@
 import React, { useEffect, useState } from "react";
 import { usePoints, useGainPoints } from "@/api/pointAPI";
 import { useQueryClient } from "@tanstack/react-query";
-import Button from "@/components/atoms/button";
+import Button from "@/components/atoms/Button";
 
 const PointModal = ({
   title1 = "랜덤",

@@ -104,24 +104,24 @@ const CardSearchContainer = ({
       </div>
 
       {/* 카드 리스트 */}
-      <div className={cardGridClass}>
-        {cards.length > 0 ? (
-          cards.map((card, index) => (
+      {cards.length > 0 ? (
+        <div className={cardGridClass}>
+          {cards.map((card, index) => (
             <div
-              key={card.id || index}
+              key={card.id ? `${card.id}-${index}` : `card-${index}`}
               ref={index === cards.length - 1 ? lastCardRef : null}
               onClick={() => handleCardClick(card)}
               className={onCardClick || card?.id ? "cursor-pointer" : ""}
             >
               <Card {...card} />
             </div>
-          ))
-        ) : (
-          <div className="col-span-3 text-center text-gray-300 text-noto-xs mt-3xl">
-            {emptyMessage}
-          </div>
-        )}
-      </div>
+          ))}
+        </div>
+      ) : (
+        <div className="flex items-center justify-center min-h-[calc(100vh-300px)] text-center text-gray-300 text-noto-xs">
+          {emptyMessage}
+        </div>
+      )}
 
       {/* 페이지네이션 */}
       {showPagination && paginationComponent && (

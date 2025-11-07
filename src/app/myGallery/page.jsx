@@ -1,6 +1,6 @@
 "use client";
 import { useAuth } from "@/contexts/AuthContext";
-import { useEffect, useMemo, useState, useRef } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import PagesHeader from "@/components/organisms/PagesHeader";
 import CardSearchContainer from "@/components/organisms/CardSearchContainer";
@@ -9,7 +9,6 @@ import { PATHNAME, GENRE } from "@/constants";
 import { useMyCards } from "@/api/myGalleryAPI";
 
 const PAGE_SIZE = 15;
-const DEBOUNCE_DELAY = 500; // 디바운스 지연 시간 (500ms)
 const GENRE_OPTIONS = [
   GENRE.KPOP,
   GENRE.ACTOR,
@@ -27,11 +26,9 @@ export default function MyGalleryPage() {
   const [debouncedSearchText, setDebouncedSearchText] = useState("");
   const [selectedRarity, setSelectedRarity] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
-  const [selectedStatus, setSelectedStatus] = useState("");
   const [sortOrder, setSortOrder] = useState("낮은 가격순");
   const [page, setPage] = useState(1);
   const [error, setError] = useState(null);
-  const debounceTimerRef = useRef(null);
 
   // 로그인 체크
   useEffect(() => {
@@ -40,38 +37,10 @@ export default function MyGalleryPage() {
     }
   }, [isAuthenticated, loading, router]);
 
-  // 검색어 디바운싱 (타이핑 시)
-  useEffect(() => {
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-    }
-
-    debounceTimerRef.current = setTimeout(() => {
-      setDebouncedSearchText(searchText);
-    }, DEBOUNCE_DELAY);
-
-    return () => {
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-      }
-    };
-  }, [searchText]);
-
-  // 검색 제출 핸들러 (엔터/검색 버튼 클릭 시)
+  // 검색 제출 핸들러 (엔터/검색 버튼 클릭 시에만 검색)
   const handleSearchSubmit = (value) => {
-    // 디바운싱 타이머 취소 후 즉시 검색
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-    }
     setDebouncedSearchText(value);
   };
-
-  // 매진여부 필터 변환 (판매중 -> false, 매진 -> true)
-  const isSoldOut = useMemo(() => {
-    if (selectedStatus === "매진") return true;
-    if (selectedStatus === "판매중") return false;
-    return undefined;
-  }, [selectedStatus]);
 
   // React Query를 사용한 포토카드 목록 조회
   const {
@@ -87,20 +56,11 @@ export default function MyGalleryPage() {
     grade: selectedRarity,
     genre: selectedCategory,
     keyword: debouncedSearchText,
-    isSoldOut,
   });
 
   // API 호출 상태 확인
   useEffect(() => {
-    console.log("📊 API Status:", {
-      isLoading,
-      isFetching,
-      isError,
-      hasData: !!data,
-      dataItems: data?.items?.length || 0,
-      totalCount: data?.totalCount || 0,
-      error: queryError?.message,
-    });
+    // API 상태 모니터링 (필요시 활성화)
   }, [isLoading, isFetching, isError, data, queryError]);
 
   // 에러 처리
@@ -133,53 +93,13 @@ export default function MyGalleryPage() {
 
   // 디버깅: 페이지네이션 정보 확인 및 API 응답 필드 확인
   useEffect(() => {
-    if (ownedItems.length > 0) {
-      const firstItem = ownedItems[0];
-      console.log("🟡 Page State - API Response Fields:", {
-        currentPage: page,
-        totalCount,
-        itemsCount: ownedItems.length,
-        firstItemKeys: Object.keys(firstItem || {}),
-        firstItemFullData: firstItem,
-        requiredFields: {
-          id: firstItem?.id,
-          creator_id: firstItem?.creator_id,
-          name: firstItem?.name,
-          grade: firstItem?.grade,
-          genre: firstItem?.genre,
-          price: firstItem?.price,
-          total_count: firstItem?.total_count,
-          total_issued: firstItem?.total_issued,
-          count: firstItem?.count,
-          image_url: firstItem?.image_url,
-          createdAt: firstItem?.createdAt,
-          updatedAt: firstItem?.updatedAt,
-        },
-        allItemsFields: ownedItems.slice(0, 3).map((item) => ({
-          id: item.id,
-          name: item.name,
-          hasAllFields: !!(
-            item.id &&
-            item.creator_id !== undefined &&
-            item.grade &&
-            item.genre &&
-            item.price !== undefined &&
-            (item.total_issued !== undefined ||
-              item.total_count !== undefined) &&
-            item.count !== undefined &&
-            item.image_url &&
-            item.createdAt &&
-            item.updatedAt
-          ),
-        })),
-      });
-    }
+    // 페이지네이션 및 API 응답 필드 모니터링 (필요시 활성화)
   }, [page, totalCount, ownedItems]);
 
   // 필터/검색 변경 시 페이지 1로 초기화
   useEffect(() => {
     setPage(1);
-  }, [selectedRarity, selectedCategory, debouncedSearchText, selectedStatus]);
+  }, [selectedRarity, selectedCategory, debouncedSearchText]);
 
   // 재시도 핸들러
   const handleRetry = () => {
@@ -189,8 +109,6 @@ export default function MyGalleryPage() {
 
   // 카드 데이터 정규화
   const normalizedCards = useMemo(() => {
-    console.log("🔄 Normalizing Cards - ownedItems:", ownedItems);
-
     return ownedItems.map((item, index) => {
       // API 응답 구조: {id, creator_id, name, grade, genre, price, total_count, image_url, createdAt, updatedAt}
       const grade = String(item.grade || "").toUpperCase();
@@ -207,28 +125,7 @@ export default function MyGalleryPage() {
         `${item.genre || ""} ${item.grade || ""} 카드`.trim() || // 장르 + 등급 조합
         "포토카드";
 
-      // 디버깅: 각 카드의 모든 필드 확인
-      if (index < 3) {
-        console.log(`📝 Card ${index + 1} - Full API Data:`, {
-          id: item.id,
-          creator_id: item.creator_id,
-          name: item.name,
-          grade: item.grade,
-          genre: item.genre,
-          price: item.price,
-          total_count: item.total_count,
-          total_issued: item.total_issued,
-          count: item.count,
-          total: item.total,
-          quantity: item.quantity,
-          image_url: item.image_url,
-          createdAt: item.createdAt,
-          updatedAt: item.updatedAt,
-          allKeys: Object.keys(item),
-          fullItem: item,
-          mappedCardName: cardName,
-        });
-      }
+      // 디버깅: 각 카드의 모든 필드 확인 (필요시 활성화)
 
       // total_count 대신 total_issued 사용 (실제 API 응답 구조)
       // count는 보유 개수, total_issued는 총 발행 개수
@@ -305,13 +202,28 @@ export default function MyGalleryPage() {
     });
   }, [normalizedCards, sortOrder]);
 
-  // 로딩 상태
-  if (loading || isLoading) {
-    return <div>불러오는 중</div>;
-  }
-
   // 에러 상태 (에러가 있어도 이전 데이터가 있으면 표시)
   const hasData = ownedItems.length > 0;
+  const isSearching = debouncedSearchText.trim().length > 0;
+  const hasFilters = selectedRarity || selectedCategory;
+
+  // 빈 메시지 결정 (stale-while-revalidate 패턴: 이전 데이터가 있으면 표시하지 않음)
+  const getEmptyMessage = () => {
+    // keepPreviousData로 인해 이전 데이터가 있으면 isLoading은 false, isFetching만 true
+    // 따라서 hasData가 true면 백그라운드에서 데이터를 가져오는 중이어도 메시지 표시 안 함
+    if (isLoading && !hasData) {
+      // 초기 로딩 중이고 데이터가 없을 때만
+      if (isSearching || hasFilters) {
+        return "검색 중..."; // 검색 중일 때
+      }
+      return "불러오는 중..."; // 초기 로딩 중일 때
+    }
+    // isFetching && hasData인 경우는 백그라운드에서 업데이트 중이므로 메시지 표시 안 함
+    if (isSearching || hasFilters) {
+      return "검색 결과가 없습니다."; // 검색어나 필터가 있을 때
+    }
+    return "보유한 카드가 없습니다."; // 일반적인 경우
+  };
 
   return (
     <div className="bg-black">
@@ -322,31 +234,6 @@ export default function MyGalleryPage() {
           totalCount={totalCount}
           gradeCounts={gradeCounts}
         />
-
-        {/* 에러 메시지 표시 (데이터가 있을 때는 상단에 표시) */}
-        {error && (
-          <div
-            className="mb-4 p-4 rounded"
-            style={{
-              backgroundColor: "rgba(255, 72, 61, 0.1)",
-              border: "1px solid rgba(255, 72, 61, 0.3)",
-            }}
-          >
-            <div className="flex items-center justify-between">
-              <p className="text-red-400 text-sm">{error}</p>
-              <button
-                onClick={handleRetry}
-                className="ml-4 px-4 py-2 rounded text-sm font-medium"
-                style={{
-                  backgroundColor: "var(--color-main, #EFFF04)",
-                  color: "var(--color-black)",
-                }}
-              >
-                다시 시도
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* 에러가 있고 데이터가 없을 때만 전체 에러 화면 표시 */}
         {error && !hasData ? (
@@ -368,23 +255,21 @@ export default function MyGalleryPage() {
             searchText={searchText}
             selectedRarity={selectedRarity}
             selectedCategory={selectedCategory}
-            selectedStatus={selectedStatus}
             sortOrder={sortOrder}
-            showStatusFilter={true}
+            showStatusFilter={false}
             showSortDropdown={false}
             categoryOptions={GENRE_OPTIONS}
             onSearchChange={setSearchText}
             onSearchSubmit={handleSearchSubmit}
             onRarityChange={setSelectedRarity}
             onCategoryChange={setSelectedCategory}
-            onStatusChange={setSelectedStatus}
             onSortOrderChange={setSortOrder}
             cards={sortedCards.map((card) => ({
               ...card,
               showRemainingAsFraction: true,
             }))}
             cardGridClass="grid grid-cols-3 gap-x-xl gap-y-xl my-3xl"
-            emptyMessage="보유한 카드가 없습니다."
+            emptyMessage={getEmptyMessage()}
             showPagination={true}
             paginationComponent={
               <Pagination
