@@ -32,7 +32,7 @@ const GNB = () => {
               <img
                 src="/images/favorite.svg"
                 alt="최애의 포토"
-                className="w-[120px] h-auto"
+                className="w-[120px] h-auto mobile:jutify-center"
               />
             </Link>
           </div>

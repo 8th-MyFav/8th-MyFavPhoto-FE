@@ -79,6 +79,8 @@ export default function MyGalleryPage() {
     isLoading,
     error: queryError,
     refetch,
+    isFetching,
+    isError,
   } = useMyCards({
     page,
     pageSize: PAGE_SIZE,
@@ -87,6 +89,19 @@ export default function MyGalleryPage() {
     keyword: debouncedSearchText,
     isSoldOut,
   });
+
+  // API 호출 상태 확인
+  useEffect(() => {
+    console.log("📊 API Status:", {
+      isLoading,
+      isFetching,
+      isError,
+      hasData: !!data,
+      dataItems: data?.items?.length || 0,
+      totalCount: data?.totalCount || 0,
+      error: queryError?.message,
+    });
+  }, [isLoading, isFetching, isError, data, queryError]);
 
   // 에러 처리
   useEffect(() => {
@@ -116,17 +131,49 @@ export default function MyGalleryPage() {
     LEGENDARY: 0,
   };
 
-  // 디버깅: 페이지네이션 정보 확인
+  // 디버깅: 페이지네이션 정보 확인 및 API 응답 필드 확인
   useEffect(() => {
-    console.log("🟡 Page State:", {
-      currentPage: page,
-      totalCount,
-      itemsCount: ownedItems.length,
-      items: ownedItems.map((item) => ({
-        id: item.id,
-        name: item.name,
-      })),
-    });
+    if (ownedItems.length > 0) {
+      const firstItem = ownedItems[0];
+      console.log("🟡 Page State - API Response Fields:", {
+        currentPage: page,
+        totalCount,
+        itemsCount: ownedItems.length,
+        firstItemKeys: Object.keys(firstItem || {}),
+        firstItemFullData: firstItem,
+        requiredFields: {
+          id: firstItem?.id,
+          creator_id: firstItem?.creator_id,
+          name: firstItem?.name,
+          grade: firstItem?.grade,
+          genre: firstItem?.genre,
+          price: firstItem?.price,
+          total_count: firstItem?.total_count,
+          total_issued: firstItem?.total_issued,
+          count: firstItem?.count,
+          image_url: firstItem?.image_url,
+          createdAt: firstItem?.createdAt,
+          updatedAt: firstItem?.updatedAt,
+        },
+        allItemsFields: ownedItems.slice(0, 3).map((item) => ({
+          id: item.id,
+          name: item.name,
+          hasAllFields: !!(
+            item.id &&
+            item.creator_id !== undefined &&
+            item.grade &&
+            item.genre &&
+            item.price !== undefined &&
+            (item.total_issued !== undefined ||
+              item.total_count !== undefined) &&
+            item.count !== undefined &&
+            item.image_url &&
+            item.createdAt &&
+            item.updatedAt
+          ),
+        })),
+      });
+    }
   }, [page, totalCount, ownedItems]);
 
   // 필터/검색 변경 시 페이지 1로 초기화
@@ -142,19 +189,106 @@ export default function MyGalleryPage() {
 
   // 카드 데이터 정규화
   const normalizedCards = useMemo(() => {
-    return ownedItems.map((item) => {
+    console.log("🔄 Normalizing Cards - ownedItems:", ownedItems);
+
+    return ownedItems.map((item, index) => {
+      // API 응답 구조: {id, creator_id, name, grade, genre, price, total_count, image_url, createdAt, updatedAt}
       const grade = String(item.grade || "").toUpperCase();
+
+      // 다양한 필드명 가능성 체크 (name 필드)
+      // 실제 API 응답: name 필드가 없을 수 있음
+      const cardName =
+        item.name ||
+        item.title ||
+        item.card_name ||
+        item.cardName ||
+        item.card?.name ||
+        item.card?.title ||
+        `${item.genre || ""} ${item.grade || ""} 카드`.trim() || // 장르 + 등급 조합
+        "포토카드";
+
+      // 디버깅: 각 카드의 모든 필드 확인
+      if (index < 3) {
+        console.log(`📝 Card ${index + 1} - Full API Data:`, {
+          id: item.id,
+          creator_id: item.creator_id,
+          name: item.name,
+          grade: item.grade,
+          genre: item.genre,
+          price: item.price,
+          total_count: item.total_count,
+          total_issued: item.total_issued,
+          count: item.count,
+          total: item.total,
+          quantity: item.quantity,
+          image_url: item.image_url,
+          createdAt: item.createdAt,
+          updatedAt: item.updatedAt,
+          allKeys: Object.keys(item),
+          fullItem: item,
+          mappedCardName: cardName,
+        });
+      }
+
+      // total_count 대신 total_issued 사용 (실제 API 응답 구조)
+      // count는 보유 개수, total_issued는 총 발행 개수
+      const totalCountValue =
+        item.total_issued !== undefined
+          ? item.total_issued
+          : item.total_count !== undefined
+          ? item.total_count
+          : item.count !== undefined
+          ? item.count
+          : item.total !== undefined
+          ? item.total
+          : item.quantity !== undefined
+          ? item.quantity
+          : 0;
+
+      // remaining은 보유 개수 (count 필드)
+      const remainingCount =
+        item.count !== undefined
+          ? item.count
+          : item.total_issued !== undefined
+          ? item.total_issued
+          : item.total_count !== undefined
+          ? item.total_count
+          : 0;
+
+      // image_url이 null이거나 없을 때 sample.svg 또는 sample2.svg 사용
+      const imageUrl =
+        item.image_url && item.image_url !== null && item.image_url !== ""
+          ? item.image_url
+          : item.imageUrl && item.imageUrl !== null && item.imageUrl !== ""
+          ? item.imageUrl
+          : item.image && item.image !== null && item.image !== ""
+          ? item.image
+          : // 인덱스 기반으로 sample.svg와 sample2.svg 번갈아 사용
+          index % 2 === 0
+          ? "/images/sample.svg"
+          : "/images/sample2.svg";
+
       return {
-        topImage: item.image_url || "/images/sample.svg",
-        title: item.name || "포토카드",
+        // UI에서 사용하는 필드
+        id: item.id,
+        creator_id:
+          item.creator_id !== undefined ? item.creator_id : item.creatorId, // API 원본 필드 보존
+        topImage: imageUrl,
+        title: cardName,
         rarityIcon: grade === "SUPER_RARE" ? "SUPER RARE" : grade,
         category: item.genre || "",
         author: user?.nickname || "",
         price: item.price || 0,
-        remaining: item.count || item.total_count || 0,
-        total: item.total_count || 0,
+        remaining: remainingCount, // 보유 개수 (count)
+        total: totalCountValue, // 총 발행 개수 (total_issued)
+        quantity: remainingCount, // 마이갤러리에서는 수량으로 표시
         favoriteImg: "/images/favorite.svg",
-        createdAt: item.createdAt,
+        createdAt: item.createdAt || item.created_at,
+        updatedAt:
+          item.updatedAt !== undefined ? item.updatedAt : item.updated_at, // API 원본 필드 보존
+
+        // 원본 데이터 전체 보존 (필요시 사용 가능)
+        _original: item,
       };
     });
   }, [ownedItems, user?.nickname]);

@@ -7,11 +7,12 @@ import { useNotification, useReadNotification } from "@/api/notificationAPI";
 const NotificationUI = ({ show, onClose, onUnreadCountChange }) => {
   const queryClient = useQueryClient();
   const [currentPage, setCurrentPage] = useState(1);
-  const [notifications, setNotifications] = useState([]);
-  const [totalPages, setTotalPages] = useState(1);
+  const [allNotifications, setAllNotifications] = useState([]); // 전체 알림
+  const [displayedNotifications, setDisplayedNotifications] = useState([]); // 현재 페이지에 표시할 알림
   const ITEMS_PER_PAGE = 5;
 
-  const { data, isLoading, isError } = useNotification(currentPage, 5);
+  // 전체 알림을 한 번에 가져오기 (충분히 큰 수로 요청)
+  const { data, isLoading, isError } = useNotification(1, 100);
   const { mutate: readNotification } = useReadNotification();
 
   const formatTime = (iso) => {
@@ -31,30 +32,32 @@ const NotificationUI = ({ show, onClose, onUnreadCountChange }) => {
     }
   };
 
+  // 알림을 최신순으로 정렬하는 함수 (방금 전이 제일 위에 오도록)
+  // createdAtMs가 클수록 최신이므로 내림차순 정렬
   const sortNotifications = (list) => {
     return [...list].sort((a, b) => {
-      if (a.isRead !== b.isRead) return a.isRead ? 1 : -1;
       const aTs = a.createdAtMs || 0;
       const bTs = b.createdAtMs || 0;
-      return bTs - aTs;
+      return bTs - aTs; // 최신순 (내림차순) - 방금 전이 제일 위
     });
   };
 
-  // API 데이터를 알림 형태로 변환
+  // API 데이터를 알림 형태로 변환 및 전체 알림 저장
   useEffect(() => {
     if (!show) return; // 모달이 닫혀있으면 데이터 처리 안 함
 
     if (isLoading) return;
 
     if (isError) {
-      setNotifications([]);
-      setTotalPages(1);
+      setAllNotifications([]);
+      setDisplayedNotifications([]);
       return;
     }
 
     if (data) {
       let notificationsData = [];
 
+      // API 응답 구조에 따라 알림 배열 추출
       if (Array.isArray(data)) {
         notificationsData = data;
       } else if (data.data && Array.isArray(data.data)) {
@@ -66,8 +69,14 @@ const NotificationUI = ({ show, onClose, onUnreadCountChange }) => {
       }
 
       if (notificationsData.length > 0) {
+        // 전체 알림을 map으로 변환
         const apiNotifications = notificationsData.map((notification) => {
-          const isRead = notification.is_read ?? notification.isRead ?? false;
+          // is_read 필드만 사용 (isRead는 없음)
+          const isRead =
+            notification.is_read === true ||
+            notification.is_read === "true" ||
+            notification.is_read === 1 ||
+            notification.is_read === "1";
           const createdAt = notification.createdAt || notification.created_at;
 
           return {
@@ -79,27 +88,33 @@ const NotificationUI = ({ show, onClose, onUnreadCountChange }) => {
           };
         });
 
+        // 전체 알림을 최신순으로 정렬 (방금 전이 제일 위)
         const sorted = sortNotifications(apiNotifications);
-        setNotifications(sorted);
-        setTotalPages(Math.max(1, Math.ceil(sorted.length / ITEMS_PER_PAGE)));
+        setAllNotifications(sorted);
       } else {
-        setNotifications([]);
-        setTotalPages(1);
+        setAllNotifications([]);
+        setDisplayedNotifications([]);
       }
     } else {
-      setNotifications([]);
-      setTotalPages(1);
+      setAllNotifications([]);
+      setDisplayedNotifications([]);
     }
   }, [data, isLoading, isError, show]);
 
-  // notifications 변경 시 unreadCount를 부모에게 전달
+  // 전체 알림에서 현재 페이지에 해당하는 알림만 추출
   useEffect(() => {
-    if (!show || !onUnreadCountChange) return;
+    if (allNotifications.length === 0) {
+      setDisplayedNotifications([]);
+      return;
+    }
 
-    const unread = notifications.filter((n) => !n.isRead).length;
-    console.log("📊 notifications 변경 시 unreadCount 업데이트:", unread);
-    onUnreadCountChange(unread);
-  }, [notifications, show, onUnreadCountChange]);
+    // 현재 페이지에 표시할 알림 계산 (프론트엔드 페이지네이션)
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    const pageNotifications = allNotifications.slice(startIndex, endIndex);
+
+    setDisplayedNotifications(pageNotifications);
+  }, [allNotifications, currentPage]);
 
   const handleRead = (id) => {
     if (!queryClient) {
@@ -117,7 +132,7 @@ const NotificationUI = ({ show, onClose, onUnreadCountChange }) => {
 
       const updated = notificationsData.map((notification) =>
         notification.id === id
-          ? { ...notification, is_read: true, isRead: true }
+          ? { ...notification, is_read: true }
           : notification
       );
 
@@ -127,10 +142,16 @@ const NotificationUI = ({ show, onClose, onUnreadCountChange }) => {
     // PATCH API 호출
     readNotification(id, {
       onSuccess: () => {
-        // 읽음 처리 성공 후 상태 업데이트
-        setNotifications((prev) => {
-          return prev.map((n) => (n.id === id ? { ...n, isRead: true } : n));
+        // 읽음 처리 성공 후 전체 알림 상태 업데이트
+        setAllNotifications((prev) => {
+          const updated = prev.map((n) =>
+            n.id === id ? { ...n, isRead: true } : n
+          );
+          return updated;
         });
+
+        // API 캐시 무효화하여 NotificationButton에서 전체 알림을 다시 가져오도록 함
+        // 이렇게 하면 NotificationButton의 unreadCount가 정확하게 업데이트됨
         queryClient.invalidateQueries({ queryKey: ["notification"] });
       },
       onError: (err) => {
@@ -148,10 +169,9 @@ const NotificationUI = ({ show, onClose, onUnreadCountChange }) => {
     setCurrentPage(newPage);
   };
 
-  // 현재 페이지에 표시할 알림만 슬라이싱
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const endIndex = startIndex + ITEMS_PER_PAGE;
-  const displayedNotifications = notifications.slice(startIndex, endIndex);
+  // 전체 알림 수와 총 페이지 수 계산
+  const totalCount = allNotifications.length;
+  const totalPages = Math.max(1, Math.ceil(totalCount / ITEMS_PER_PAGE));
 
   if (!show) return null;
 
@@ -207,12 +227,12 @@ const NotificationUI = ({ show, onClose, onUnreadCountChange }) => {
           )}
         </div>
 
-        {/* 페이지네이션 */}
-        {totalPages > 1 && (
+        {/* 페이지네이션 - 전체 알림이 5개보다 많을 때만 표시 */}
+        {totalCount > ITEMS_PER_PAGE && (
           <Pagination
             page={currentPage}
             pageSize={ITEMS_PER_PAGE}
-            totalCount={notifications.length}
+            totalCount={totalCount}
             onChange={handlePageChange}
             variant="simple"
           />
