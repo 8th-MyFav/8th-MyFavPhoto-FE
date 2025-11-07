@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useRouter } from "next/navigation";
 import SearchMolecule from "../molecules/Search";
 import Dropdown from "../molecules/DropDown";
 import Card from "./Card";
@@ -26,7 +27,7 @@ const CardSearchContainer = ({
   onSortOrderChange,
   // 카드 리스트
   cards = [],
-  onCardClick,
+  onCardClick, // 외부에서 핸들러를 전달할 수도 있음
   lastCardRef,
   // 레이아웃 옵션
   cardGridClass = "grid grid-cols-3 gap-x-xl gap-y-xl mt-xl", // 카드 그리드 클래스
@@ -35,6 +36,17 @@ const CardSearchContainer = ({
   showPagination = false,
   paginationComponent,
 }) => {
+  const router = useRouter();
+
+  // 카드 클릭 핸들러
+  const handleCardClick = (card) => {
+    if (onCardClick) {
+      onCardClick(card); // 외부 핸들러 있을 경우 우선 실행
+    } else if (card?.id) {
+      router.push(`/marketplace/${card.id}`); // 상세페이지로 이동
+    }
+  };
+
   return (
     <>
       {/* 검색 + 필터 + 정렬 */}
@@ -96,10 +108,10 @@ const CardSearchContainer = ({
         {cards.length > 0 ? (
           cards.map((card, index) => (
             <div
-              key={index}
+              key={card.id || index}
               ref={index === cards.length - 1 ? lastCardRef : null}
-              onClick={() => onCardClick && onCardClick(index)}
-              className={onCardClick ? "cursor-pointer" : ""}
+              onClick={() => handleCardClick(card)}
+              className={onCardClick || card?.id ? "cursor-pointer" : ""}
             >
               <Card {...card} />
             </div>
