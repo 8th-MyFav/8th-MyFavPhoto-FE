@@ -76,7 +76,9 @@ const Navigation = () => {
     <div className="relative">
       <nav className="flex justify-center items-center gap-[30px] text-gray-200 text-noto-3x">
         {/* 포인트 */}
-        <p className="font-br font-bold">{points?.acc_point} P</p>
+        <p className="font-br font-bold max-tablet:hidden">
+          {points?.acc_point} P
+        </p>
 
         {/* 알림 버튼 */}
         <NotificationButton />
