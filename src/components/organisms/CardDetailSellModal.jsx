@@ -5,9 +5,12 @@ import { useRouter } from "next/navigation";
 import Button from "../atoms/Button";
 import CardMeta from "../molecules/CardMeta";
 import { PATHNAME, GRADE } from "@/constants";
+import { useMarketCreateListing } from "@/api/marketListings";
 
 const CardDetailSellModal = ({ isOpen, onClose, card }) => {
   const router = useRouter();
+  const { mutateAsync: createListing, isPending } = useMarketCreateListing();
+
   if (!isOpen || !card) return null;
 
   const [selectedRarity, setSelectedRarity] = useState("");
@@ -24,29 +27,57 @@ const CardDetailSellModal = ({ isOpen, onClose, card }) => {
     if (quantity > 1) setQuantity(quantity - 1);
   };
 
-  /** 판매 처리 */
-  const handleSell = () => {
+  /** ✅ 판매 처리 (React Query 사용) */
+  const handleSell = async () => {
     const isValid =
       quantity > 0 &&
       selectedRarity &&
       selectedCategory &&
       description.trim().length > 0;
 
-    if (isValid) {
-      router.push(
-        `${PATHNAME.SELL_SUCCESS}?rarity=${
-          card.rarity
-        }&title=${encodeURIComponent(card.title)}&quantity=${quantity}`
-      );
-    } else {
+    if (!isValid) {
       router.push(
         `${PATHNAME.SELL_FAIL}?rarity=${card.rarity}&title=${encodeURIComponent(
           card.title
-        )}&quantity=${quantity}`
+        )}&quantity=${quantity}&error=${encodeURIComponent(
+          "입력값이 올바르지 않습니다."
+        )}`
       );
+      onClose();
+      return;
     }
 
-    onClose();
+    try {
+      const response = await createListing({
+        cardId: card.id,
+        total_count: quantity, 
+        trade_grade: selectedRarity,
+        trade_genre: selectedCategory,
+        trade_note: description,
+      });
+
+      const tradePostId = response.id || response.trade_post_id;
+
+      router.push(
+        `${PATHNAME.SELL_SUCCESS}?rarity=${
+          card.rarity
+        }&title=${encodeURIComponent(card.title)}&quantity=${quantity}&tradePostId=${
+          tradePostId || ""
+        }`
+      );
+    } catch (error) {
+      console.error("판매 등록 실패:", error);
+
+      router.push(
+        `${PATHNAME.SELL_FAIL}?rarity=${card.rarity}&title=${encodeURIComponent(
+          card.title
+        )}&quantity=${quantity}&error=${encodeURIComponent(
+          error.message || "판매 등록에 실패했습니다."
+        )}`
+      );
+    } finally {
+      onClose();
+    }
   };
 
   return (
@@ -101,10 +132,9 @@ const CardDetailSellModal = ({ isOpen, onClose, card }) => {
 
           {/* 정보 텍스트 */}
           <div className="flex flex-col text-white items-start">
-            {/* CardMeta 적용 */}
             <div className="mb-[36px] w-full">
               <CardMeta
-                rarityText={card.rarity || "COMMON"} 
+                rarityText={card.rarity || "COMMON"}
                 category={card.category}
                 author={card.author}
                 variant="withAuthor"
@@ -112,7 +142,6 @@ const CardDetailSellModal = ({ isOpen, onClose, card }) => {
               />
             </div>
 
-            {/* 하단 회색 구분선 */}
             <div className="w-full border-b border-gray-600 mb-[30px]" />
 
             {/* 총 판매 수량 */}
@@ -123,26 +152,28 @@ const CardDetailSellModal = ({ isOpen, onClose, card }) => {
 
               <div className="flex items-center">
                 <div className="flex items-center justify-between w-[176px] h-[50px] border border-gray-300 bg-[#161616] rounded-[2px] flex-shrink-0 px-[10px]">
-                  <button className="text-white text-[20px]" onClick={decrease}>
+                  <button
+                    className="text-white text-[20px]"
+                    onClick={decrease}
+                    disabled={isPending}
+                  >
                     -
                   </button>
                   <span className="text-[18px]">{quantity}</span>
-                  <button className="text-white text-[20px]" onClick={increase}>
+                  <button
+                    className="text-white text-[20px]"
+                    onClick={increase}
+                    disabled={isPending}
+                  >
                     +
                   </button>
                 </div>
 
                 <div className="flex flex-col items-center justify-center ml-[10px] leading-tight">
-                  <span
-                    className="text-[20px]"
-                    style={{ color: "var(--white-white, #FFF)" }}
-                  >
+                  <span className="text-[20px]" style={{ color: "#FFF" }}>
                     / {card.remaining}
                   </span>
-                  <span
-                    className="text-[12px]"
-                    style={{ color: "var(--gray-gray200, #DDD)" }}
-                  >
+                  <span className="text-[12px]" style={{ color: "#DDD" }}>
                     최대 {card.remaining}장
                   </span>
                 </div>
@@ -151,9 +182,7 @@ const CardDetailSellModal = ({ isOpen, onClose, card }) => {
 
             {/* 장당 가격 */}
             <div className="flex items-center mb-[30px]">
-              <span className="font-bold text-[16px] mr-[127px]">
-                장당 가격
-              </span>
+              <span className="font-bold text-[16px] mr-[127px]">장당 가격</span>
               <div className="flex items-center justify-center w-[230px] h-[50px] border border-gray-300 bg-[#161616] rounded-[2px] text-[18px]">
                 {card.price}P
               </div>
@@ -174,6 +203,7 @@ const CardDetailSellModal = ({ isOpen, onClose, card }) => {
                 className="h-[48px] bg-black border border-white/30 rounded px-2 text-gray-400 outline-none"
                 value={selectedRarity}
                 onChange={(e) => setSelectedRarity(e.target.value)}
+                disabled={isPending}
               >
                 <option value="" disabled>
                   등급을 선택해 주세요
@@ -192,14 +222,16 @@ const CardDetailSellModal = ({ isOpen, onClose, card }) => {
                 className="h-[48px] bg-black border border-white/30 rounded px-2 text-gray-400 outline-none"
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
+                disabled={isPending}
               >
                 <option value="" disabled>
                   장르를 선택해 주세요
                 </option>
-                <option value="풍경">풍경</option>
-                <option value="인물">인물</option>
-                <option value="동물">동물</option>
-                <option value="추상">추상</option>
+                <option value="KPOP">KPOP</option>
+                <option value="ACTOR">ACTOR</option>
+                <option value="ESPORTS">ESPORTS</option>
+                <option value="KBO">KBO</option>
+                <option value="ANIMATION">ANIMATION</option>
               </select>
             </div>
           </div>
@@ -214,6 +246,7 @@ const CardDetailSellModal = ({ isOpen, onClose, card }) => {
               placeholder="설명을 입력해 주세요"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
+              disabled={isPending}
             />
           </div>
         </div>
@@ -228,14 +261,16 @@ const CardDetailSellModal = ({ isOpen, onClose, card }) => {
             color="#FFF"
             border="1px solid #FFF"
             onClick={onClose}
+            disabled={isPending}
           />
           <Button
-            text="판매하기"
+            text={isPending ? "등록 중..." : "판매하기"}
             width="400px"
             height="60px"
             backgroundColor="#EFFF04"
             color="#0F0F0F"
             onClick={handleSell}
+            disabled={isPending}
           />
         </div>
       </div>

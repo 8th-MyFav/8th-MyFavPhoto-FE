@@ -68,9 +68,9 @@ export default function MarketplacePage() {
     }
   }, []);
 
-  /* ✅ API 호출 (한 번에 전체 데이터 불러오기) */
+  /* ✅ API 호출 (전체 데이터 불러오기) */
   const { data, isLoading, refetch, error } = useMarketList({
-    take: 9999, // 💡 충분히 큰 수로 한 번에 전부 불러옴
+    take: 9999,
     cursor: undefined,
     grade: selectedRarity || undefined,
     genre: selectedCategory || undefined,
@@ -105,7 +105,7 @@ export default function MarketplacePage() {
 
   /* ✅ 카드 매핑 */
   const mappedCards = cards.map((card) => ({
-    id: card.id,
+    id: card.id, // ✅ 중요: 실제 id 사용
     topImage: card.image_url || "/images/sample.svg",
     title: card.name || "제목 없음",
     rarityIcon: card.grade || "COMMON",
@@ -122,7 +122,10 @@ export default function MarketplacePage() {
   }));
 
   /* ✅ 핸들러 */
-  const handleCardClick = (id) => router.push(PATHNAME.MARKET_DETAIL(id));
+  const handleCardClick = (id) => {
+    // console.log("✅ 클릭된 카드 id:", id);
+    router.push(PATHNAME.MARKET_DETAIL(id));
+  };
   const handleSellButtonClick = () => setIsSellModalOpen(true);
   const handleLogin = () => router.push(PATHNAME.LOGIN);
   const handleRetry = () => refetch();
@@ -185,7 +188,7 @@ export default function MarketplacePage() {
             onStatusChange={setSelectedStatus}
             onSortOrderChange={setSortOrder}
             cards={mappedCards}
-            onCardClick={handleCardClick}
+            onCardClick={(card) => handleCardClick(card.id)} // ✅ 수정: id 전달
             isLoading={isLoading}
           />
 
