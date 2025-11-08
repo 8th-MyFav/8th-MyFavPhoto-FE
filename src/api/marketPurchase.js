@@ -6,11 +6,11 @@ import { ERROR_MESSAGES } from "./constants";
 /* 포토카드 구매 (명세서: body로 cardId 전달) */
 export const useMarketPurchase = () =>
   useMutation({
-    mutationFn: async (cardId) => {
+    mutationFn: async ({ cardId, quantity }) => {
       try {
         return await apiClient(MARKET_ENDPOINTS.PURCHASE, {
           method: "POST",
-          data: { cardId },
+          data: { cardId, quantity }, // quantity도 같이 전달
           auth: true,
         });
       } catch {
