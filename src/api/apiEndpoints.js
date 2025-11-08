@@ -1,6 +1,7 @@
 export const MARKET_ENDPOINTS = {
   LISTINGS: "/market/listings",
   MY_LISTINGS: "/market/listings/me",
+  MY_SALES: "/market/listings/me",
   TRADES: "/market/trades",
   PURCHASE: "/market/purchase",
 };

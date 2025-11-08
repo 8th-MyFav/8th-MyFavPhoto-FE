@@ -1,68 +1,25 @@
-// components/molecules/pointModal.jsx
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { usePoints, useGainPoints } from "@/api/pointAPI";
-import { useQueryClient } from "@tanstack/react-query";
+import React from "react";
 import Button from "@/components/atoms/Button";
 
 const PointModal = ({
+  isOpen,
+  onClose,
+  isConfirmed,
+  selectedBox,
+  setSelectedBox,
+  earned,
+  handleGain,
+  isPending,
+  minutes,
+  seconds,
+  boxImages,
   title1 = "랜덤",
   title2 = "포인트",
   buttonText = "선택완료",
-  onClose,
 }) => {
-  const [selectedBox, setSelectedBox] = useState(null);
-  const [isConfirmed, setIsConfirmed] = useState(false);
-  const [earned, setEarned] = useState(0); // 이번에 획득한 포인트(로컬)
-  const [timeLeft, setTimeLeft] = useState(3600);
-
-  const queryClient = useQueryClient();
-  const { data: points, isLoading } = usePoints();
-  const { mutate: gainPoints, isPending } = useGainPoints();
-
-  useEffect(() => {
-    if (timeLeft <= 0) {
-      setSelectedBox(null);
-      setIsConfirmed(false);
-      setEarned(0);
-      setTimeLeft(3600);
-      return;
-    }
-    const timer = setInterval(() => setTimeLeft((prev) => prev - 1), 1000);
-    return () => clearInterval(timer);
-  }, [timeLeft]);
-
-  const minutes = Math.floor(timeLeft / 60);
-  const seconds = timeLeft % 60;
-
-  const handleBoxClick = (index) => {
-    if (isConfirmed || isPending) return;
-    setSelectedBox(index);
-  };
-
-  const handleGain = () => {
-    if (selectedBox === null || isPending) return;
-
-    const randomPoint = Math.floor(Math.random() * 91) + 10;
-
-    gainPoints(randomPoint, {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["points"] });
-      },
-    });
-
-    setEarned(randomPoint); // UI 즉시 반영
-    setIsConfirmed(true);
-  };
-
-  const boxImages = [
-    "/images/random_box-1.svg",
-    "/images/random_box-2.svg",
-    "/images/random_box-3.svg",
-  ];
-
-  if (isLoading) return <div>로딩중...</div>;
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex justify-center items-center overflow-y-auto pointer-events-none">
@@ -127,7 +84,7 @@ const PointModal = ({
                     key={index}
                     src={img}
                     alt={`선물상자 ${index + 1}`}
-                    onClick={() => handleBoxClick(index)}
+                    onClick={() => setSelectedBox(index)}
                     className={`transition-all cursor-pointer rounded-md ${
                       index === 0
                         ? "w-[246px] h-[191px]"
@@ -168,7 +125,6 @@ const PointModal = ({
           )}
         </div>
 
-        {/* 선택완료 - 상자 선택 시 노출 */}
         {!isConfirmed && selectedBox !== null && (
           <div className="flex justify-center mb-[63px]">
             <Button
@@ -187,19 +143,6 @@ const PointModal = ({
               }`}
               onClick={handleGain}
             />
-          </div>
-        )}
-
-        {isConfirmed && (
-          <div className="absolute bottom-[73px] text-[16px]">
-            <div className="flex items-center justify-center gap-[10px]">
-              <p className="text-gray-300 text-center">
-                다음 기회까지 남은 시간
-              </p>
-              <p className="text-main text-center">
-                {minutes}분 {seconds}초
-              </p>
-            </div>
           </div>
         )}
       </div>

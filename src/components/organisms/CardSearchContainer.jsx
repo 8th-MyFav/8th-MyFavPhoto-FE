@@ -13,10 +13,12 @@ const CardSearchContainer = ({
   selectedRarity = "",
   selectedCategory = "",
   selectedStatus = "",
+  selectedSaleType = "", // ✅ 추가
   sortOrder = "낮은 가격순",
   // 필터 옵션
   showStatusFilter = true, // 매진여부 필터 표시 여부
   showSortDropdown = true, // 정렬 드롭다운 표시 여부
+  showSaleTypeFilter = false, // ✅ 추가
   categoryOptions = ["풍경", "인물", "동물", "추상"], // 장르/카테고리 옵션
   // 핸들러
   onSearchChange,
@@ -25,6 +27,7 @@ const CardSearchContainer = ({
   onCategoryChange,
   onStatusChange,
   onSortOrderChange,
+  onSaleTypeChange, // ✅ 추가
   // 카드 리스트
   cards = [],
   onCardClick, // 외부에서 핸들러를 전달할 수도 있음
@@ -78,6 +81,13 @@ const CardSearchContainer = ({
               options={categoryOptions}
               onChange={onCategoryChange}
             />
+            {showSaleTypeFilter && (
+                  <Dropdown
+                  placeholder="판매형태"
+                  options={["판매", "교환"]}
+                  onChange={onSaleTypeChange} // ✅ 수정됨
+                />
+              )}
             {showStatusFilter && (
               <Dropdown
                 placeholder="매진여부"
