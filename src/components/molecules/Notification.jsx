@@ -185,12 +185,25 @@ const NotificationUI = ({ show, onClose, onUnreadCountChange }) => {
       />
       {/* 알림 모달 */}
       <div
-        className={`absolute top-full left-1/2 transform -translate-x-1/2 w-[300px] bg-noti-read shadow-xl/30 z-50 pointer-events-auto ${
-          totalPages > 1 ? "rounded-t-base" : "rounded-base"
+        className={`fixed inset-0 flex h-full w-full flex-col gap-[16px] bg-noti-read px-x-mobile py-[24px] shadow-xl/30 z-50 pointer-events-auto overflow-hidden tablet:absolute tablet:inset-auto tablet:top-full tablet:left-1/2 tablet:-translate-x-1/2 tablet:w-[300px] tablet:h-auto tablet:px-0 tablet:py-0 tablet:flex-col tablet:gap-0 tablet:overflow-visible ${
+          totalPages > 1 ? "tablet:rounded-t-base" : "tablet:rounded-base"
         }`}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex flex-col gap-0">
+        <div className="flex h-[56px] items-center justify-between border-b border-gray-400 px-[4px] tablet:hidden">
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="알림 닫기"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-transparent"
+          >
+            <img src="/icons/leftArrow.svg" alt="Back" className="h-5 w-5" />
+          </button>
+          <h2 className="text-white text-noto-3xs">알림</h2>
+          <div className="h-10 w-10" />
+        </div>
+
+        <div className="flex-1 flex flex-col gap-0 overflow-y-auto pt-[8px] tablet:flex-none tablet:overflow-visible tablet:pt-0">
           {displayedNotifications.length > 0 ? (
             displayedNotifications.map((n, index) => (
               <div
@@ -229,13 +242,15 @@ const NotificationUI = ({ show, onClose, onUnreadCountChange }) => {
 
         {/* 페이지네이션 - 전체 알림이 5개보다 많을 때만 표시 */}
         {totalCount > ITEMS_PER_PAGE && (
-          <Pagination
-            page={currentPage}
-            pageSize={ITEMS_PER_PAGE}
-            totalCount={totalCount}
-            onChange={handlePageChange}
-            variant="simple"
-          />
+          <div className="mt-auto tablet:mt-0">
+            <Pagination
+              page={currentPage}
+              pageSize={ITEMS_PER_PAGE}
+              totalCount={totalCount}
+              onChange={handlePageChange}
+              variant="simple"
+            />
+          </div>
         )}
       </div>
     </>

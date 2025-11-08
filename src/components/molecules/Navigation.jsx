@@ -74,11 +74,9 @@ const Navigation = () => {
 
   return (
     <div className="relative">
-      <nav className="flex justify-center items-center gap-[30px] text-gray-200 text-noto-3x">
+      <nav className="flex items-center justify-center gap-[30px] text-gray-200 text-noto-3x">
         {/* 포인트 */}
-        <p className="font-br font-bold max-tablet:hidden">
-          {points?.acc_point} P
-        </p>
+        <p className="font-br font-bold">{points?.acc_point} P</p>
 
         {/* 알림 버튼 */}
         <NotificationButton />
@@ -87,7 +85,7 @@ const Navigation = () => {
         <div className="relative">
           <button
             onClick={() => setShowProfile((prev) => !prev)}
-            className="text-left cursor-pointer bg-transparent border-none p-0 hover:text-main font-br"
+            className="cursor-pointer bg-transparent p-0 text-left font-br hover:text-main"
           >
             {user.nickname}
           </button>
@@ -106,7 +104,7 @@ const Navigation = () => {
         {/* 로그아웃 */}
         <button
           onClick={logout}
-          className="flex justify-center self-start text-gray-400 text-noto-3x font-bold cursor-pointer bg-transparent border-none p-0"
+          className="flex justify-center self-start cursor-pointer bg-transparent p-0 text-gray-400 text-noto-3x font-bold"
         >
           로그아웃
         </button>

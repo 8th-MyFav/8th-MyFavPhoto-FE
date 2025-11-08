@@ -14,17 +14,17 @@ const HomePage = () => {
   };
   return (
     <div className="bg-black">
-      <div>
+      <div className="page-wrapper">
         <main>
           <div>
             <div
-              className="relative w-screen  
+              className="relative w-full  
                         mobile:h-[412px] tablet:h-[722px] desktop:h-[1088px] "
             >
               <img
                 src="/images/hpMain001.svg"
                 alt="메인 이미지"
-                className="w-screen absolute bottom-0 z-10
+                className="w-full absolute bottom-0 z-10
                 mobile:h-[199px] tablet:h-[352px] desktop:h-[765px] "
               />
               <div className="absolute top-0 left-0 right-0 z-20">
@@ -196,17 +196,17 @@ const HomePage = () => {
               <img
                 src="/images/hpMain004.svg"
                 alt="배경"
-                className="z-0 w-screen mobile:hidden tablet:hidden desktop:block "
+                className="z-0 w-full mobile:hidden tablet:hidden desktop:block "
               />
               <img
                 src="/images/hpMain004t.svg"
                 alt="배경"
-                className="z-0 w-screen mobile:hidden tablet:block desktop:hidden "
+                className="z-0 w-full mobile:hidden tablet:block desktop:hidden "
               />
               <img
                 src="/images/hpMain004m.svg"
                 alt="배경"
-                className="z-0 w-screen mobile:block tablet:hidden desktop:hidden "
+                className="z-0 w-full mobile:block tablet:hidden desktop:hidden "
               />
             </div>
             <div className="flex justify-center">
