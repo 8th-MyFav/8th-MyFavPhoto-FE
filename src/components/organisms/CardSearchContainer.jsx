@@ -3,7 +3,7 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import SearchMolecule from "../molecules/Search";
-import Dropdown from "../molecules/DropDown";
+import Dropdown, { SortDropdown } from "../molecules/DropDown";
 import Card from "./Card";
 import { GRADE } from "@/constants";
 
@@ -82,12 +82,12 @@ const CardSearchContainer = ({
               onChange={onCategoryChange}
             />
             {showSaleTypeFilter && (
-                  <Dropdown
-                  placeholder="판매형태"
-                  options={["판매", "교환"]}
-                  onChange={onSaleTypeChange} // ✅ 수정됨
-                />
-              )}
+              <Dropdown
+                placeholder="판매형태"
+                options={["판매", "교환"]}
+                onChange={onSaleTypeChange} // ✅ 수정됨
+              />
+            )}
             {showStatusFilter && (
               <Dropdown
                 placeholder="매진여부"
@@ -98,19 +98,7 @@ const CardSearchContainer = ({
           </div>
         </div>
 
-        {showSortDropdown && (
-          <Dropdown
-            placeholder="낮은 가격순"
-            options={["낮은 가격순", "높은 가격순", "최신순"]}
-            height="50px"
-            width="123px"
-            onChange={onSortOrderChange}
-            customStyles={{
-              container: { border: "1px solid #FFF", padding: "12px" },
-              optionList: { padding: "10px 24px" },
-            }}
-          />
-        )}
+        {showSortDropdown && <SortDropdown onChange={onSortOrderChange} />}
       </div>
 
       {/* 카드 리스트 */}

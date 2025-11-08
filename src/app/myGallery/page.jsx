@@ -7,6 +7,7 @@ import CardSearchContainer from "@/components/organisms/CardSearchContainer";
 import Pagination from "@/components/molecules/Pagination";
 import { PATHNAME, GENRE } from "@/constants";
 import { useMyCards } from "@/api/myGalleryAPI";
+import LoadingOverlay from "@/components/molecules/LoadingOverlay";
 
 const PAGE_SIZE = 15;
 const GENRE_OPTIONS = [
@@ -227,6 +228,7 @@ export default function MyGalleryPage() {
 
   return (
     <div className="bg-black">
+      <LoadingOverlay show={isFetching} />
       <div className="bg-black mx-x-desktop">
         <PagesHeader
           showPhotoCardSummary={true}
