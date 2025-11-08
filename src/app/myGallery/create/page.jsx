@@ -232,6 +232,7 @@ const CreatePhotoPage = () => {
                 type="number"
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
+                onWheel={(e) => e.target.blur()}
                 placeholder="가격을 입력해주세요"
                 className="w-[520px] h-[60px] px-[20px] py-[18px] rounded-[2px] border border-[#DDD] bg-[#0F0F0F] text-white outline-none placeholder:text-[#A4A4A4]"
               />
@@ -247,6 +248,7 @@ const CreatePhotoPage = () => {
                 type="number"
                 value={quantity}
                 onChange={(e) => setQuantity(e.target.value)}
+                onWheel={(e) => e.target.blur()}
                 min="1"
                 max="10"
                 placeholder="총 발행량을 입력해 주세요"
