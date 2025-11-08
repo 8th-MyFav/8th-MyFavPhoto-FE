@@ -2,7 +2,17 @@
 
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useMarketListingDetail } from "@/api/marketListings";
+import {
+  useMarketListingDetail,
+} from "@/api/marketListings";
+import { useMarketPurchase } from "@/api/marketPurchase";
+import {
+  useMarketTradeList,
+  useMarketTradeCreate,
+  useMarketTradeApprove,
+  useMarketTradeReject,
+} from "@/api/marketTrades";
+
 import Modal from "@/components/molecules/Modal";
 import CardTradeModal from "@/components/organisms/CardTradeModal";
 import ExchangeModal from "@/components/organisms/ExchangeModal";
@@ -12,40 +22,33 @@ import { PATHNAME } from "@/constants";
 export default function DetailPage() {
   const params = useParams();
   const router = useRouter();
-
-  // ✅ URL 파라미터에서 id 가져오기
   const listingId = parseInt(params.id, 10);
 
-  // ✅ 상세조회 API
+  // 상세조회
   const { data: listing, isLoading, isError } = useMarketListingDetail(listingId);
 
-  // ✅ 상태값
+  // 트레이드 목록 조회
+  const { data: tradeList = [], refetch: refetchTrades } = useMarketTradeList(listingId);
+
+  // 트레이드 관련 mutation
+  const { mutate: purchaseCard, isLoading: isPurchasing } = useMarketPurchase();
+  const { mutate: createTrade, isLoading: isCreatingTrade } = useMarketTradeCreate();
+  const { mutate: approveTrade } = useMarketTradeApprove();
+  const { mutate: rejectTrade } = useMarketTradeReject();
+
+  // 상태값
   const [count, setCount] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isTradeModalOpen, setIsTradeModalOpen] = useState(false);
   const [isExchangeModalOpen, setIsExchangeModalOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState(null);
+  const [tradeContent, setTradeContent] = useState("");
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [cancelTargetCard, setCancelTargetCard] = useState(null);
 
-  // ✅ 로딩 / 에러 처리
-  if (isLoading) {
-    return (
-      <div className="text-white p-8 min-h-screen bg-[#111]">
-        포토카드 정보를 불러오는 중입니다...
-      </div>
-    );
-  }
+  if (isLoading) return <div className="text-white p-8 min-h-screen bg-[#111]">포토카드 정보를 불러오는 중입니다...</div>;
+  if (isError || !listing) return <div className="text-white p-8 min-h-screen bg-[#111]">카드를 불러올 수 없습니다.</div>;
 
-  if (isError || !listing) {
-    return (
-      <div className="text-white p-8 min-h-screen bg-[#111]">
-        카드를 불러올 수 없습니다.
-      </div>
-    );
-  }
-
-  // ✅ 데이터 매핑
   const trade = {
     id: listing.id,
     tradeGrade: listing.trade_grade,
@@ -66,23 +69,57 @@ export default function DetailPage() {
     topImage: listing.card?.image_url ?? "/images/sample.svg",
   };
 
-  // ✅ 수량 및 가격 계산
   const total = count * (trade.price ?? 0);
   const decrease = () => count > 1 && setCount(count - 1);
   const increase = () => count < (trade.remaining ?? 0) && setCount(count + 1);
 
-  // ✅ 구매 처리
+  /** 구매 */
   const handlePurchase = () => {
-    setIsModalOpen(false);
-    const query = `?rarity=${photoCard.rarity}&title=${encodeURIComponent(
-      photoCard.title
-    )}&quantity=${count}`;
-
-    if (count <= trade.remaining) {
-      router.push(`${PATHNAME.MARKET_DETAIL_SUCCESS(trade.id)}${query}`);
-    } else {
-      router.push(`${PATHNAME.MARKET_DETAIL_FAIL(trade.id)}${query}`);
+    if (count > trade.remaining) {
+      alert("잔여 수량보다 많은 수량을 구매할 수 없습니다.");
+      return;
     }
+
+    purchaseCard(
+      { cardId: listing.id, quantity: count },
+      {
+        onSuccess: () => {
+          setIsModalOpen(false);
+          const query = `?rarity=${photoCard.rarity}&title=${encodeURIComponent(photoCard.title)}&quantity=${count}`;
+          router.push(`${PATHNAME.MARKET_DETAIL_SUCCESS(trade.id)}${query}`);
+        },
+        onError: (err) => {
+          console.error("구매 실패:", err);
+          setIsModalOpen(false);
+          const query = `?rarity=${photoCard.rarity}&title=${encodeURIComponent(photoCard.title)}&quantity=${count}`;
+          router.push(`${PATHNAME.MARKET_DETAIL_FAIL(trade.id)}${query}`);
+        },
+      }
+    );
+  };
+
+  /** 트레이드 생성 */
+  const handleCreateTrade = (offeredCard) => {
+    createTrade(
+      { cardId: listing.id, offeredCardId: offeredCard.id, content: tradeContent },
+      {
+        onSuccess: () => {
+          setIsExchangeModalOpen(false);
+          refetchTrades(); // 목록 갱신
+        },
+        onError: (err) => {
+          console.error("교환 제시 실패:", err);
+        },
+      }
+    );
+  };
+
+  /** 트레이드 승인/거절 */
+  const handleApprove = (tradeId) => {
+    approveTrade(tradeId, { onSuccess: () => refetchTrades() });
+  };
+  const handleReject = (tradeId) => {
+    rejectTrade(tradeId, { onSuccess: () => refetchTrades() });
   };
 
   const handleCancelTradeCard = (targetCard) => {
@@ -96,27 +133,20 @@ export default function DetailPage() {
     setCancelTargetCard(null);
   };
 
-  // ✅ 렌더링
   return (
     <div className="bg-[#111] text-white min-h-screen pb-24">
       <div className="max-w-6xl mx-auto px-6 pt-16">
-        {/* 상단 타이틀 */}
+        {/* 상단 */}
         <div className="mb-8">
-          <div className="text-gray-400 text-2xl mb-[60px] font-br">
-            마켓플레이스
-          </div>
+          <div className="text-gray-400 text-2xl mb-[60px] font-br">마켓플레이스</div>
           <h2 className="text-white text-4xl font-bold mb-5">{photoCard.title}</h2>
           <hr className="border-t-2 border-gray-100 mb-[70px]" />
         </div>
 
-        {/* 카드 상세 정보 */}
+        {/* 카드 상세 */}
         <div className="flex flex-col md:flex-row gap-10 items-start">
           <div className="flex-1">
-            <img
-              src={photoCard.topImage}
-              alt={photoCard.title}
-              className="rounded-md object-cover w-full"
-            />
+            <img src={photoCard.topImage} alt={photoCard.title} className="rounded-md object-cover w-full" />
           </div>
 
           <div style={{ width: "440px" }}>
@@ -147,8 +177,6 @@ export default function DetailPage() {
               </div>
             </div>
 
-            <hr className="border-gray-700 mb-4" />
-
             {/* 구매 수량 */}
             <div className="flex justify-between items-center mb-6">
               <span className="text-white text-lg">구매수량</span>
@@ -162,10 +190,7 @@ export default function DetailPage() {
             {/* 총 가격 */}
             <div className="flex justify-between items-center mb-10">
               <span className="text-white text-lg">총 가격</span>
-              <span className="text-white font-bold text-xl">
-                {total} P{" "}
-                <span className="text-gray-400 text-lg">({count}장)</span>
-              </span>
+              <span className="text-white font-bold text-xl">{total} P <span className="text-gray-400 text-lg">({count}장)</span></span>
             </div>
 
             {/* 구매 버튼 */}
@@ -173,13 +198,14 @@ export default function DetailPage() {
               className="bg-[var(--color-main)] rounded-md w-full h-20 text-black font-bold cursor-pointer"
               style={{ marginBottom: "120px" }}
               onClick={() => setIsModalOpen(true)}
+              disabled={isPurchasing}
             >
-              포토카드 구매하기
+              {isPurchasing ? "구매 중..." : "포토카드 구매하기"}
             </button>
           </div>
         </div>
 
-        {/* ✅ 교환 희망 정보 (UI 그대로 유지 + 데이터만 바인딩 수정) */}
+        {/* 교환 희망 정보 + 트레이드 목록 */}
         <div className="mt-20">
           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-6 mb-[20px]">
             <h3 style={{ fontSize: "40px", fontWeight: 700 }}>교환 희망 정보</h3>
@@ -193,8 +219,6 @@ export default function DetailPage() {
           </div>
 
           <hr className="border-white mb-[60px]" />
-
-          {/* 기존 CardMeta UI 유지 */}
           <CardMeta
             rarityText={trade.tradeGrade || "정보 없음"}
             category={trade.tradeGenre || "정보 없음"}
@@ -202,31 +226,37 @@ export default function DetailPage() {
             sizeVariant="base"
             className="mb-[30px]"
           />
-
-          {/* 설명 부분도 교환희망 note 값으로 표시 */}
-          <p
-            style={{
-              color: "var(--color-white)",
-              fontFamily: "var(--font-noto)",
-              fontSize: "18px",
-              fontWeight: 400,
-              marginTop: "20px",
-              marginBottom: "120px",
-            }}
-          >
+          <p style={{ color: "var(--color-white)", fontSize: "18px", marginTop: "20px", marginBottom: "120px" }}>
             {trade.tradeNote || "교환 희망 정보가 없습니다."}
           </p>
 
-          {/* 내가 제시한 교환 목록 */}
-          <h3 className="text-white text-4xl font-bold mb-5">
-            내가 제시한 교환 목록
-          </h3>
-          <hr className="border-t-2 border-gray-100 mb-[70px]" />
-          <div className="text-gray-400">아직 제시한 교환 목록이 없습니다.</div>
+          {/* 트레이드 목록 */}
+          <h3 className="text-white text-4xl font-bold mb-5">내가 제시한 교환 목록</h3>
+          <hr className="border-t-2 border-gray-100 mb-[20px]" />
+          {tradeList.length === 0 ? (
+            <div className="text-gray-400">아직 제시한 교환 목록이 없습니다.</div>
+          ) : (
+            tradeList.map((t) => (
+              <div key={t.id} className="mb-4 p-3 border border-gray-600 rounded">
+                <div className="flex justify-between items-center">
+                  <span>[{t.offeredCard.rarity} | {t.offeredCard.title}]</span>
+                  <span className="text-gray-400">상태: {t.status}</span>
+                </div>
+                <div className="mt-2 flex gap-2">
+                  {t.status === "PENDING" && (
+                    <>
+                      <button onClick={() => handleApprove(t.id)} className="bg-green-500 px-2 rounded">승인</button>
+                      <button onClick={() => handleReject(t.id)} className="bg-red-500 px-2 rounded">거절</button>
+                    </>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
-      {/* ✅ 모달들 */}
+      {/* 모달들 */}
       {isTradeModalOpen && (
         <CardTradeModal
           isOpen={isTradeModalOpen}
@@ -239,11 +269,15 @@ export default function DetailPage() {
         />
       )}
 
-      {isExchangeModalOpen && (
+      {isExchangeModalOpen && selectedCard && (
         <ExchangeModal
           selectedCard={selectedCard}
           targetCard={photoCard}
           onClose={() => setIsExchangeModalOpen(false)}
+          onSubmit={(content) => {
+            setTradeContent(content);
+            handleCreateTrade(selectedCard);
+          }}
         />
       )}
 

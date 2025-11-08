@@ -1,50 +1,82 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import { useAuth } from "@/contexts/AuthContext"; // 로그인 유저 닉네임 사용
+import { useMyCards } from "@/api/myGalleryAPI";
 import Search from "../molecules/Search";
 import Dropdown from "../molecules/DropDown";
 import Card from "../organisms/Card";
-import { GRADE } from "@/constants";
+import { GRADE, GENRE } from "@/constants";
+
+const GENRE_OPTIONS = [
+  GENRE.KPOP,
+  GENRE.ACTOR,
+  GENRE.ESPORTS,
+  GENRE.KBO,
+  GENRE.ANIMATION,
+];
 
 const CardTradeModal = ({ isOpen, onClose, onCardSelect }) => {
-  if (!isOpen) return null;
-
-  // MyGallery용 더미 카드 데이터
-  const myCardList = Array.from({ length: 10 }, (_, i) => ({
-    id: i,
-    topImage: "/images/sample.svg",
-    title: `내 포토카드 ${i + 1}`,
-    rarity:
-      i % 4 === 0
-        ? "COMMON"
-        : i % 4 === 1
-        ? "RARE"
-        : i % 4 === 2
-        ? "SUPER RARE"
-        : "LEGENDARY",
-    category: i % 3 === 0 ? "풍경" : i % 3 === 1 ? "인물" : "동물",
-    author: "나 자신",
-    remaining: 3,
-  }));
-
+  const { user } = useAuth(); // 로그인 유저
   const [searchText, setSearchText] = useState("");
   const [selectedRarity, setSelectedRarity] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
 
+  // React Query 사용, 모달이 열렸을 때만 호출
+  const { data, isLoading, isError, refetch } = useMyCards({
+    page: 1,
+    pageSize: 50,
+    grade: selectedRarity || undefined,
+    genre: selectedCategory || undefined,
+    keyword: searchText || undefined,
+    saleType: "TRADE",
+    isSoldOut: false,
+  });
+
+  // 카드 데이터 정규화
+  const mappedCards = useMemo(() => {
+    const cards = data?.items || [];
+    return cards.map((item) => {
+      const grade = String(item.grade || "").toUpperCase();
+      return {
+        id: item.id,
+        topImage: item.image_url || "/images/sample.svg",
+        title: item.name || "포토카드",
+        rarityIcon:
+          grade === "SUPER_RARE"
+            ? "SUPER RARE"
+            : grade === "LEGENDARY"
+            ? "LEGENDARY"
+            : grade,
+        category: item.genre || "",
+        author: user?.nickname || "익명",
+        price: item.price || 0,
+        remaining: item.count || item.total_count || 0,
+        total: item.total_count || 0,
+        favoriteImg: "/images/favorite.svg",
+      };
+    });
+  }, [data, user?.nickname]);
+
+  // 필터링 (검색어, 등급, 장르)
   const filteredCards = useMemo(() => {
-    return myCardList.filter((card) => {
+    return mappedCards.filter((card) => {
       const matchesSearch =
-        card.title.toLowerCase().includes(searchText.toLowerCase()) ||
-        card.author.toLowerCase().includes(searchText.toLowerCase());
+        card.title?.toLowerCase()?.includes(searchText.toLowerCase()) ||
+        card.author?.toLowerCase()?.includes(searchText.toLowerCase());
+
       const matchesRarity = selectedRarity
-        ? card.rarity === selectedRarity
+        ? card.rarityIcon === selectedRarity
         : true;
       const matchesCategory = selectedCategory
         ? card.category === selectedCategory
         : true;
+
       return matchesSearch && matchesRarity && matchesCategory;
     });
-  }, [myCardList, searchText, selectedRarity, selectedCategory]);
+  }, [mappedCards, searchText, selectedRarity, selectedCategory]);
+
+  if (!isOpen) return null;
 
   return (
     <>
@@ -106,19 +138,14 @@ const CardTradeModal = ({ isOpen, onClose, onCardSelect }) => {
           </div>
           <div className="flex gap-[45px]">
             <Dropdown
-              options={[
-                GRADE.COMMON,
-                GRADE.RARE,
-                GRADE.SUPER_RARE,
-                GRADE.LEGENDARY,
-              ]}
+              options={[GRADE.COMMON, GRADE.RARE, GRADE.SUPER_RARE, GRADE.LEGENDARY]}
               placeholder="등급"
               height="48px"
               maxWidth="300px"
               onChange={(value) => setSelectedRarity(value)}
             />
             <Dropdown
-              options={["풍경", "인물", "동물"]}
+              options={GENRE_OPTIONS}
               placeholder="장르"
               height="48px"
               maxWidth="300px"
@@ -132,21 +159,24 @@ const CardTradeModal = ({ isOpen, onClose, onCardSelect }) => {
           className="grid gap-[24px] justify-center"
           style={{ gridTemplateColumns: "repeat(2, 1fr)", width: "100%" }}
         >
-          {filteredCards.length > 0 ? (
-            filteredCards.map((card) => (
+          {isLoading ? (
+            <div className="text-center text-gray-300 col-span-2 mt-[100px] text-[18px]">
+              불러오는 중...
+            </div>
+          ) : filteredCards.length > 0 ? (
+            filteredCards.map((card, index) => (
               <div
-                key={card.id}
+                key={`${card.id}-${index}`}
                 onClick={() => {
                   onClose();
-                  onCardSelect?.(card);
+                  onCardSelect?.({ ...card, rarity: card.rarityIcon });
                 }}
                 className="cursor-pointer"
               >
                 <Card
                   {...card}
-                  rarityIcon={card.rarity}
                   quantity={card.remaining || 0}
-                  showRemainingAsFraction={false}
+                  showRemainingAsFraction={true}
                 />
               </div>
             ))

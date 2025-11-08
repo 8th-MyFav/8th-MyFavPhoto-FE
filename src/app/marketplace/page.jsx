@@ -8,8 +8,16 @@ import Modal from "@/components/molecules/Modal";
 import SellPhotoModal from "@/components/organisms/SellPhotoModal";
 import CardDetailSellModal from "@/components/organisms/CardDetailSellModal";
 import PointModal from "@/components/molecules/PointModal";
-import { PATHNAME } from "@/constants";
+import LoadingOverlay from "@/components/molecules/LoadingOverlay"; 
+import { PATHNAME, GENRE } from "@/constants";
 import { useMarketList } from "@/api/marketListings";
+
+const CATEGORY_OPTIONS = Object.values(GENRE);
+const SORT_ORDER_MAP = {
+  "낮은 가격순": "price_asc",
+  "높은 가격순": "price_desc",
+  최신순: "created_desc",
+};
 
 const POINT_MODAL_KEY = "lastPointModalTime";
 const LAST_LOGIN_TOKEN_KEY = "lastLoginToken";
@@ -30,6 +38,7 @@ export default function MarketplacePage() {
 
   /** 필터/정렬/검색 상태 */
   const [searchText, setSearchText] = useState("");
+  const [debouncedSearchText, setDebouncedSearchText] = useState("");
   const [selectedRarity, setSelectedRarity] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
@@ -80,8 +89,8 @@ export default function MarketplacePage() {
         : selectedStatus === "판매중"
         ? "false"
         : undefined,
-    orderBy: sortOrder,
-    keyword: searchText || undefined,
+    orderBy: sortOrder || undefined,
+    keyword: debouncedSearchText || undefined,
   });
 
   /* ✅ 데이터 반영 */
@@ -91,10 +100,27 @@ export default function MarketplacePage() {
     }
   }, [data]);
 
+  /* ✅ 검색어 디바운스 */
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      const trimmed = searchText.trim();
+      setDebouncedSearchText((prev) => (prev === trimmed ? prev : trimmed));
+    }, 400);
+
+    return () => clearTimeout(handler);
+  }, [searchText]);
+
   /* ✅ 필터나 검색 변경 시 다시 불러오기 */
   useEffect(() => {
     refetch();
-  }, [searchText, selectedRarity, selectedCategory, selectedStatus, sortOrder, refetch]);
+  }, [
+    debouncedSearchText,
+    selectedRarity,
+    selectedCategory,
+    selectedStatus,
+    sortOrder,
+    refetch,
+  ]);
 
   /* ✅ 페이지 이동 시 리셋 */
   useEffect(() => {
@@ -105,16 +131,13 @@ export default function MarketplacePage() {
 
   /* ✅ 카드 매핑 */
   const mappedCards = cards.map((card) => ({
-    id: card.id, // ✅ 중요: 실제 id 사용
+    id: card.id,
     topImage: card.image_url || "/images/sample.svg",
     title: card.name || "제목 없음",
     rarityIcon: card.grade || "COMMON",
     category: card.genre || "기타",
     author:
-      card.creator?.nickname ||
-      card.nickname ||
-      card.creator_name ||
-      "익명",
+      card.creator?.nickname || card.nickname || card.creator_name || "익명",
     price: card.price ?? 0,
     remaining: card.available ?? 0,
     total: card.total ?? 0,
@@ -123,10 +146,25 @@ export default function MarketplacePage() {
 
   /* ✅ 핸들러 */
   const handleCardClick = (id) => {
-    // console.log("✅ 클릭된 카드 id:", id);
     router.push(PATHNAME.MARKET_DETAIL(id));
   };
   const handleSellButtonClick = () => setIsSellModalOpen(true);
+  const handleSearchChange = (value) => {
+    setSearchText(value);
+    if (value === "") {
+      setDebouncedSearchText("");
+    }
+  };
+  const handleSearchSubmit = (value) => {
+    setDebouncedSearchText(value?.trim() || "");
+  };
+  const handleSortOrderChange = (label) => {
+    const mapped = SORT_ORDER_MAP[label] || SORT_ORDER_MAP["낮은 가격순"];
+    setSortOrder(mapped);
+  };
+  const handleCategoryChange = (value) => {
+    setSelectedCategory(value || "");
+  };
   const handleLogin = () => router.push(PATHNAME.LOGIN);
   const handleRetry = () => refetch();
 
@@ -182,19 +220,20 @@ export default function MarketplacePage() {
             selectedCategory={selectedCategory}
             selectedStatus={selectedStatus}
             sortOrder={sortOrder}
-            onSearchChange={setSearchText}
+            categoryOptions={CATEGORY_OPTIONS}
+            onSearchChange={handleSearchChange}
+            onSearchSubmit={handleSearchSubmit}
             onRarityChange={setSelectedRarity}
-            onCategoryChange={setSelectedCategory}
+            onCategoryChange={handleCategoryChange}
             onStatusChange={setSelectedStatus}
-            onSortOrderChange={setSortOrder}
+            onSortOrderChange={handleSortOrderChange}
             cards={mappedCards}
-            onCardClick={(card) => handleCardClick(card.id)} // ✅ 수정: id 전달
+            onCardClick={(card) => handleCardClick(card.id)}
             isLoading={isLoading}
           />
 
-          {isLoading && (
-            <div className="text-white text-center py-4">불러오는 중...</div>
-          )}
+          {/* 로딩 오버레이 */}
+          <LoadingOverlay show={isLoading} />
 
           {/* 판매 관련 모달 */}
           <SellPhotoModal

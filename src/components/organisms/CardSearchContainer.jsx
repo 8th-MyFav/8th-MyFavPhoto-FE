@@ -13,10 +13,12 @@ const CardSearchContainer = ({
   selectedRarity = "",
   selectedCategory = "",
   selectedStatus = "",
+  selectedSaleType = "", // ✅ 추가
   sortOrder = "낮은 가격순",
   // 필터 옵션
   showStatusFilter = true, // 매진여부 필터 표시 여부
   showSortDropdown = true, // 정렬 드롭다운 표시 여부
+  showSaleTypeFilter = false, // ✅ 추가
   categoryOptions = ["풍경", "인물", "동물", "추상"], // 장르/카테고리 옵션
   // 핸들러
   onSearchChange,
@@ -25,12 +27,13 @@ const CardSearchContainer = ({
   onCategoryChange,
   onStatusChange,
   onSortOrderChange,
+  onSaleTypeChange, // ✅ 추가
   // 카드 리스트
   cards = [],
   onCardClick, // 외부에서 핸들러를 전달할 수도 있음
   lastCardRef,
   // 레이아웃 옵션
-  cardGridClass = "grid grid-cols-3 gap-x-xl gap-y-xl mt-xl", // 카드 그리드 클래스
+  cardGridClass = "card-grid grid grid-cols-3 gap-x-xl gap-y-xl mt-xl", // 카드 그리드 클래스
   emptyMessage = "조건에 맞는 포토카드가 없습니다.", // 빈 리스트 메시지
   // 페이지네이션
   showPagination = false,
@@ -48,7 +51,7 @@ const CardSearchContainer = ({
   };
 
   return (
-    <>
+    <div className="page-wrapper">
       {/* 검색 + 필터 + 정렬 */}
       <div
         className={`flex justify-between items-center ${
@@ -78,6 +81,13 @@ const CardSearchContainer = ({
               options={categoryOptions}
               onChange={onCategoryChange}
             />
+            {showSaleTypeFilter && (
+                  <Dropdown
+                  placeholder="판매형태"
+                  options={["판매", "교환"]}
+                  onChange={onSaleTypeChange} // ✅ 수정됨
+                />
+              )}
             {showStatusFilter && (
               <Dropdown
                 placeholder="매진여부"
@@ -104,24 +114,35 @@ const CardSearchContainer = ({
       </div>
 
       {/* 카드 리스트 */}
-      <div className={cardGridClass}>
-        {cards.length > 0 ? (
-          cards.map((card, index) => (
-            <div
-              key={card.id || index}
-              ref={index === cards.length - 1 ? lastCardRef : null}
-              onClick={() => handleCardClick(card)}
-              className={onCardClick || card?.id ? "cursor-pointer" : ""}
-            >
-              <Card {...card} />
-            </div>
-          ))
-        ) : (
-          <div className="col-span-3 text-center text-gray-300 text-noto-xs mt-3xl">
-            {emptyMessage}
-          </div>
-        )}
-      </div>
+      {cards.length > 0 ? (
+        <div className={cardGridClass}>
+          {cards.map((card, index) => {
+            const alignmentClasses = [
+              "justify-self-start",
+              "justify-self-center",
+              "justify-self-end",
+            ];
+            const alignmentClass = alignmentClasses[index % 3];
+            const clickableClass =
+              onCardClick || card?.id ? "cursor-pointer" : "";
+
+            return (
+              <div
+                key={card.id ? `${card.id}-${index}` : `card-${index}`}
+                ref={index === cards.length - 1 ? lastCardRef : null}
+                onClick={() => handleCardClick(card)}
+                className={`${alignmentClass} ${clickableClass}`.trim()}
+              >
+                <Card {...card} />
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="flex items-center justify-center min-h-[calc(100vh-300px)] text-center text-gray-300 text-noto-xs">
+          {emptyMessage}
+        </div>
+      )}
 
       {/* 페이지네이션 */}
       {showPagination && paginationComponent && (
@@ -129,7 +150,7 @@ const CardSearchContainer = ({
           {paginationComponent}
         </div>
       )}
-    </>
+    </div>
   );
 };
 
