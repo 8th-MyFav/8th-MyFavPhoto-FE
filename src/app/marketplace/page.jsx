@@ -8,7 +8,7 @@ import Modal from "@/components/molecules/Modal";
 import SellPhotoModal from "@/components/organisms/SellPhotoModal";
 import CardDetailSellModal from "@/components/organisms/CardDetailSellModal";
 import PointModal from "@/components/molecules/PointModal";
-import LoadingOverlay from "@/components/molecules/LoadingOverlay"; // ✅ 추가
+import LoadingOverlay from "@/components/molecules/LoadingOverlay"; 
 import { PATHNAME, GENRE } from "@/constants";
 import { useMarketList } from "@/api/marketListings";
 
@@ -99,6 +99,16 @@ export default function MarketplacePage() {
       setCards(data.list);
     }
   }, [data]);
+
+  /* ✅ 검색어 디바운스 */
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      const trimmed = searchText.trim();
+      setDebouncedSearchText((prev) => (prev === trimmed ? prev : trimmed));
+    }, 400);
+
+    return () => clearTimeout(handler);
+  }, [searchText]);
 
   /* ✅ 필터나 검색 변경 시 다시 불러오기 */
   useEffect(() => {

@@ -9,14 +9,15 @@ import { useMarketUpdateListing } from "@/api/marketListings";
 const CardDetailEdit = ({ isOpen, onClose, listing }) => {
   if (!isOpen || !listing) return null;
 
-  const { photocard: card } = listing; // ✅ photocard 기준
+  // ✅ listing.card 기준으로 수정
+  const card = listing.card || {};
 
   // 기본 카드 정보
   const cardGrade = card?.grade || "COMMON";
   const cardGenre = card?.genre || "기타";
   const authorName = card?.nickname || "익명";
 
-  // 초기 상태
+  // 상태 초기화
   const [selectedRarity, setSelectedRarity] = useState(listing.trade_grade || "");
   const [selectedCategory, setSelectedCategory] = useState(listing.trade_genre || "");
   const [description, setDescription] = useState(listing.trade_note || "");
@@ -37,16 +38,10 @@ const CardDetailEdit = ({ isOpen, onClose, listing }) => {
   }, [listing]);
 
   // 수량 & 가격 조정
-  const increaseQuantity = () => {
-    if (quantity < listing.total_count) setQuantity(quantity + 1);
-  };
-  const decreaseQuantity = () => {
-    if (quantity > 1) setQuantity(quantity - 1);
-  };
-  const increasePrice = () => setPrice(price + 1);
-  const decreasePrice = () => {
-    if (price > 1) setPrice(price - 1);
-  };
+  const increaseQuantity = () => setQuantity(prev => Math.min(prev + 1, listing.total_count));
+  const decreaseQuantity = () => setQuantity(prev => Math.max(prev - 1, 1));
+  const increasePrice = () => setPrice(prev => prev + 1);
+  const decreasePrice = () => setPrice(prev => Math.max(prev - 1, 1));
 
   // 저장
   const handleSave = () => {
@@ -62,26 +57,22 @@ const CardDetailEdit = ({ isOpen, onClose, listing }) => {
       return;
     }
 
-    // ✅ PATCH 요청 payload (변경된 값만)
     const payload = {
       price,
       trade_grade: selectedRarity,
       trade_genre: selectedCategory,
       trade_note: description,
-      // total_count: listing.total_count, // 필요 시 추가
+      left_count: quantity,
     };
 
-    // ✅ 명세서 기준 PATCH 호출 (listing.id = trade post id)
     updateListing(
       { cardId: listing.id, data: payload },
       {
-        onSuccess: (res) => {
-          console.log("✅ 수정 성공:", res);
+        onSuccess: () => {
           alert("수정이 완료되었습니다!");
           onClose();
         },
-        onError: (err) => {
-          console.error("❌ 수정 실패:", err);
+        onError: () => {
           alert("수정 중 오류가 발생했습니다. 다시 시도해주세요.");
         },
       }
@@ -105,7 +96,6 @@ const CardDetailEdit = ({ isOpen, onClose, listing }) => {
           padding: "40px",
         }}
       >
-        {/* 닫기 버튼 */}
         <img
           src="/images/close.svg"
           alt="close"
@@ -113,7 +103,6 @@ const CardDetailEdit = ({ isOpen, onClose, listing }) => {
           onClick={onClose}
         />
 
-        {/* 헤더 */}
         <div className="flex flex-col mb-[40px]">
           <h2 className="text-[24px] text-gray-400 font-[BR B] mb-[10px]">수정하기</h2>
           <h3 className="text-[40px] font-bold text-white mb-[40px] border-b border-white pb-[10px]">
@@ -121,7 +110,6 @@ const CardDetailEdit = ({ isOpen, onClose, listing }) => {
           </h3>
         </div>
 
-        {/* 카드 메인 정보 */}
         <div className="flex justify-start gap-[20px] mb-[30px]">
           <img
             src={card?.image_url || "/images/default-card.png"}
@@ -141,7 +129,6 @@ const CardDetailEdit = ({ isOpen, onClose, listing }) => {
 
             <div className="w-full border-b border-gray-600 mb-[30px]" />
 
-            {/* 총 판매 수량 */}
             <div className="flex items-center mb-[20px]">
               <span className="font-bold text-[16px] mr-[108px]">총 판매 수량</span>
               <div className="flex items-center">
@@ -157,7 +144,6 @@ const CardDetailEdit = ({ isOpen, onClose, listing }) => {
               </div>
             </div>
 
-            {/* 장당 가격 */}
             <div className="flex items-center mb-[30px]">
               <span className="font-bold text-[16px] mr-[126px]">장당 가격</span>
               <div className="flex items-center">
@@ -172,7 +158,6 @@ const CardDetailEdit = ({ isOpen, onClose, listing }) => {
           </div>
         </div>
 
-        {/* 교환 희망 정보 */}
         <div className="text-white mb-[30px] pt-[30px]">
           <h4 className="text-[20px] font-bold mb-[20px]">교환 희망 정보</h4>
           <div className="border-b-[2px] border-[#EEE] mb-[20px]" />
@@ -219,7 +204,6 @@ const CardDetailEdit = ({ isOpen, onClose, listing }) => {
           </div>
         </div>
 
-        {/* 하단 버튼 */}
         <div className="flex justify-end gap-[20px]">
           <Button text="취소하기" width="400px" height="60px" backgroundColor="transparent" color="#FFF" border="1px solid #FFF" onClick={onClose} />
           <Button text={isPending ? "수정 중..." : "수정하기"} width="400px" height="60px" backgroundColor="#EFFF04" color="#0F0F0F" onClick={handleSave} disabled={isPending} />
