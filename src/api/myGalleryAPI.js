@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { apiClient } from "./apiClient";
 import { MY_GALLERY_ENDPOINTS } from "./apiEndpoints";
 import { ERROR_MESSAGES } from "./constants";
@@ -160,6 +160,10 @@ export const useMyCards = ({
       }
     },
     enabled: page !== undefined && pageSize !== undefined,
+    placeholderData: keepPreviousData, // 새로운 데이터를 불러오는 동안 이전 데이터 유지 (stale-while-revalidate)
+    staleTime: 0, // 데이터를 즉시 stale로 간주하여 백그라운드에서 refetch
+    gcTime: 5 * 60 * 1000, // 5분 동안 캐시 유지 (v5에서 cacheTime -> gcTime으로 변경)
+    refetchOnWindowFocus: true, // 윈도우 포커스 시 백그라운드 refetch
     retry: 1, // 재시도 횟수
     retryDelay: 1000, // 재시도 지연 시간 (1초)
   });

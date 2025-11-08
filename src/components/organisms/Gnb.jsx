@@ -3,6 +3,7 @@
 import Link from "next/link";
 import React from "react";
 import Navigation from "../molecules/Navigation";
+import MobileNavigation from "../molecules/MobileNavigation";
 import { usePathname } from "next/navigation";
 import { PATHNAME } from "@/constants";
 
@@ -24,22 +25,32 @@ const GNB = () => {
 
   return (
     <div className="bg-black">
-      <div className="flex justify-center px-x-desktop bg-black">
-        <nav className="w-full h-lg flex justify-between items-center bg-black">
-          {/* 좌측 로고 */}
-          <div className="flex items-center cursor-pointer">
+      <div className="page-wrapper bg-black">
+        <nav
+          className="w-full h-lg flex justify-between items-center bg-black 
+                        desktop:px-x-tablet
+                        tablet:px-x-tablet
+                        mobile:px-x-mobile"
+        >
+          {/* 좌측 로고 (모바일에서는 숨김) */}
+          <div className="hidden tablet:flex desktop:flex items-center cursor-pointer">
             <Link href={PATHNAME.HOME}>
               <img
                 src="/images/favorite.svg"
                 alt="최애의 포토"
-                className="w-[120px] h-auto mobile:jutify-center"
+                className="w-[120px] h-auto"
               />
             </Link>
           </div>
 
-          {/* 우측 메뉴 */}
-          <div className="flex items-center gap-sm">
+          {/* 데스크탑 & 태블릿 메뉴 */}
+          <div className="hidden tablet:flex desktop:flex items-center gap-sm ml-auto">
             <Navigation />
+          </div>
+
+          {/* 모바일 메뉴 */}
+          <div className="flex w-full tablet:hidden desktop:hidden">
+            <MobileNavigation />
           </div>
         </nav>
       </div>

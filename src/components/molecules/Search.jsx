@@ -2,13 +2,27 @@
 
 import React, { useState } from "react";
 
-const Search = ({ onSearch }) => {
+const Search = ({ onSearch, onSearchSubmit }) => {
   const [searchText, setSearchText] = useState("");
 
   const handleChange = (e) => {
     const value = e.target.value;
     setSearchText(value);
     if (onSearch) onSearch(value);
+  };
+
+  const handleSubmit = () => {
+    if (onSearchSubmit) {
+      onSearchSubmit(searchText);
+    } else if (onSearch) {
+      onSearch(searchText);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      handleSubmit();
+    }
   };
 
   return (
@@ -26,6 +40,7 @@ const Search = ({ onSearch }) => {
           type="text"
           value={searchText}
           onChange={handleChange}
+          onKeyDown={handleKeyDown}
           placeholder="검색"
           className="flex-1 bg-transparent border-none outline-none"
           style={{
@@ -43,6 +58,7 @@ const Search = ({ onSearch }) => {
           src="/images/search.svg"
           alt="searchIcon"
           className="w-[24px] h-[24px] cursor-pointer"
+          onClick={handleSubmit}
         />
       </div>
     </div>

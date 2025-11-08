@@ -180,3 +180,9 @@ button:hover .notification-icon .alarm-path {
   --breakpoint-tablet: 768px; /* 768px */
   --breakpoint-desktop: 1200px; /* 1200px */
 }
+
+@layer utilities {
+  .page-wrapper {
+    @apply w-full min-w-[375px] max-w-[1920px] mx-auto px-4;
+  }
+}
