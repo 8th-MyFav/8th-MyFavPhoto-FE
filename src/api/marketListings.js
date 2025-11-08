@@ -1,4 +1,4 @@
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, keepPreviousData } from "@tanstack/react-query";
 import { apiClient } from "./apiClient";
 import { MARKET_ENDPOINTS } from "./apiEndpoints";
 import { ERROR_MESSAGES } from "./constants";
@@ -41,6 +41,7 @@ export const useMarketList = ({
       }
     },
   });
+  placeholderData: keepPreviousData
 };
 
 /* 🧾 판매 상세 조회 */
@@ -97,6 +98,74 @@ export const useMarketMyListings = ({
         throw new Error(ERROR_MESSAGES.MY_LIST_FAIL);
       }
     },
+  });
+};
+
+// useMySaleList
+export const useMySaleList = ({
+  page = 1,
+  pageSize = 15,
+  grade,
+  genre,
+  keyword,
+  saleType, // UI 또는 API 약칭이 올 수 있음
+  isSoldOut,
+} = {}) => {
+  // Normalize saleType into API-expected value ("SELL" | "TRADE")
+  let normalizedSaleType;
+  if (saleType) {
+    const s = String(saleType).toUpperCase();
+    if (s === "판매".toUpperCase() || s === "SELL") normalizedSaleType = "SELL";
+    else if (s === "교환".toUpperCase() || s === "TRADE") normalizedSaleType = "TRADE";
+    else normalizedSaleType = s; 
+  }
+
+  const queryObj = {
+    page,
+    pageSize,
+    ...(grade ? { grade } : {}),
+    ...(genre ? { genre } : {}),
+    ...(keyword ? { keyword } : {}),
+    ...(typeof isSoldOut !== "undefined" ? { isSoldOut } : {}),
+    ...(normalizedSaleType ? { saleType: normalizedSaleType } : {}),
+  };
+
+  const queryString = new URLSearchParams(
+    Object.entries(queryObj).map(([k, v]) => [k, String(v)])
+  ).toString();
+
+  const url = `${MARKET_ENDPOINTS.MY_SALES}${queryString ? `?${queryString}` : ""}`;
+  console.log("📡 [useMySaleList] GET", url);
+
+  return useQuery({
+    queryKey: ["mySaleList", page, pageSize, grade, genre, keyword, normalizedSaleType, isSoldOut],
+    queryFn: async () => {
+      try {
+        const response = await apiClient(url, {
+          method: "GET",
+          auth: true,
+        });
+
+        console.log("✅ [useMySaleList] response:", response);
+
+        return {
+          totalCount: response.totalCount ?? response.total_count ?? 0,
+          totalGrades: response.totalGrades ?? response.total_grades ?? {},
+          page: response.page ?? page,
+          pageSize: response.pageSize ?? pageSize,
+          totalPages:
+            response.totalPages ??
+            Math.ceil((response.totalCount ?? response.total_count ?? 0) / pageSize),
+          list: response.list || response.lists || [],
+        };
+      } catch (err) {
+        console.error("❌ [useMySaleList] error:", err);
+        throw err;
+      }
+    },
+    refetchOnWindowFocus: false,
+    keepPreviousData: true,
+    placeholderData: keepPreviousData
   });
 };
 
