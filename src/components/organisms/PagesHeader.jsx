@@ -85,7 +85,7 @@ const PagesHeader = ({
   }, [buttonOnClick, pathname]);
 
   return (
-    <div className="w-full">
+    <div className="page-wrapper">
       <div className="mb-xs pt-lg">
         <div className="flex justify-between items-center w-full border-b-[2px] border-gray-100 pb-xs">
           {/* 왼쪽 텍스트 */}
