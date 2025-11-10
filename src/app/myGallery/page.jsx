@@ -7,6 +7,7 @@ import CardSearchContainer from "@/components/organisms/CardSearchContainer";
 import Pagination from "@/components/molecules/Pagination";
 import { PATHNAME, GENRE } from "@/constants";
 import { useMyCards } from "@/api/myGalleryAPI";
+import LoadingOverlay from "@/components/molecules/LoadingOverlay";
 
 const PAGE_SIZE = 15;
 const GENRE_OPTIONS = [
@@ -110,7 +111,7 @@ export default function MyGalleryPage() {
   // 카드 데이터 정규화
   const normalizedCards = useMemo(() => {
     return ownedItems.map((item, index) => {
-      // API 응답 구조: {id, creator_id, name, grade, genre, price, total_count, image_url, createdAt, updatedAt}
+      // API 응답 구조: {id, creator_id, name, grade, genre, price, image_url, createdAt, updatedAt}
       const grade = String(item.grade || "").toUpperCase();
 
       // 다양한 필드명 가능성 체크 (name 필드)
@@ -127,30 +128,16 @@ export default function MyGalleryPage() {
 
       // 디버깅: 각 카드의 모든 필드 확인 (필요시 활성화)
 
-      // total_count 대신 total_issued 사용 (실제 API 응답 구조)
-      // count는 보유 개수, total_issued는 총 발행 개수
+      // count는 보유 개수
       const totalCountValue =
-        item.total_issued !== undefined
-          ? item.total_issued
-          : item.total_count !== undefined
-          ? item.total_count
-          : item.count !== undefined
+        item.count !== undefined
           ? item.count
-          : item.total !== undefined
-          ? item.total
           : item.quantity !== undefined
           ? item.quantity
           : 0;
 
       // remaining은 보유 개수 (count 필드)
-      const remainingCount =
-        item.count !== undefined
-          ? item.count
-          : item.total_issued !== undefined
-          ? item.total_issued
-          : item.total_count !== undefined
-          ? item.total_count
-          : 0;
+      const remainingCount = item.count !== undefined ? item.count : 0;
 
       // image_url이 null이거나 없을 때 sample.svg 또는 sample2.svg 사용
       const imageUrl =
@@ -177,7 +164,7 @@ export default function MyGalleryPage() {
         author: user?.nickname || "",
         price: item.price || 0,
         remaining: remainingCount, // 보유 개수 (count)
-        total: totalCountValue, // 총 발행 개수 (total_issued)
+        total: totalCountValue, // 총 발행 개수
         quantity: remainingCount, // 마이갤러리에서는 수량으로 표시
         favoriteImg: "/images/favorite.svg",
         createdAt: item.createdAt || item.created_at,
@@ -214,9 +201,9 @@ export default function MyGalleryPage() {
     if (isLoading && !hasData) {
       // 초기 로딩 중이고 데이터가 없을 때만
       if (isSearching || hasFilters) {
-        return "검색 중..."; // 검색 중일 때
+        return; // 검색 중일 때
       }
-      return "불러오는 중..."; // 초기 로딩 중일 때
+      return; // 초기 로딩 중일 때
     }
     // isFetching && hasData인 경우는 백그라운드에서 업데이트 중이므로 메시지 표시 안 함
     if (isSearching || hasFilters) {
@@ -227,6 +214,7 @@ export default function MyGalleryPage() {
 
   return (
     <div className="bg-black">
+      <LoadingOverlay show={isFetching} />
       <div className="bg-black mx-x-desktop">
         <PagesHeader
           showPhotoCardSummary={true}
@@ -268,9 +256,10 @@ export default function MyGalleryPage() {
               ...card,
               showRemainingAsFraction: true,
             }))}
-            cardGridClass="grid grid-cols-3 gap-x-xl gap-y-xl my-3xl"
+            cardGridClass="grid grid-cols-3 gap-x-xl gap-y-xl my-3xl cursor-default [&_div]:cursor-default"
             emptyMessage={getEmptyMessage()}
             showPagination={true}
+            onCardClick={() => {}}
             paginationComponent={
               <Pagination
                 page={page}

@@ -56,58 +56,11 @@ export const useMyCards = ({
           ...(forSale ? { forSale: "" } : {}), // ✅ 여기만 추가됨
         };
 
-        // 요청 파라미터 확인
-        console.log("🔵 API Request - Page:", page, "Params:", requestParams);
-
         const data = await apiClient(MY_GALLERY_ENDPOINTS.MY_CARDS, {
           method: "GET",
           auth: true,
           data: requestParams,
         });
-
-        // 응답 데이터 정규화
-        // 백엔드 응답 구조 확인을 위한 로그
-        console.log("🟢 API Response - Page:", page);
-        console.log(
-          "  - Response Type:",
-          Array.isArray(data) ? "Array" : "Object"
-        );
-        console.log("  - Response Data (Full):", JSON.stringify(data, null, 2));
-        console.log("  - Response Keys:", Object.keys(data || {}));
-        console.log(
-          "  - Items Count:",
-          Array.isArray(data)
-            ? data.length
-            : data.lists?.length || data.items?.length || 0
-        );
-        console.log(
-          "  - TotalCount:",
-          data.totalCount || data.total || "NOT PROVIDED"
-        );
-        // 모든 아이템의 구조 확인 (API 응답 필드 확인용)
-        const itemsToCheck = Array.isArray(data)
-          ? data.slice(0, 3) // 처음 3개만
-          : (data.lists || data.items || []).slice(0, 3);
-
-        if (itemsToCheck.length > 0) {
-          console.log("  - 📋 API Response Fields Check (first 3 items):");
-          itemsToCheck.forEach((item, index) => {
-            console.log(`  - Item ${index + 1} - All Fields:`, {
-              id: item.id,
-              creator_id: item.creator_id,
-              name: item.name,
-              grade: item.grade,
-              genre: item.genre,
-              price: item.price,
-              total_count: item.total_count,
-              image_url: item.image_url,
-              createdAt: item.createdAt,
-              updatedAt: item.updatedAt,
-              allKeys: Object.keys(item),
-            });
-            console.log(`  - Item ${index + 1} - Full Object:`, item);
-          });
-        }
 
         // 응답이 배열인 경우와 객체인 경우 모두 처리
         let items = [];

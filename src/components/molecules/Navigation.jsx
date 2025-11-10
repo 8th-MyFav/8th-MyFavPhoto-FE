@@ -14,12 +14,6 @@ const Navigation = () => {
   const { data: points } = usePoints();
   const [showProfile, setShowProfile] = useState(false);
 
-  console.log("points", points);
-  // 포인트 상태 변경 디버깅
-  useEffect(() => {
-    console.log("포인트 상태 변경:", points);
-  }, [points]);
-
   useEffect(
     function () {
       // 로그인된 경우에만 포인트 데이터를 불러옴
@@ -49,9 +43,6 @@ const Navigation = () => {
     },
     [isAuthenticated, loading]
   );
-
-  console.log("isAuthenticated", isAuthenticated);
-  console.log("loading", loading);
 
   if (loading) {
     // 아직 로그인 여부가 판단이 안된 상태
