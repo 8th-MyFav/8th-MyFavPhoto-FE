@@ -3,30 +3,34 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Card from "./Card";
 import { PATHNAME } from "@/constants";
+import { useMarketTradeCreate } from "@/api/marketTrades";
 
-const ExchangeModal = ({ selectedCard, onClose, targetCard }) => {
+const ExchangeModal = ({ selectedCard, onClose, tradePostId, targetCard }) => {
   const [offerText, setOfferText] = useState("");
   const router = useRouter();
+  const tradeCreateMutation = useMarketTradeCreate();
 
   if (!selectedCard) return null;
 
-  // ✅ 교환 조건 판단 함수
-  const isExchangeValid = () => {
-    if (!offerText.trim()) return false;
-    if (selectedCard.rarity !== targetCard.rarity) return false;
-    if (selectedCard.category !== targetCard.category) return false;
-    return true;
-  };
+  // ✅ 교환 버튼 클릭 시 API 호출
+  const handleExchange = async () => {
+    try {
+      await tradeCreateMutation.mutateAsync({
+        tradePostId: tradePostId,      // 교환 대상 카드 ID
+        offeredCardId: selectedCard.id,  // 내가 제시하는 카드 ID
+        content: offerText,              // 교환 제시 내용
+      });
 
-  // ✅ 교환 버튼 클릭 시
-  const handleExchange = () => {
-    if (isExchangeValid()) {
+      // 성공 시 이동
       router.push(
         `${PATHNAME.EXCHANGE_SUCCESS}?title=${encodeURIComponent(
           targetCard.title
         )}&my=${encodeURIComponent(selectedCard.title)}`
       );
-    } else {
+    } catch (error) {
+      console.error(error);
+
+      // 실패 시 이동
       router.push(
         `${PATHNAME.EXCHANGE_FAIL}?title=${encodeURIComponent(
           targetCard.title

@@ -25,6 +25,7 @@ const CardDetailEdit = ({ isOpen, onClose, listing }) => {
   const [price, setPrice] = useState(listing.price || 1);
 
   const { mutate: updateListing, isPending } = useMarketUpdateListing();
+  
 
   // listing 변경 시 상태 동기화
   useEffect(() => {
@@ -65,9 +66,8 @@ const CardDetailEdit = ({ isOpen, onClose, listing }) => {
       left_count: quantity,
     };
 
-    updateListing(
-      { cardId: listing.id, data: payload },
-      {
+  
+    updateListing({ cardId: listing.card?.id, data: payload }, {
         onSuccess: () => {
           alert("수정이 완료되었습니다!");
           onClose();

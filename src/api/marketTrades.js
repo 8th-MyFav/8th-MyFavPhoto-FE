@@ -6,11 +6,11 @@ import { ERROR_MESSAGES } from "./constants";
 /* 교환 요청 생성 */
 export const useMarketTradeCreate = () =>
   useMutation({
-    mutationFn: async ({ cardId, offeredCardId, content }) => {
+    mutationFn: async ({ tradePostId, offeredCardId, content }) => {
       try {
-        return await apiClient(`${MARKET_ENDPOINTS.TRADES}/${cardId}`, {
+        return await apiClient(`${MARKET_ENDPOINTS.TRADES}`, {
           method: "POST",
-          data: { offeredCardId, content },
+          data: { tradePostId, offeredCardId, content },
           auth: true,
         });
       } catch {

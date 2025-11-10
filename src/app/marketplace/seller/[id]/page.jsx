@@ -1,8 +1,16 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useMarketListingDetail, useMarketDeleteListing } from "@/api/marketListings";
+import {
+  useMarketListingDetail,
+  useMarketDeleteListing,
+} from "@/api/marketListings";
+import {
+  useMarketTradeList,
+  useMarketTradeApprove,
+  useMarketTradeReject,
+} from "@/api/marketTrades";
 import Modal from "@/components/molecules/Modal";
 import CardDetailEditModal from "@/components/organisms/CardDetailEdit";
 import TradeCard from "@/components/organisms/TradeCard";
@@ -18,9 +26,43 @@ export default function SellerDetailPage() {
   const { data: listing, isLoading, isError } = useMarketListingDetail(listingId);
   const deleteListingMutation = useMarketDeleteListing();
 
+  // ---------------- 트레이드 관련 ----------------
+  const { data: tradeProposalsRaw = [], isLoading: isTradeLoading } =
+    useMarketTradeList(listing?.card?.id);
+  const tradeApproveMutation = useMarketTradeApprove();
+  const tradeRejectMutation = useMarketTradeReject();
+
+  // ---------------- TradeCard용 상태 ----------------
+  const [tradeProposals, setTradeProposals] = useState([]);
+
+  // tradeProposalsRaw가 바뀔 때 한 번만 세팅
+  useEffect(() => {
+    if (tradeProposalsRaw) {
+      const pendingProposals = tradeProposalsRaw
+        .filter((p) => p.trade_status === "PENDING")
+        .map((p) => ({
+          id: p.id,
+          title: p.offeredCard?.name ?? "제목 없음",
+          rarity: p.offeredCard?.grade ?? "COMMON",
+          category: p.offeredCard?.genre ?? "기타",
+          imageUrl: p.offeredCard?.image_url ?? "/images/sample.svg",
+          description: p.trade_content ?? p.offeredCard?.description ?? "설명 없음",
+          sellerName: p.requester?.nickname ?? `유저 ${p.requester_id}`,
+          price: p.offeredCard?.price ?? 0,
+        }));
+      setTradeProposals(pendingProposals);
+    }
+  }, [tradeProposalsRaw?.length]); // ✅ 배열 길이만 의존
+
+  // ---------------- 모달 상태 ----------------
   const [modalOpen, setModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
-  const [modalData, setModalData] = useState({ title: "", content: "", buttonText: "", onConfirm: null });
+  const [modalData, setModalData] = useState({
+    title: "",
+    content: "",
+    buttonText: "",
+    onConfirm: null,
+  });
   const [cursorStyle, setCursorStyle] = useState("default");
 
   // ---------------- 로딩/에러 처리 ----------------
@@ -88,7 +130,7 @@ export default function SellerDetailPage() {
             buttonText: "확인",
             onConfirm: () => {
               closeModal();
-              router.push(PATHNAME.MARKET); // 판매 종료 후 마켓 리스트로 이동
+              router.push(PATHNAME.MARKET);
             },
           });
         } catch (err) {
@@ -104,18 +146,29 @@ export default function SellerDetailPage() {
     });
   };
 
-  // ---------------- 교환 제시 목록 매핑 ----------------
-  const tradeProposals = listing?.proposals ?? [];
-
+  // ---------------- 교환 승인/거절 ----------------
   const handleApprove = (proposal) => {
     setCursorStyle("progress");
     openModal({
       title: "교환 제시 승인",
       content: `[${proposal.rarity} | ${proposal.title}] 카드와의 교환을 승인하시겠습니까?`,
       buttonText: "승인하기",
-      onConfirm: () => {
+      onConfirm: async () => {
         closeModal();
-        setCursorStyle("default");
+        try {
+          await tradeApproveMutation.mutateAsync(proposal.id);
+          setCursorStyle("default");
+          // ✅ 승인 시 리스트에서 제거
+          setTradeProposals((prev) => prev.filter((p) => p.id !== proposal.id));
+        } catch (err) {
+          setCursorStyle("default");
+          openModal({
+            title: "승인 실패",
+            content: "교환 제시 승인에 실패했습니다.",
+            buttonText: "확인",
+            onConfirm: closeModal,
+          });
+        }
       },
     });
   };
@@ -126,9 +179,22 @@ export default function SellerDetailPage() {
       title: "교환 제시 거절",
       content: `[${proposal.rarity} | ${proposal.title}] 카드와의 교환을 거절하시겠습니까?`,
       buttonText: "거절하기",
-      onConfirm: () => {
+      onConfirm: async () => {
         closeModal();
-        setCursorStyle("default");
+        try {
+          await tradeRejectMutation.mutateAsync(proposal.id);
+          setCursorStyle("default");
+          // ✅ 거절 시 리스트에서 제거
+          setTradeProposals((prev) => prev.filter((p) => p.id !== proposal.id));
+        } catch (err) {
+          setCursorStyle("default");
+          openModal({
+            title: "거절 실패",
+            content: "교환 제시 거절에 실패했습니다.",
+            buttonText: "확인",
+            onConfirm: closeModal,
+          });
+        }
       },
     });
   };
@@ -139,6 +205,7 @@ export default function SellerDetailPage() {
       className="min-h-screen bg-[#0F0F0F] text-white flex flex-col items-center pb-[100px]"
       style={{ cursor: cursorStyle }}
     >
+      {/* 카드 정보 */}
       <section className="w-full max-w-[1200px] mt-[60px] mb-[60px] px-[20px]">
         <div className="flex flex-col">
           <span className="mb-[10px] text-gray-300 text-[24px]">마켓플레이스</span>
@@ -222,20 +289,24 @@ export default function SellerDetailPage() {
       <section className="w-full max-w-[1200px] mt-[100px] px-[20px]">
         <h2 className="text-[40px] font-bold text-white mt-[120px] mb-[15px]">교환 제시 목록</h2>
         <div className="border-t border-white mb-[70px]" />
-        <div className="flex flex-col lg:flex-row gap-[40px] flex-wrap">
-          {tradeProposals.length === 0 ? (
-            <div className="text-gray-400">아직 제시한 교환 목록이 없습니다.</div>
-          ) : (
-            tradeProposals.map((proposal) => (
-              <TradeCard
-                key={proposal.id}
-                proposal={proposal}
-                onApprove={() => handleApprove(proposal)}
-                onReject={() => handleReject(proposal)}
-              />
-            ))
-          )}
-        </div>
+        {isTradeLoading ? (
+          <div className="text-gray-400">교환 제시 목록을 불러오는 중입니다...</div>
+        ) : (
+          <div className="flex flex-col lg:flex-row gap-[40px] flex-wrap">
+            {tradeProposals.length === 0 ? (
+              <div className="text-gray-400">아직 제시한 교환 목록이 없습니다.</div>
+            ) : (
+              tradeProposals.map((proposal) => (
+                <TradeCard
+                  key={proposal.id}
+                  proposal={proposal}
+                  onApprove={handleApprove}
+                  onReject={handleReject}
+                />
+              ))
+            )}
+          </div>
+        )}
       </section>
 
       {/* 모달 */}
@@ -249,7 +320,7 @@ export default function SellerDetailPage() {
         />
       )}
 
-      {/* ✅ 수정된 부분 — listing 전체 전달 */}
+      {/* 수정 모달 */}
       {editModalOpen && (
         <CardDetailEditModal
           isOpen={editModalOpen}

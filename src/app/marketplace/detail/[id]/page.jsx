@@ -273,6 +273,7 @@ export default function DetailPage() {
       {isExchangeModalOpen && selectedCard && (
         <ExchangeModal
           selectedCard={selectedCard}
+          tradePostId={trade.id}
           targetCard={photoCard}
           onClose={() => setIsExchangeModalOpen(false)}
           onSubmit={(content) => {

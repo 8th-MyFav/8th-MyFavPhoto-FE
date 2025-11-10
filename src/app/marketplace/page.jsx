@@ -7,7 +7,7 @@ import CardSearchContainer from "@/components/organisms/CardSearchContainer";
 import Modal from "@/components/molecules/Modal";
 import SellPhotoModal from "@/components/organisms/SellPhotoModal";
 import CardDetailSellModal from "@/components/organisms/CardDetailSellModal";
-import PointModal from "@/components/molecules/PointModal";
+import PointModalContainer from "@/components/molecules/pointmodalcontainer"; // 변경된 부분
 import LoadingOverlay from "@/components/molecules/LoadingOverlay";
 import { PATHNAME, GENRE } from "@/constants";
 import { useInfiniteMarketList } from "@/api/marketListings";
@@ -100,11 +100,12 @@ export default function MarketplacePage() {
   // 모든 카드 데이터 합치기
   const cards = data?.pages?.flatMap((page) => page.list) || [];
 
+  // ✅ SUPER_RARE → SUPER RARE 변환
   const mappedCards = cards.map((card) => ({
     id: card.id,
     topImage: card.image_url || "/images/sample.svg",
     title: card.name || "제목 없음",
-    rarityIcon: card.grade || "COMMON",
+    rarityIcon: card.grade ? card.grade.replace("_", " ") : "COMMON",
     category: card.genre || "기타",
     author:
       card.creator?.nickname || card.nickname || card.creator_name || "익명",
@@ -191,9 +192,8 @@ export default function MarketplacePage() {
             />
           )}
 
-          {isPointModalOpen && (
-            <PointModal onClose={() => setIsPointModalOpen(false)} />
-          )}
+          {/* ✅ PointModal 대신 PointModalContainer 사용 */}
+          <PointModalContainer />
         </div>
       )}
     </div>
