@@ -80,8 +80,9 @@ export default function DetailPage() {
       return;
     }
 
+    // 수정된 API 호출
     purchaseCard(
-      { cardId: listing.id, quantity: count },
+      { tradePostId: listing.id, count },
       {
         onSuccess: () => {
           setIsModalOpen(false);

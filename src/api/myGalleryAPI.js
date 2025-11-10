@@ -14,6 +14,7 @@ import { ERROR_MESSAGES } from "./constants";
  * @param {string} params.keyword - 검색 키워드
  * @param {string} params.saleType - 판매방법 (SELL: 판매, TRADE: 교환) - 선택적
  * @param {boolean} params.isSoldOut - 매진여부 (true: 매진, false: 판매중) - 선택적
+ * @param {boolean} params.forSale - 판매용 카드만 조회 여부 - 선택적 ✅ 추가됨
  */
 export const useMyCards = ({
   page,
@@ -23,6 +24,7 @@ export const useMyCards = ({
   keyword,
   saleType,
   isSoldOut,
+  forSale, // ✅ 추가됨
 } = {}) => {
   return useQuery({
     queryKey: [
@@ -34,6 +36,7 @@ export const useMyCards = ({
       keyword,
       saleType,
       isSoldOut,
+      forSale, // ✅ queryKey에도 포함
     ],
     queryFn: async () => {
       try {
@@ -50,6 +53,7 @@ export const useMyCards = ({
           keyword: keyword || undefined,
           saleType: saleType || undefined,
           isSoldOut: isSoldOut !== undefined ? isSoldOut : undefined,
+          ...(forSale ? { forSale: "" } : {}), // ✅ 여기만 추가됨
         };
 
         // 요청 파라미터 확인

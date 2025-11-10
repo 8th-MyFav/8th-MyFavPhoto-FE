@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useMarketListingDetail } from "@/api/marketListings";
+import { useMarketListingDetail, useMarketDeleteListing } from "@/api/marketListings";
 import Modal from "@/components/molecules/Modal";
 import CardDetailEditModal from "@/components/organisms/CardDetailEdit";
 import TradeCard from "@/components/organisms/TradeCard";
@@ -16,14 +16,12 @@ export default function SellerDetailPage() {
 
   // ---------------- Hook 최상단 배치 ----------------
   const { data: listing, isLoading, isError } = useMarketListingDetail(listingId);
+  const deleteListingMutation = useMarketDeleteListing();
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [modalData, setModalData] = useState({ title: "", content: "", buttonText: "", onConfirm: null });
   const [cursorStyle, setCursorStyle] = useState("default");
-  const [selectedCard, setSelectedCard] = useState(null);
-  const [isTradeModalOpen, setIsTradeModalOpen] = useState(false);
-  const [isExchangeModalOpen, setIsExchangeModalOpen] = useState(false);
 
   // ---------------- 로딩/에러 처리 ----------------
   if (isLoading) {
@@ -73,6 +71,42 @@ export default function SellerDetailPage() {
   const openEditModal = () => setEditModalOpen(true);
   const closeEditModal = () => setEditModalOpen(false);
 
+  const handleStopSale = () => {
+    setCursorStyle("progress");
+    openModal({
+      title: "포토카드 판매 내리기",
+      content: "정말로 판매를 중단하시겠습니까?",
+      buttonText: "판매 내리기",
+      onConfirm: async () => {
+        closeModal();
+        try {
+          await deleteListingMutation.mutateAsync(card.id);
+          setCursorStyle("default");
+          openModal({
+            title: "판매 내리기 성공",
+            content: "포토카드 판매가 성공적으로 중단되었습니다.",
+            buttonText: "확인",
+            onConfirm: () => {
+              closeModal();
+              router.push(PATHNAME.MARKET); // 판매 종료 후 마켓 리스트로 이동
+            },
+          });
+        } catch (err) {
+          setCursorStyle("default");
+          openModal({
+            title: "판매 내리기 실패",
+            content: "판매 중단에 실패했습니다. 다시 시도해주세요.",
+            buttonText: "확인",
+            onConfirm: closeModal,
+          });
+        }
+      },
+    });
+  };
+
+  // ---------------- 교환 제시 목록 매핑 ----------------
+  const tradeProposals = listing?.proposals ?? [];
+
   const handleApprove = (proposal) => {
     setCursorStyle("progress");
     openModal({
@@ -98,22 +132,6 @@ export default function SellerDetailPage() {
       },
     });
   };
-
-  const handleStopSale = () => {
-    setCursorStyle("progress");
-    openModal({
-      title: "포토카드 판매 내리기",
-      content: "정말로 판매를 중단하시겠습니까?",
-      buttonText: "판매 내리기",
-      onConfirm: () => {
-        closeModal();
-        setCursorStyle("default");
-      },
-    });
-  };
-
-  // ---------------- 교환 제시 목록 매핑 ----------------
-  const tradeProposals = listing?.proposals ?? [];
 
   // ---------------- 렌더링 ----------------
   return (

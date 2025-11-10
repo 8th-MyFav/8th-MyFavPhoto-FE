@@ -1,4 +1,4 @@
-import { useQuery, useMutation, keepPreviousData } from "@tanstack/react-query";
+import { useQuery, useMutation, keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
 import { apiClient } from "./apiClient";
 import { MARKET_ENDPOINTS } from "./apiEndpoints";
 import { ERROR_MESSAGES } from "./constants";
@@ -27,8 +27,9 @@ export const useMarketList = ({
     queryFn: async () => {
       try {
         const response = await apiClient(MARKET_ENDPOINTS.LISTINGS, {
+          method: "GET",
           data: { take, cursor, grade, genre, isSoldOut, orderBy, keyword },
-          auth: true, // ✅ 토큰 포함
+          auth: true,
         });
 
         return {
@@ -44,20 +45,64 @@ export const useMarketList = ({
   });
 };
 
+/* 🛒 무한 스크롤 마켓 리스트 */
+export const useInfiniteMarketList = ({
+  take = 5,
+  grade,
+  genre,
+  isSoldOut,
+  orderBy,
+  keyword,
+} = {}) => {
+  return useInfiniteQuery({
+    queryKey: ["marketListInfinite", grade, genre, isSoldOut, orderBy, keyword],
+    queryFn: async ({ pageParam = undefined }) => {
+      try {
+        const response = await apiClient(MARKET_ENDPOINTS.LISTINGS, {
+          method: "GET",
+          data: {
+            take,
+            cursor: pageParam,
+            grade,
+            genre,
+            isSoldOut,
+            orderBy,
+            keyword,
+          },
+          auth: true,
+        });
+
+        return {
+          list: response.lists || [],
+          nextCursor: response.nextCursor ?? null,
+          hasMore: response.hasMore ?? false,
+        };
+      } catch (err) {
+        console.error("❌ [useInfiniteMarketList] error:", err);
+        throw new Error(ERROR_MESSAGES.LIST_FAIL);
+      }
+    },
+    getNextPageParam: (lastPage) =>
+      lastPage?.hasMore ? lastPage.nextCursor : undefined,
+    staleTime: 1000 * 60 * 5,
+    keepPreviousData: true,
+  });
+};
+
 /* 🧾 판매 상세 조회 */
-export const useMarketListingDetail = (listingId) => {
+export const useMarketListingDetail = (postId) => {
   return useQuery({
-    queryKey: ["marketDetail", listingId],
+    queryKey: ["marketDetail", postId],
     queryFn: async () => {
       try {
-        return await apiClient(`${MARKET_ENDPOINTS.LISTINGS}/${listingId}`, {
-          auth: true, // ✅ 토큰 포함
+        return await apiClient(`${MARKET_ENDPOINTS.LISTINGS}/${postId}`, {
+          auth: true,
         });
       } catch {
         throw new Error(ERROR_MESSAGES.DETAIL_FAIL);
       }
     },
-    enabled: !!listingId,
+    enabled: !!postId,
   });
 };
 
@@ -101,7 +146,7 @@ export const useMarketMyListings = ({
   });
 };
 
-// 👤 내 판매 내역 (필터 + 페이지네이션)
+/* 👤 내 판매 내역 */
 export const useMySaleList = ({
   page = 1,
   pageSize = 15,
@@ -134,42 +179,21 @@ export const useMySaleList = ({
     Object.entries(queryObj).map(([k, v]) => [k, String(v)])
   ).toString();
 
-  const url = `${MARKET_ENDPOINTS.MY_SALES}${
-    queryString ? `?${queryString}` : ""
-  }`;
-
-  console.log("📡 [useMySaleList] GET", url);
+  const url = `${MARKET_ENDPOINTS.MY_SALES}${queryString ? `?${queryString}` : ""}`;
 
   return useQuery({
-    queryKey: [
-      "mySaleList",
-      page,
-      pageSize,
-      grade,
-      genre,
-      keyword,
-      normalizedSaleType,
-      isSoldOut,
-    ],
+    queryKey: ["mySaleList", page, pageSize, grade, genre, keyword, normalizedSaleType, isSoldOut],
     queryFn: async () => {
       try {
-        const response = await apiClient(url, {
-          method: "GET",
-          auth: true,
-        });
-
-        console.log("✅ [useMySaleList] response:", response);
-
+        const response = await apiClient(url, { method: "GET", auth: true });
         return {
-          totalCount: response.totalCount ?? response.total_count ?? 0,
-          totalGrades: response.totalGrades ?? response.total_grades ?? {},
+          totalCount: response.totalCount ?? 0,
+          totalGrades: response.totalGrades ?? {},
           page: response.page ?? page,
           pageSize: response.pageSize ?? pageSize,
           totalPages:
             response.totalPages ??
-            Math.ceil(
-              (response.totalCount ?? response.total_count ?? 0) / pageSize
-            ),
+            Math.ceil((response.totalCount ?? 0) / pageSize),
           list: response.list || response.lists || [],
         };
       } catch (err) {
@@ -200,7 +224,7 @@ export const useMarketCreateListing = () => {
   });
 };
 
-/* ✏️ 판매 수정 (명세서 기반 PATCH 적용) */
+/* ✏️ 판매 수정 */
 export const useMarketUpdateListing = () => {
   return useMutation({
     mutationFn: async ({ cardId, data }) => {
@@ -220,16 +244,26 @@ export const useMarketUpdateListing = () => {
   });
 };
 
-/* ❌ 판매 삭제 */
+/* ❌ 판매 삭제 (개선) */
 export const useMarketDeleteListing = () => {
   return useMutation({
-    mutationFn: async (listingId) => {
+    mutationFn: async (cardId) => {
       try {
-        return await apiClient(`${MARKET_ENDPOINTS.LISTINGS}/${listingId}`, {
+        return await apiClient(`${MARKET_ENDPOINTS.LISTINGS}/${cardId}`, {
           method: "DELETE",
           auth: true,
         });
-      } catch {
+      } catch (err) {
+        if (err?.response?.code === 401) {
+          throw new Error("로그인이 필요합니다.");
+        }
+        if (err?.response?.code === 403) {
+          throw new Error("권한이 없는 사용자입니다.");
+        }
+        if (err?.response?.code === 404) {
+          throw new Error("판매 등록된 카드가 없습니다.");
+        }
+        console.error("❌ [useMarketDeleteListing] unknown error:", err);
         throw new Error(ERROR_MESSAGES.DELETE_FAIL);
       }
     },
