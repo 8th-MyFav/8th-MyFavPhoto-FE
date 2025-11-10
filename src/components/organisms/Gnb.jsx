@@ -10,6 +10,8 @@ import { PATHNAME } from "@/constants";
 const GNB = () => {
   const pathname = usePathname();
 
+  const isLanding = pathname === PATHNAME.HOME;
+
   // 숨길 페이지 경로
   const hidePagePathname = [PATHNAME.LOGIN, PATHNAME.JOIN];
 
@@ -27,10 +29,14 @@ const GNB = () => {
     <div className="bg-black">
       <div className="page-wrapper bg-black">
         <nav
-          className="w-full h-lg flex justify-between items-center bg-black 
-                        desktop:px-x-tablet
+          className={`w-full h-lg flex justify-between items-center bg-black 
+                        ${
+                          pathname === PATHNAME.HOME
+                            ? "desktop:px-x-desktop"
+                            : "desktop:px-x-tablet"
+                        }
                         tablet:px-x-tablet
-                        mobile:px-x-mobile"
+                        mobile:px-x-mobile`}
         >
           {/* 좌측 로고 (모바일에서는 숨김) */}
           <div className="hidden tablet:flex desktop:flex items-center cursor-pointer">

@@ -243,13 +243,13 @@ const NotificationUI = ({ show, onClose, onUnreadCountChange }) => {
         {/* 페이지네이션 - 전체 알림이 5개보다 많을 때만 표시 */}
         {totalCount > ITEMS_PER_PAGE && (
           <div className="mt-auto tablet:mt-0">
-            <Pagination
-              page={currentPage}
-              pageSize={ITEMS_PER_PAGE}
-              totalCount={totalCount}
-              onChange={handlePageChange}
-              variant="simple"
-            />
+          <Pagination
+            page={currentPage}
+            pageSize={ITEMS_PER_PAGE}
+            totalCount={totalCount}
+            onChange={handlePageChange}
+            variant="simple"
+          />
           </div>
         )}
       </div>
