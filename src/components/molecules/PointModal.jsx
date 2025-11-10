@@ -14,6 +14,7 @@ const PointModal = ({
   isPending,
   minutes,
   seconds,
+  isCooldown, // ⬅️ 추가: 쿨타임 여부
   boxImages,
   title1 = "랜덤",
   title2 = "포인트",
@@ -78,14 +79,17 @@ const PointModal = ({
               </div>
 
               {/* 선물 상자 */}
-              <div className="flex justify-center items-center gap-[60px]">
+              <div className="flex justify-center items-center gap-[60px] mt-[20px]">
                 {boxImages.map((img, index) => (
                   <img
                     key={index}
                     src={img}
                     alt={`선물상자 ${index + 1}`}
-                    onClick={() => setSelectedBox(index)}
-                    className={`transition-all cursor-pointer rounded-md ${
+                    onClick={() => {
+                      if (isCooldown || isPending) return; // ⬅️ 쿨타임 중 선택 방지
+                      setSelectedBox(index);
+                    }}
+                    className={`transition-all rounded-md ${
                       index === 0
                         ? "w-[246px] h-[191px]"
                         : index === 1
@@ -97,7 +101,11 @@ const PointModal = ({
                         : selectedBox === index
                         ? "opacity-100 scale-105"
                         : "opacity-40"
-                    } ${isPending ? "pointer-events-none" : ""}`}
+                    } ${
+                      isCooldown || isPending
+                        ? "pointer-events-none opacity-50"
+                        : "cursor-pointer"
+                    }`}
                     style={{
                       imageRendering: "crisp-edges",
                       backfaceVisibility: "hidden",
@@ -107,6 +115,7 @@ const PointModal = ({
               </div>
             </>
           ) : (
+            // 획득 결과
             <>
               <div className="flex flex-col justify-center items-center">
                 <img
@@ -125,6 +134,7 @@ const PointModal = ({
           )}
         </div>
 
+        {/* 하단 버튼: 선택 완료 */}
         {!isConfirmed && selectedBox !== null && (
           <div className="flex justify-center mb-[63px]">
             <Button
@@ -138,10 +148,9 @@ const PointModal = ({
               fontSize="20px"
               fontWeight={800}
               borderRadius="var(--radius-base)"
-              className={`active:scale-95 disabled:opacity-50 ${
-                isPending ? "pointer-events-none" : ""
-              }`}
+              className={`active:scale-95 disabled:opacity-50`}
               onClick={handleGain}
+              disabled={isCooldown || isPending} // ⬅️ 잔여시간 있으면 비활성화
             />
           </div>
         )}
