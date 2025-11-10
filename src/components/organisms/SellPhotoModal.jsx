@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { useAuth } from "@/contexts/AuthContext"; // ✅ 로그인 유저 닉네임 사용
+import { useAuth } from "@/contexts/AuthContext";
 import { useMyCards } from "@/api/myGalleryAPI";
 import Search from "../molecules/Search";
 import Dropdown from "../molecules/DropDown";
@@ -17,13 +17,12 @@ const GENRE_OPTIONS = [
 ];
 
 const SellPhotoModal = ({ isOpen, onClose, onCardSelect }) => {
-  // ✅ 훅들은 항상 실행되어야 함 (조건부 X)
   const { user } = useAuth();
   const [searchText, setSearchText] = useState("");
   const [selectedRarity, setSelectedRarity] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
 
-  // ✅ React Query - enabled 옵션으로 모달이 열렸을 때만 실행
+  // ✅ React Query - forSale 포함
   const { data, isLoading } = useMyCards(
     {
       page: 1,
@@ -31,13 +30,13 @@ const SellPhotoModal = ({ isOpen, onClose, onCardSelect }) => {
       grade: selectedRarity || undefined,
       genre: selectedCategory || undefined,
       keyword: searchText || undefined,
+      forSale: true, // ✅ 판매 가능한 카드만 불러오기
     },
-    { enabled: isOpen } // ✅ 모달이 열렸을 때만 API 호출
+    { enabled: isOpen }
   );
 
   const cards = data?.items || [];
 
-  // ✅ 카드 데이터 정규화
   const mappedCards = useMemo(() => {
     return cards.map((item) => {
       const grade = String(item.grade || "").toUpperCase();
@@ -55,14 +54,13 @@ const SellPhotoModal = ({ isOpen, onClose, onCardSelect }) => {
         category: item.genre || "",
         author: user?.nickname || "익명",
         price: item.price || 0,
-        remaining: item.count || item.total_count || 0,
-        total: item.total_count || 0,
+        remaining: item.count || item.total_issued || 0,
+        total: item.total_issued || 0,
         favoriteImg: "/images/favorite.svg",
       };
     });
   }, [cards, user?.nickname]);
 
-  // ✅ 필터링
   const filteredCards = useMemo(() => {
     return mappedCards.filter((card) => {
       const matchesSearch =
@@ -80,7 +78,6 @@ const SellPhotoModal = ({ isOpen, onClose, onCardSelect }) => {
     });
   }, [mappedCards, searchText, selectedRarity, selectedCategory]);
 
-  // ✅ 모달이 닫혀 있으면 렌더링만 스킵
   if (!isOpen) return null;
 
   return (
@@ -117,7 +114,6 @@ const SellPhotoModal = ({ isOpen, onClose, onCardSelect }) => {
               color: "var(--gray-gray300, #A4A4A4)",
               fontFamily: "BR B",
               fontSize: "24px",
-              marginBottom: "0px",
             }}
           >
             마이 갤러리
