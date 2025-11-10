@@ -19,18 +19,18 @@ const TradeCard = ({
     >
       {/* 이미지 영역 */}
       <img
-        src={proposal.imageUrl || "/images/sample.svg"}
-        alt={proposal.title || "교환 제시 이미지"}
+        src={proposal.imageUrl}
+        alt={proposal.title}
         className="w-full h-[220px] object-cover rounded-[4px] mb-[20px]"
       />
 
       {/* CardMeta 영역 */}
-      <div style={{ marginBottom: "15px" }}>
+      <div className="mb-[15px]">
         <CardMeta
-          rarityText={proposal.rarity || "COMMON"} 
-          category={proposal.category || "풍경"}
-          point={proposal.price || 4}
-          author={proposal.sellerName || "프로 여행러"}
+          rarityText={proposal.rarity}
+          category={proposal.category}
+          point={proposal.price}
+          author={proposal.sellerName}
           variant="withAuthor"
         />
       </div>
@@ -53,49 +53,21 @@ const TradeCard = ({
         }}
         className="mb-[40px]"
       >
-        {proposal.description ||
-          "스페인 여행 사진도 좋은데.. 우리집 앞마당 포토카드와 교환하고 싶습니다!"}
+        {proposal.description}
       </p>
 
       {/* 버튼 영역 */}
       {mode === "trade" ? (
         <div className="flex gap-[20px]">
           <button
-            onClick={() => onReject?.(proposal.id)}
-            style={{
-              display: "flex",
-              width: "100%",
-              height: "60px",
-              justifyContent: "center",
-              alignItems: "center",
-              borderRadius: "2px",
-              border: "1px solid var(--color-gray-100)",
-              background: "var(--color-gray-500)",
-              color: "var(--color-white)",
-              fontFamily: "var(--font-noto)",
-              fontSize: "18px",
-              fontWeight: 500,
-              cursor: "pointer",
-            }}
+            onClick={() => onReject?.(proposal)}
+            className="flex w-full h-[60px] justify-center items-center border border-[var(--color-gray-100)] rounded-[2px] bg-[var(--color-gray-500)] text-white font-medium text-[18px] cursor-pointer"
           >
             거절하기
           </button>
           <button
-            onClick={() => onApprove?.(proposal.id)}
-            style={{
-              display: "flex",
-              width: "100%",
-              height: "60px",
-              justifyContent: "center",
-              alignItems: "center",
-              borderRadius: "2px",
-              background: "var(--color-main)",
-              color: "var(--color-black)",
-              fontFamily: "var(--font-noto)",
-              fontSize: "18px",
-              fontWeight: 700,
-              cursor: "pointer",
-            }}
+            onClick={() => onApprove?.(proposal)}
+            className="flex w-full h-[60px] justify-center items-center rounded-[2px] bg-[var(--color-main)] text-[var(--color-black)] font-bold text-[18px] cursor-pointer"
           >
             승인하기
           </button>
@@ -103,22 +75,8 @@ const TradeCard = ({
       ) : (
         <div className="flex justify-center">
           <button
-            onClick={() => onCancel?.(proposal.id)}
-            style={{
-              display: "flex",
-              width: "100%",
-              height: "60px",
-              justifyContent: "center",
-              alignItems: "center",
-              borderRadius: "2px",
-              border: "1px solid var(--color-gray-100)",
-              background: "var(--color-gray-500)",
-              color: "var(--color-white)",
-              fontFamily: "var(--font-noto)",
-              fontSize: "18px",
-              fontWeight: 500,
-              cursor: "pointer",
-            }}
+            onClick={() => onCancel?.(proposal)}
+            className="flex w-full h-[60px] justify-center items-center border border-[var(--color-gray-100)] rounded-[2px] bg-[var(--color-gray-500)] text-white font-medium text-[18px] cursor-pointer"
           >
             취소하기
           </button>
