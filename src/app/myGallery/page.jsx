@@ -9,7 +9,7 @@ import { PATHNAME, GENRE } from "@/constants";
 import { useMyCards } from "@/api/myGalleryAPI";
 import LoadingOverlay from "@/components/molecules/LoadingOverlay";
 
-const PAGE_SIZE = 15;
+const PAGE_SIZE = 18;
 const GENRE_OPTIONS = [
   GENRE.KPOP,
   GENRE.ACTOR,
@@ -215,7 +215,7 @@ export default function MyGalleryPage() {
   return (
     <div className="bg-black">
       <LoadingOverlay show={isFetching} />
-      <div className="bg-black mx-x-desktop">
+      <div className="bg-black page-wrapper">
         <PagesHeader
           showPhotoCardSummary={true}
           ownerName={user?.nickname || ""}

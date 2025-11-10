@@ -86,24 +86,42 @@ const PagesHeader = ({
 
   return (
     <div className="page-wrapper">
-      <div className="mb-xs pt-lg">
-        <div className="flex justify-between items-center w-full border-b-[2px] border-gray-100 pb-xs">
+      <div className="mb-xs desktop:pt-lg tablet:pt-md pt-xs">
+        <div className="flex justify-between items-center w-full desktop:border-b-[2px] tablet:border-b-[2px] border-gray-100 pb-xs">
           {/* 왼쪽 텍스트 */}
-          <div className="flex items-center text-white text-br-3xl tracking-[-1.86px]">
+          <div className="hidden tablet:flex flex-1 items-center text-white tracking-[-2px] font-br tablet:text-[48px] desktop:text-[62px]">
             {displayTitle}
           </div>
 
           {/* 오른쪽 버튼 */}
           {showButton && displayButtonText && displayButtonOnClick && (
-            <Button
-              text={displayButtonText}
-              width="440px"
-              height="60px"
-              padding="0"
-              backgroundColor="var(--color-main)"
-              color="var(--color-black)"
-              onClick={displayButtonOnClick}
-            />
+            <>
+              <div className="hidden tablet:flex flex-shrink-0 ml-auto justify-end">
+                <div className="tablet:w-[280px] desktop:w-[440px]">
+                  <Button
+                    text={displayButtonText}
+                    width="100%"
+                    height="60px"
+                    padding="0"
+                    backgroundColor="var(--color-main)"
+                    color="var(--color-black)"
+                    onClick={displayButtonOnClick}
+                  />
+                </div>
+              </div>
+              <div className="tablet:hidden fixed left-1/2 bottom-[60px] -translate-x-1/2 z-3 w-[345px]">
+                <Button
+                  text={displayButtonText}
+                  width="100%"
+                  height="55px"
+                  padding="0"
+                  backgroundColor="var(--color-main)"
+                  color="var(--color-black)"
+                  onClick={displayButtonOnClick}
+                  className="w-full"
+                />
+              </div>
+            </>
           )}
         </div>
         {showPhotoCardSummary && (

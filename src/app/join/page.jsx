@@ -2,9 +2,9 @@
 import { useAuth } from "@/contexts/AuthContext";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React, { useReducer, useState } from "react";
+import React, { useState } from "react";
 import FormGroup from "@/components/molecules/FormGroup";
-import Button from "@/components/atoms/Button";
+import Modal from "@/components/molecules/Modal";
 import { PATHNAME } from "@/constants";
 
 const JoinPage = () => {
@@ -13,51 +13,162 @@ const JoinPage = () => {
   const [nickname, setNickname] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
-  const [errors, setErrors] = useState({
-    email: "",
-    nickname: "",
-    password: "",
-    passwordConfirmation: "",
+  const [touched, setTouched] = useState({
+    email: false,
+    nickname: false,
+    password: false,
+    passwordConfirmation: false,
+  });
+  const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [modalState, setModalState] = useState({
+    open: false,
+    title: "",
+    content: "",
+    buttonText: "확인",
+    onConfirm: null,
   });
   const { signup } = useAuth();
+
+  const resetForm = () => {
+    setEmail("");
+    setNickname("");
+    setPassword("");
+    setPasswordConfirmation("");
+    setTouched({
+      email: false,
+      nickname: false,
+      password: false,
+      passwordConfirmation: false,
+    });
+    setHasSubmitted(false);
+  };
+
+  const openModal = ({ title, content, buttonText = "확인", onConfirm }) => {
+    setModalState({
+      open: true,
+      title,
+      content,
+      buttonText,
+      onConfirm: onConfirm || null,
+    });
+  };
+
+  const closeModal = () => {
+    setModalState((prev) => {
+      if (prev.onConfirm) {
+        prev.onConfirm();
+      }
+      return {
+        open: false,
+        title: "",
+        content: "",
+        buttonText: "확인",
+        onConfirm: null,
+      };
+    });
+  };
+
+  const emailRegex =
+    // eslint-disable-next-line no-control-regex
+    /^[\w!#$%&'*+/=?`{|}~^.-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+
+  const getEmailError = (value) => {
+    const trimmed = value.trim();
+    if (!trimmed) return "이메일을 입력해주세요.";
+    if (!emailRegex.test(trimmed)) return "유효한 이메일 주소를 입력해주세요.";
+    return "";
+  };
+
+  const getNicknameError = (value) => {
+    if (!value.trim()) return "닉네임을 입력해주세요.";
+    return "";
+  };
+
+  const getPasswordError = (value) => {
+    const trimmed = value.trim();
+    if (!trimmed) return "비밀번호를 입력해주세요.";
+    if (trimmed.length < 8) return "비밀번호는 8자 이상 입력해주세요.";
+    return "";
+  };
+
+  const getPasswordConfirmationError = (confirmation, original) => {
+    const trimmedConfirmation = confirmation.trim();
+    const trimmedOriginal = original.trim();
+    if (!trimmedConfirmation) return "비밀번호를 확인해주세요.";
+    if (trimmedOriginal !== trimmedConfirmation)
+      return "비밀번호가 일치하지 않습니다.";
+    return "";
+  };
+
+  const emailErrorMessage = getEmailError(email);
+  const nicknameErrorMessage = getNicknameError(nickname);
+  const passwordErrorMessage = getPasswordError(password);
+  const passwordConfirmationErrorMessage = getPasswordConfirmationError(
+    passwordConfirmation,
+    password
+  );
+
+  const isFormInvalid = Boolean(
+    emailErrorMessage ||
+      nicknameErrorMessage ||
+      passwordErrorMessage ||
+      passwordConfirmationErrorMessage
+  );
+
+  const displayErrors = {
+    email: hasSubmitted || touched.email ? emailErrorMessage : "",
+    nickname: hasSubmitted || touched.nickname ? nicknameErrorMessage : "",
+    password: hasSubmitted || touched.password ? passwordErrorMessage : "",
+    passwordConfirmation:
+      hasSubmitted || touched.passwordConfirmation
+        ? passwordConfirmationErrorMessage
+        : "",
+  };
 
   const handleJoin = async function (e) {
     e.preventDefault();
 
-    // 기본 유효성 검사
-    const newErrors = {
-      email: "",
-      nickname: "",
-      password: "",
-      passwordConfirmation: "",
-    };
-    if (!email.trim()) newErrors.email = "이메일을 입력해주세요.";
-    if (!nickname.trim()) newErrors.nickname = "닉네임을 입력해주세요.";
-    if (!password.trim()) newErrors.password = "비밀번호를 입력해주세요.";
-    if (!password.trim())
-      newErrors.passwordConfirmation = "비밀번호를 확인 해주세요.";
-    setErrors(newErrors);
+    setHasSubmitted(true);
+    setTouched({
+      email: true,
+      nickname: true,
+      password: true,
+      passwordConfirmation: true,
+    });
 
-    // 에러 있으면 로그인 시도 중단
-    if (
-      newErrors.email ||
-      newErrors.nickname ||
-      newErrors.password ||
-      newErrors.passwordConfirmation
-    )
-      return;
+    if (isFormInvalid) return;
 
-    const response = await signup(
-      email,
-      nickname,
-      password,
-      passwordConfirmation
-    );
-    if (response.success === false) {
-      alert(response.message);
-    } else {
-      alert(`회원가입에 성공하였습니다.`);
-      router.push(PATHNAME.LOGIN);
+    try {
+      const response = await signup(
+        email,
+        nickname,
+        password,
+        passwordConfirmation
+      );
+      if (response.success === false) {
+        openModal({
+          title: "회원가입 실패",
+          content: response.message || "회원가입에 실패했습니다.",
+        });
+        return;
+      }
+
+      openModal({
+        title: "회원가입 성공",
+        content: "회원가입에 성공하였습니다.",
+        buttonText: "로그인하기",
+        onConfirm: () => {
+          resetForm();
+          router.push(PATHNAME.LOGIN);
+        },
+      });
+    } catch (error) {
+      openModal({
+        title: "회원가입 실패",
+        content:
+          error?.message ||
+          "알 수 없는 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
+      });
     }
   };
 
@@ -72,6 +183,22 @@ const JoinPage = () => {
   };
   const handlePasswordConfirmationChange = function (e) {
     setPasswordConfirmation(e.target.value);
+  };
+
+  const handleEmailBlur = function () {
+    setTouched((prev) => ({ ...prev, email: true }));
+  };
+
+  const handleNicknameBlur = function () {
+    setTouched((prev) => ({ ...prev, nickname: true }));
+  };
+
+  const handlePasswordBlur = function () {
+    setTouched((prev) => ({ ...prev, password: true }));
+  };
+
+  const handlePasswordConfirmationBlur = function () {
+    setTouched((prev) => ({ ...prev, passwordConfirmation: true }));
   };
 
   return (
@@ -92,7 +219,8 @@ const JoinPage = () => {
             placeholder="이메일을 입력해주세요"
             value={email}
             onChange={handleEmailChange}
-            error={errors.email}
+            onBlur={handleEmailBlur}
+            error={displayErrors.email}
           />
 
           <FormGroup
@@ -103,7 +231,8 @@ const JoinPage = () => {
             placeholder="닉네임을 입력해 주세요"
             value={nickname}
             onChange={handleNicknameChange}
-            error={errors.nickname}
+            onBlur={handleNicknameBlur}
+            error={displayErrors.nickname}
           />
 
           <FormGroup
@@ -114,7 +243,8 @@ const JoinPage = () => {
             placeholder="8자 이상 입력해 주세요"
             value={password}
             onChange={handlePasswordChange}
-            error={errors.password}
+            onBlur={handlePasswordBlur}
+            error={displayErrors.password}
             showPasswordToggle={true}
           />
 
@@ -126,15 +256,22 @@ const JoinPage = () => {
             placeholder="비밀번호를 한번 더 입력해 주세요"
             value={passwordConfirmation}
             onChange={handlePasswordConfirmationChange}
-            error={errors.passwordConfirmation}
+            onBlur={handlePasswordConfirmationBlur}
+            error={displayErrors.passwordConfirmation}
             showPasswordToggle={true}
           />
           <div className="text-noto-xs pb-md">
-            <Button
+            <button
               type="submit"
-              text="가입하기"
-              className="w-[520px] h-lg bg-main text-black text-noto-xs"
-            />
+              disabled={isFormInvalid}
+              className={`w-[520px] h-lg text-noto-xs flex justify-center items-center flex-shrink-0 transition-colors ${
+                isFormInvalid
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : "bg-main text-black cursor-pointer"
+              }`}
+            >
+              가입하기
+            </button>
           </div>
         </form>
         <div className="flex justify-center gap-4 text-white text-noto-2xs">
@@ -147,6 +284,15 @@ const JoinPage = () => {
           </Link>
         </div>
       </div>
+      {modalState.open && (
+        <Modal
+          title={modalState.title}
+          content={modalState.content}
+          buttonText={modalState.buttonText}
+          onClose={closeModal}
+          onButtonClick={closeModal}
+        />
+      )}
     </div>
   );
 };

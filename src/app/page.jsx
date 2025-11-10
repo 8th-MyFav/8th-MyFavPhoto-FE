@@ -19,7 +19,7 @@ const HomePage = () => {
           <div>
             <div
               className="relative w-full  
-                        mobile:h-[412px] tablet:h-[722px] desktop:h-[1088px] "
+                        mobile:h-[412px] tablet:h-[722px] desktop:h-[988px] "
             >
               <img
                 src="/images/hpMain001.svg"
@@ -94,7 +94,7 @@ const HomePage = () => {
               <div className="absolute top-2xs bottom-0 left-0 right-0 mt-[13px] mx-lg z-0">
                 <div
                   className="w-full 
-                    mobile:h-[412px] tablet:h-[722px] desktop:h-[1088px] 
+                    mobile:h-[412px] tablet:h-[722px] desktop:h-[888px] 
                     rounded-[30px] bg-gradient-to-tr from-[#445b6d] via-[#3f3f3f]/80 to-[#75426b]"
                 />
               </div>

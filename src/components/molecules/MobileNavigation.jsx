@@ -2,17 +2,53 @@
 
 import { useAuth } from "@/contexts/AuthContext";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import NotificationButton from "./notificationButton";
-import { PATHNAME } from "@/constants";
+import { PAGE_TITLE, PATHNAME } from "@/constants";
+import Image from "next/image";
 import ProfileModal from "./profile";
 import { usePoints } from "@/api/pointAPI";
+import { usePathname } from "next/navigation";
 
 const MobileNavigation = () => {
   const { isAuthenticated, loading, user } = useAuth();
   const { data: points } = usePoints();
   const [showProfile, setShowProfile] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const pathname = usePathname();
+
+  const getTitleByPathname = (path) => {
+    if (path === PATHNAME.MARKET || path.startsWith(`${PATHNAME.MARKET}/`)) {
+      return PAGE_TITLE.MARKET;
+    }
+    if (path === PATHNAME.MYGAL || path.startsWith(`${PATHNAME.MYGAL}/`)) {
+      return PAGE_TITLE.MYGAL;
+    }
+    if (
+      path === PATHNAME.MPSELLER ||
+      path.startsWith(`${PATHNAME.MPSELLER}/`)
+    ) {
+      return PAGE_TITLE.MPSELLER;
+    }
+    return "";
+  };
+
+  const shouldUseTitle = useMemo(() => {
+    if (!pathname) return false;
+    if (pathname.startsWith(`${PATHNAME.MARKET}/detail`)) return true;
+    if (pathname.startsWith(`${PATHNAME.MYGAL}`)) return true;
+    if (pathname.startsWith(`${PATHNAME.CREATE}`)) return true;
+    if (pathname.startsWith(`${PATHNAME.MARKET}/exchange`)) return true;
+    if (pathname.startsWith(`${PATHNAME.MARKET}/sell`)) return true;
+    if (pathname.startsWith(`${PATHNAME.MPSELLER}`)) return true;
+    return false;
+  }, [pathname]);
+
+  const displayTitle = useMemo(() => {
+    if (!shouldUseTitle) return "";
+    const title = getTitleByPathname(pathname);
+    return title || "";
+  }, [pathname, shouldUseTitle]);
 
   if (loading) {
     return null;
@@ -66,7 +102,15 @@ const MobileNavigation = () => {
           </div>
         </div>
 
-        <div className="flex flex-1 justify-center">{logo}</div>
+        <div className="flex flex-1 justify-center">
+          {displayTitle ? (
+            <span className="font-br text-white text-[20px] tracking-[-1.2px]">
+              {displayTitle}
+            </span>
+          ) : (
+            logo
+          )}
+        </div>
 
         <div className="flex flex-1 items-center justify-end">
           <Link
@@ -84,29 +128,54 @@ const MobileNavigation = () => {
     <div className="flex w-full items-center">
       <div className="flex flex-1 justify-start">
         <div className="relative">
-          <button
-            onClick={() => setShowProfile((prev) => !prev)}
-            className="flex items-center justify-center rounded border"
-            aria-label="프로필 열기"
-          >
-            <img
-              src="/icons/hamburgerMenuIcon.svg"
-              alt="Hamburger menu"
-              className="h-5 w-5"
-            />
-          </button>
-          <ProfileModal
-            show={showProfile}
-            name={user.nickname}
-            point={points?.acc_point}
-          />
+          {shouldUseTitle ? (
+            <button
+              onClick={() => history.back()}
+              className="flex items-center justify-center"
+              aria-label="뒤로 가기"
+            >
+              <Image
+                src="/icons/headerArrow.svg"
+                alt="뒤로가기"
+                width={10}
+                height={10}
+              />
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={() => setShowProfile((prev) => !prev)}
+                className="flex items-center justify-center rounded border"
+                aria-label="프로필 열기"
+              >
+                <img
+                  src="/icons/hamburgerMenuIcon.svg"
+                  alt="Hamburger menu"
+                  className="h-5 w-5"
+                />
+              </button>
+              <ProfileModal
+                show={showProfile}
+                name={user.nickname}
+                point={points?.acc_point}
+              />
+            </>
+          )}
         </div>
       </div>
 
-      <div className="flex flex-1 justify-center">{logo}</div>
+      <div className="flex flex-1 justify-center">
+        {displayTitle ? (
+          <span className="font-br text-white text-[20px] tracking-[-1.2px]">
+            {displayTitle}
+          </span>
+        ) : (
+          logo
+        )}
+      </div>
 
       <div className="flex flex-1 justify-end">
-        <NotificationButton />
+        {!shouldUseTitle && <NotificationButton />}
       </div>
     </div>
   );
