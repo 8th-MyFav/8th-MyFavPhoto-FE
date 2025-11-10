@@ -7,8 +7,13 @@ import MobileNavigation from "../molecules/MobileNavigation";
 import { usePathname } from "next/navigation";
 import { PATHNAME } from "@/constants";
 
+// 추가: 로그인 여부 감지 & 모달 컨테이너 마운트
+import { useAuth } from "@/contexts/AuthContext";
+import PointModalContainer from "@/components/molecules/PointModalContainer";
+
 const GNB = () => {
   const pathname = usePathname();
+  const { isAuthenticated, loading } = useAuth();
 
   // 숨길 페이지 경로
   const hidePagePathname = [PATHNAME.LOGIN, PATHNAME.JOIN];
@@ -25,6 +30,9 @@ const GNB = () => {
 
   return (
     <div className="bg-black">
+      {/* ✅ 로그인 상태일 때, 어디서든 모달이 뜰 수 있도록 상단에서 컨테이너 마운트 */}
+      {isAuthenticated && !loading && <PointModalContainer />}
+
       <div className="page-wrapper bg-black">
         <nav
           className="w-full h-lg flex justify-between items-center bg-black 
