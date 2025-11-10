@@ -29,8 +29,7 @@ const CardTradeModal = ({ isOpen, onClose, onCardSelect }) => {
     grade: selectedRarity || undefined,
     genre: selectedCategory || undefined,
     keyword: searchText || undefined,
-    saleType: "TRADE",
-    isSoldOut: false,
+    forSale: true, // ✅ 미판매 카드만 가져오기
   });
 
   // 카드 데이터 정규화

@@ -114,3 +114,52 @@ const Dropdown = ({
 };
 
 export default Dropdown;
+
+export const SortDropdown = ({
+  options = ["낮은 가격순", "높은 가격순", "최신순"],
+  placeholder = "낮은 가격순",
+  customStyles = {},
+  ...rest
+}) => {
+  const mergedCustomStyles = {
+    container: {
+      border: "1px solid #FFF",
+      padding: "13px 20px",
+      ...customStyles.container,
+    },
+    select: {
+      width: "100%",
+      justifyContent: "space-between",
+      ...customStyles.select,
+    },
+    text: {
+      width: "100%",
+      ...customStyles.text,
+    },
+    arrow: {
+      marginLeft: "12px",
+      ...customStyles.arrow,
+    },
+    optionList: {
+      width: "180px",
+      padding: "10px 24px",
+      ...customStyles.optionList,
+    },
+    option: {
+      ...customStyles.option,
+    },
+  };
+
+  return (
+    <Dropdown
+      options={options}
+      placeholder={placeholder}
+      width="180px"
+      height="50px"
+      padding="13px 20px"
+      maxWidth="180px"
+      customStyles={mergedCustomStyles}
+      {...rest}
+    />
+  );
+};
