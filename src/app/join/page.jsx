@@ -53,7 +53,6 @@ const JoinPage = () => {
       password,
       passwordConfirmation
     );
-    console.log(response);
     if (response.success === false) {
       alert(response.message);
     } else {
