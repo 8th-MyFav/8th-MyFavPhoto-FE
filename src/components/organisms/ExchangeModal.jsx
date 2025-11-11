@@ -110,6 +110,8 @@ const ExchangeModal = ({ selectedCard, onClose, tradePostId, targetCard }) => {
             rarityIcon={selectedCard.rarity}
             category={selectedCard.category}
             author={selectedCard.author}
+            quantity={selectedCard.remaining || 0}
+            showRemainingAsFraction={false}
           />
 
           {/* 오른쪽 입력 */}
