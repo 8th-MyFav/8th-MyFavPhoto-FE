@@ -201,6 +201,11 @@ const CreatePhotoPage = () => {
                 arrowSpacing="justify-content"
                 optionListMarginTop="25px"
                 containerBorder="1px solid #DDD"
+                height="60px"
+                padding="18px 20px"
+                placeholderTextColor="var(--gray-gray200, #DDD)"
+                selectedTextColor="var(--gray-gray200, #DDD)"
+                placeholderFontWeight="400"
                 options={[
                   GRADE.COMMON,
                   GRADE.RARE,
@@ -229,6 +234,11 @@ const CreatePhotoPage = () => {
                 arrowSpacing="justify-content"
                 optionListMarginTop="25px"
                 containerBorder="1px solid #DDD"
+                height="60px"
+                padding="18px 20px"
+                placeholderTextColor="var(--gray-gray200, #DDD)"
+                selectedTextColor="var(--gray-gray200, #DDD)"
+                placeholderFontWeight="400"
                 options={[
                   GENRE.KPOP,
                   GENRE.KBO,
