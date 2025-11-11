@@ -7,7 +7,7 @@ import CardSearchContainer from "@/components/organisms/CardSearchContainer";
 import Modal from "@/components/molecules/Modal";
 import SellPhotoModal from "@/components/organisms/SellPhotoModal";
 import CardDetailSellModal from "@/components/organisms/CardDetailSellModal";
-import PointModalContainer from "@/components/molecules/pointmodalcontainer"; // 변경된 부분
+import PointModalContainer from "@/components/molecules/Pointmodalcontainer"; // 변경된 부분
 import LoadingOverlay from "@/components/molecules/LoadingOverlay";
 import { PATHNAME, GENRE } from "@/constants";
 import { useInfiniteMarketList } from "@/api/marketListings";
