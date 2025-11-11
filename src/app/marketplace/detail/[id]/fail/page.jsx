@@ -10,13 +10,17 @@ export default function PurchaseFailPage() {
   const quantity = searchParams.get("quantity");
 
   return (
-    <ActionResultPage
-      type="구매"
-      result="실패"
-      rarity={rarity}
-      title={title}
-      quantity={quantity}
-      buttonText="마켓 플레이스로 돌아가기"
-    />
+    <div className="bg-black m-auto">
+      <div className="bg-black min-h-screen flex items-center justify-center">
+        <ActionResultPage
+          type="구매"
+          result="실패"
+          rarity={rarity}
+          title={title}
+          quantity={quantity}
+          buttonText="마켓 플레이스로 돌아가기"
+        />
+      </div>
+    </div>
   );
 }

@@ -7,11 +7,11 @@ import CardSearchContainer from "@/components/organisms/CardSearchContainer";
 import Modal from "@/components/molecules/Modal";
 import SellPhotoModal from "@/components/organisms/SellPhotoModal";
 import CardDetailSellModal from "@/components/organisms/CardDetailSellModal";
-import PointModalContainer from "@/components/molecules/pointmodalcontainer"; // 변경된 부분
+import PointModalContainer from "@/components/molecules/PointModalContainer"; // 변경된 부분
 import LoadingOverlay from "@/components/molecules/LoadingOverlay";
 import { PATHNAME, GENRE } from "@/constants";
 import { useInfiniteMarketList } from "@/api/marketListings";
-import { useAuth } from "@/contexts/AuthContext"; 
+import { useAuth } from "@/contexts/AuthContext";
 
 const CATEGORY_OPTIONS = Object.values(GENRE);
 
@@ -24,7 +24,7 @@ const SORT_ORDER_MAP = {
 export default function MarketplacePage() {
   const router = useRouter();
   const loadMoreRef = useRef(null);
-  const { user, isAuthenticated, loading } = useAuth(); 
+  const { user, isAuthenticated, loading } = useAuth();
 
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
@@ -123,7 +123,11 @@ export default function MarketplacePage() {
     const authorNickname = card.author?.trim();
     const currentNickname = user?.nickname?.trim();
 
-    if (authorNickname && currentNickname && authorNickname === currentNickname) {
+    if (
+      authorNickname &&
+      currentNickname &&
+      authorNickname === currentNickname
+    ) {
       router.push(PATHNAME.MPSELLER_DETAIL(card.id)); // 내 카드
     } else {
       router.push(PATHNAME.MARKET_DETAIL(card.id)); // 남의 카드

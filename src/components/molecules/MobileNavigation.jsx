@@ -137,8 +137,8 @@ const MobileNavigation = () => {
               <Image
                 src="/icons/headerArrow.svg"
                 alt="뒤로가기"
-                width={10}
-                height={10}
+                width={11}
+                height={18}
               />
             </button>
           ) : (
@@ -166,7 +166,7 @@ const MobileNavigation = () => {
 
       <div className="flex flex-1 justify-center">
         {displayTitle ? (
-          <span className="font-br text-white text-[20px] tracking-[-1.2px]">
+          <span className="text-white text-br-lg tracking-[-1.2px]">
             {displayTitle}
           </span>
         ) : (
@@ -175,7 +175,7 @@ const MobileNavigation = () => {
       </div>
 
       <div className="flex flex-1 justify-end">
-        {!shouldUseTitle && <NotificationButton />}
+        <NotificationButton />
       </div>
     </div>
   );

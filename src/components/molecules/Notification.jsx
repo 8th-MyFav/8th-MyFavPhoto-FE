@@ -199,7 +199,7 @@ const NotificationUI = ({ show, onClose, onUnreadCountChange }) => {
           >
             <img src="/icons/leftArrow.svg" alt="Back" className="h-5 w-5" />
           </button>
-          <h2 className="text-white text-noto-3xs">알림</h2>
+          <h2 className="text-white text-br-lg">알림</h2>
           <div className="h-10 w-10" />
         </div>
 
@@ -209,7 +209,10 @@ const NotificationUI = ({ show, onClose, onUnreadCountChange }) => {
               <div
                 key={n.id}
                 onClick={() => handleItemClick && handleItemClick(n.id)}
-                className={`w-full h-[107px] rounded-none flex justify-start items-center cursor-pointer transition border-b border-gray-400 px-[20px] text-left 
+                className={`w-full rounded-none flex justify-start items-center cursor-pointer transition border-b border-gray-400 px-[20px] text-left 
+                  mobile:h-[140px]
+                  tablet:h-[107px]
+                  desktop:h-[107px]
                   ${n.isRead ? "bg-noti-read" : "bg-noti-unread"}
                 ${
                   totalPages <= 1 && index === displayedNotifications.length - 1
@@ -232,8 +235,8 @@ const NotificationUI = ({ show, onClose, onUnreadCountChange }) => {
               </div>
             ))
           ) : (
-            <div className="w-full h-[107px] rounded-base flex justify-center items-center px-[20px]">
-              <p className="text-gray-400 text-noto-3xs">
+            <div className="w-full rounded-base flex justify-center items-center px-[20px] mobile:h-[140px] tablet:h-[107px] desktop:h-[107px]">
+              <p className="text-gray-400 mobile:text-[14px] tablet:text-noto-3xs desktop:text-noto-3xs">
                 새로운 알림이 없습니다.
               </p>
             </div>
@@ -243,13 +246,13 @@ const NotificationUI = ({ show, onClose, onUnreadCountChange }) => {
         {/* 페이지네이션 - 전체 알림이 5개보다 많을 때만 표시 */}
         {totalCount > ITEMS_PER_PAGE && (
           <div className="mt-auto tablet:mt-0">
-          <Pagination
-            page={currentPage}
-            pageSize={ITEMS_PER_PAGE}
-            totalCount={totalCount}
-            onChange={handlePageChange}
-            variant="simple"
-          />
+            <Pagination
+              page={currentPage}
+              pageSize={ITEMS_PER_PAGE}
+              totalCount={totalCount}
+              onChange={handlePageChange}
+              variant="simple"
+            />
           </div>
         )}
       </div>
