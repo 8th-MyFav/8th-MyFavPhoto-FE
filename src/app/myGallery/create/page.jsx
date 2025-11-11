@@ -200,6 +200,7 @@ const CreatePhotoPage = () => {
                 optionListWidth="100%"
                 arrowSpacing="justify-content"
                 optionListMarginTop="25px"
+                containerBorder="1px solid #DDD"
                 options={[
                   GRADE.COMMON,
                   GRADE.RARE,
@@ -227,6 +228,7 @@ const CreatePhotoPage = () => {
                 optionListWidth="100%"
                 arrowSpacing="justify-content"
                 optionListMarginTop="25px"
+                containerBorder="1px solid #DDD"
                 options={[
                   GENRE.KPOP,
                   GENRE.KBO,
