@@ -85,12 +85,41 @@ export default function MyGalleryPage() {
   // 데이터 추출
   const ownedItems = data?.items || [];
   const totalCount = data?.totalCount || 0;
-  const gradeCounts = data?.gradeCounts || {
-    COMMON: 0,
-    RARE: 0,
-    SUPER_RARE: 0,
-    LEGENDARY: 0,
-  };
+  const DEFAULT_GRADE_COUNTS = useMemo(
+    () => ({
+      COMMON: 0,
+      RARE: 0,
+      SUPER_RARE: 0,
+      LEGENDARY: 0,
+    }),
+    []
+  );
+
+  const gradeCounts = data?.gradeCounts || DEFAULT_GRADE_COUNTS;
+
+  const [summaryGradeCounts, setSummaryGradeCounts] =
+    useState(DEFAULT_GRADE_COUNTS);
+  const [summaryTotalCount, setSummaryTotalCount] = useState(0);
+
+  useEffect(() => {
+    const isBaseView =
+      !selectedRarity &&
+      !selectedCategory &&
+      !debouncedSearchText &&
+      page === 1;
+
+    if (isBaseView) {
+      setSummaryGradeCounts(gradeCounts);
+      setSummaryTotalCount(totalCount);
+    }
+  }, [
+    gradeCounts,
+    totalCount,
+    selectedRarity,
+    selectedCategory,
+    debouncedSearchText,
+    page,
+  ]);
 
   // 디버깅: 페이지네이션 정보 확인 및 API 응답 필드 확인
   useEffect(() => {
@@ -217,8 +246,8 @@ export default function MyGalleryPage() {
         <PagesHeader
           showPhotoCardSummary={true}
           ownerName={user?.nickname || ""}
-          totalCount={totalCount}
-          gradeCounts={gradeCounts}
+          totalCount={summaryTotalCount}
+          gradeCounts={summaryGradeCounts}
         />
 
         {/* 에러가 있고 데이터가 없을 때만 전체 에러 화면 표시 */}
