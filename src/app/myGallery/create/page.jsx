@@ -124,7 +124,6 @@ const CreatePhotoPage = () => {
     // 이미지 파일 추가
     cardData.append("file", photo); // 여기서 photo는 File 객체
 
-    console.log("cardData=> ", cardData);
     // const cardData = {
     //   name: photoName,
     //   grade,
