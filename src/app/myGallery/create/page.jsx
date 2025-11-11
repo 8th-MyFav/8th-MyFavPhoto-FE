@@ -136,22 +136,10 @@ const CreatePhotoPage = () => {
     createCards(cardData, {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["myCards"] });
-        router.push(
-          buildUrlWithParams(PATHNAME.CREATE_SUCCESS, {
-            rarity: grade,
-            title: photoName,
-            quantity,
-          })
-        );
+        router.replace(PATHNAME.CREATE_SUCCESS);
       },
       onError: () => {
-        router.push(
-          buildUrlWithParams(PATHNAME.CREATE_FAIL, {
-            rarity: grade,
-            title: photoName,
-            quantity,
-          })
-        );
+        router.replace(PATHNAME.CREATE_FAIL);
       },
     });
   };
