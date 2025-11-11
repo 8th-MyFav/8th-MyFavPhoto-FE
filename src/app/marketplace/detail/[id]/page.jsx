@@ -17,6 +17,7 @@ import Modal from "@/components/molecules/Modal";
 import CardTradeModal from "@/components/organisms/CardTradeModal";
 import ExchangeModal from "@/components/organisms/ExchangeModal";
 import CardMeta from "@/components/molecules/CardMeta";
+import TradeCard from "@/components/organisms/TradeCard"; // 구매자용 카드 컴포넌트
 import { PATHNAME } from "@/constants";
 
 export default function DetailPage() {
@@ -24,7 +25,10 @@ export default function DetailPage() {
   const router = useRouter();
   const listingId = parseInt(params.id, 10);
 
-  // 상세조회
+  // 현재 로그인 유저 ID (예시)
+  const currentUserId = 3;
+
+  // 상세 조회
   const { data: listing, isLoading, isError } = useMarketListingDetail(listingId);
 
   // 트레이드 목록 조회
@@ -32,7 +36,7 @@ export default function DetailPage() {
 
   // 트레이드 관련 mutation
   const { mutate: purchaseCard, isLoading: isPurchasing } = useMarketPurchase();
-  const { mutate: createTrade, isLoading: isCreatingTrade } = useMarketTradeCreate();
+  const { mutate: createTrade } = useMarketTradeCreate();
   const { mutate: approveTrade } = useMarketTradeApprove();
   const { mutate: rejectTrade } = useMarketTradeReject();
 
@@ -67,6 +71,7 @@ export default function DetailPage() {
     author: listing.card?.nickname ?? "익명",
     content: listing.card?.description ?? "설명 없음",
     topImage: listing.card?.image_url ?? "/images/sample.svg",
+    creatorId: listing.card?.creator_id,
   };
 
   const total = count * (trade.price ?? 0);
@@ -80,7 +85,6 @@ export default function DetailPage() {
       return;
     }
 
-    // 수정된 API 호출
     purchaseCard(
       { tradePostId: listing.id, count },
       {
@@ -106,33 +110,33 @@ export default function DetailPage() {
       {
         onSuccess: () => {
           setIsExchangeModalOpen(false);
-          refetchTrades(); // 목록 갱신
+          refetchTrades();
         },
-        onError: (err) => {
-          console.error("교환 제시 실패:", err);
-        },
+        onError: (err) => console.error("교환 제시 실패:", err),
       }
     );
   };
 
-  /** 트레이드 승인/거절 */
-  const handleApprove = (tradeId) => {
-    approveTrade(tradeId, { onSuccess: () => refetchTrades() });
-  };
-  const handleReject = (tradeId) => {
-    rejectTrade(tradeId, { onSuccess: () => refetchTrades() });
-  };
+  /** 트레이드 승인/거절 (판매자용) */
+  const handleApprove = (tradeId) => approveTrade(tradeId, { onSuccess: () => refetchTrades() });
+  const handleReject = (tradeId) => rejectTrade(tradeId, { onSuccess: () => refetchTrades() });
 
+  /** 교환 제시 취소 (구매자용) */
   const handleCancelTradeCard = (targetCard) => {
     setCancelTargetCard(targetCard);
     setIsCancelModalOpen(true);
   };
-
   const handleConfirmCancel = () => {
     console.log("교환 제시 취소 완료:", cancelTargetCard);
     setIsCancelModalOpen(false);
     setCancelTargetCard(null);
+    // TODO: 취소 API 호출
   };
+
+  // 구매자 입장에서 본인이 제시한 진행 중(PENDING) 거래만 필터링
+  const myTrades = tradeList.filter(
+    (t) => t.requester_id === currentUserId && t.trade_status === "PENDING"
+  );
 
   return (
     <div className="bg-[#111] text-white min-h-screen pb-24">
@@ -231,28 +235,31 @@ export default function DetailPage() {
             {trade.tradeNote || "교환 희망 정보가 없습니다."}
           </p>
 
-          {/* 트레이드 목록 */}
+          {/* 구매자 입장: 내가 제시한 진행 중 교환 목록 */}
           <h3 className="text-white text-4xl font-bold mb-5">내가 제시한 교환 목록</h3>
           <hr className="border-t-2 border-gray-100 mb-[20px]" />
-          {tradeList.length === 0 ? (
+          {myTrades.length === 0 ? (
             <div className="text-gray-400">아직 제시한 교환 목록이 없습니다.</div>
           ) : (
-            tradeList.map((t) => (
-              <div key={t.id} className="mb-4 p-3 border border-gray-600 rounded">
-                <div className="flex justify-between items-center">
-                  <span>[{t.offeredCard.rarity} | {t.offeredCard.title}]</span>
-                  <span className="text-gray-400">상태: {t.status}</span>
-                </div>
-                <div className="mt-2 flex gap-2">
-                  {t.status === "PENDING" && (
-                    <>
-                      <button onClick={() => handleApprove(t.id)} className="bg-green-500 px-2 rounded">승인</button>
-                      <button onClick={() => handleReject(t.id)} className="bg-red-500 px-2 rounded">거절</button>
-                    </>
-                  )}
-                </div>
-              </div>
-            ))
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {myTrades.map((t) => (
+                <TradeCard
+                  key={t.id}
+                  proposal={{
+                    title: t.offeredCard.name,
+                    description: t.offeredCard.description,
+                    rarity: t.offeredCard.grade,
+                    category: t.offeredCard.genre,
+                    price: t.offeredCard.price,
+                    sellerName: t.requester.nickname,
+                    imageUrl: t.offeredCard.image_url ?? "/images/sample.svg",
+                    id: t.id,
+                  }}
+                  mode="purchase"
+                  onCancel={handleCancelTradeCard}
+                />
+              ))}
+            </div>
           )}
         </div>
       </div>
