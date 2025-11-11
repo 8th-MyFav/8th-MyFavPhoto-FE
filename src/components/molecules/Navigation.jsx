@@ -3,9 +3,9 @@
 import { useAuth } from "@/contexts/AuthContext";
 import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
-import NotificationButton from "./notificationButton";
+import NotificationButton from "./NotificationButton.jsx";
 import { PATHNAME } from "@/constants";
-import ProfileModal from "./profile";
+import ProfileModal from "./Profile.jsx";
 import { usePoints } from "@/api/pointAPI";
 
 const Navigation = () => {
