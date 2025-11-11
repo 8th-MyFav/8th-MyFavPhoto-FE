@@ -1,59 +1,90 @@
 "use client";
 
-import React, { useState } from "react";
-import Button from "../atoms/button";
+import React, { useState, useEffect } from "react";
+import Button from "../atoms/Button";
+import { GRADE } from "@/constants";
+import CardMeta from "../molecules/CardMeta";
+import { useMarketUpdateListing } from "@/api/marketListings";
 
-const CardDetailEdit = ({ isOpen, onClose, card }) => {
-  if (!isOpen || !card) return null;
+const CardDetailEdit = ({ isOpen, onClose, listing }) => {
+  if (!isOpen || !listing) return null;
 
-  const [selectedRarity, setSelectedRarity] = useState(card.rarity || "");
-  const [selectedCategory, setSelectedCategory] = useState(card.category || "");
-  const [description, setDescription] = useState(card.description || "");
-  const [quantity, setQuantity] = useState(1);
-  const [price, setPrice] = useState(card.price || 1);
+  // ✅ listing.card 기준으로 수정
+  const card = listing.card || {};
 
-  const getRarityColor = (rarity) => {
-    switch (rarity?.toUpperCase()) {
-      case "COMMON":
-        return "#EFFF04";
-      case "RARE":
-        return "#29C9F9";
-      case "SUPER RARE":
-        return "#A77EFF";
-      case "LEGENDARY":
-        return "#FF2A6A";
-      default:
-        return "#A4A4A4";
+  // 기본 카드 정보
+  const cardGrade = card?.grade || "COMMON";
+  const cardGenre = card?.genre || "기타";
+  const authorName = card?.nickname || "익명";
+
+  // 상태 초기화
+  const [selectedRarity, setSelectedRarity] = useState(listing.trade_grade || "");
+  const [selectedCategory, setSelectedCategory] = useState(listing.trade_genre || "");
+  const [description, setDescription] = useState(listing.trade_note || "");
+  const [quantity, setQuantity] = useState(listing.left_count || 1);
+  const [price, setPrice] = useState(listing.price || 1);
+
+  const { mutate: updateListing, isPending } = useMarketUpdateListing();
+  
+
+  // listing 변경 시 상태 동기화
+  useEffect(() => {
+    if (listing) {
+      setSelectedRarity(listing.trade_grade || "");
+      setSelectedCategory(listing.trade_genre || "");
+      setDescription(listing.trade_note || "");
+      setQuantity(listing.left_count || 1);
+      setPrice(listing.price || 1);
     }
-  };
+  }, [listing]);
 
-  const increaseQuantity = () => {
-    if (quantity < card.remaining) setQuantity(quantity + 1);
-  };
+  // 수량 & 가격 조정
+  const increaseQuantity = () => setQuantity(prev => Math.min(prev + 1, listing.total_count));
+  const decreaseQuantity = () => setQuantity(prev => Math.max(prev - 1, 1));
+  const increasePrice = () => setPrice(prev => prev + 1);
+  const decreasePrice = () => setPrice(prev => Math.max(prev - 1, 1));
 
-  const decreaseQuantity = () => {
-    if (quantity > 1) setQuantity(quantity - 1);
-  };
-
-  const increasePrice = () => setPrice(price + 1);
-  const decreasePrice = () => {
-    if (price > 1) setPrice(price - 1);
-  };
-
+  // 저장
   const handleSave = () => {
     const isValid =
       quantity > 0 &&
       selectedRarity &&
       selectedCategory &&
-      description.trim().length > 0;
+      description.trim().length > 0 &&
+      price > 0;
 
-    // router.push 제거: 성공/실패 페이지 이동 없이 모달만 닫기
-    onClose();
+    if (!isValid) {
+      alert("모든 필드를 올바르게 입력해주세요.");
+      return;
+    }
+
+    const payload = {
+      price,
+      trade_grade: selectedRarity,
+      trade_genre: selectedCategory,
+      trade_note: description,
+      left_count: quantity,
+    };
+
+  
+    updateListing({ cardId: listing.card?.id, data: payload }, {
+        onSuccess: () => {
+          alert("수정이 완료되었습니다!");
+          onClose();
+        },
+        onError: () => {
+          alert("수정 중 오류가 발생했습니다. 다시 시도해주세요.");
+        },
+      }
+    );
   };
+
+  const GENRES = ["KPOP", "ACTOR", "ESPORTS", "KBO", "ANIMATION"];
 
   return (
     <>
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40" />
+
       <div
         className="fixed left-1/2 top-1/2 z-50 transform -translate-x-1/2 -translate-y-1/2 overflow-y-auto"
         style={{
@@ -65,7 +96,6 @@ const CardDetailEdit = ({ isOpen, onClose, card }) => {
           padding: "40px",
         }}
       >
-        {/* 닫기 버튼 */}
         <img
           src="/images/close.svg"
           alt="close"
@@ -73,64 +103,32 @@ const CardDetailEdit = ({ isOpen, onClose, card }) => {
           onClick={onClose}
         />
 
-        {/* 헤더 */}
         <div className="flex flex-col mb-[40px]">
-          <h2 className="text-[24px] text-gray-400 font-[BR B] mb-[10px]">
-            수정하기
-          </h2>
+          <h2 className="text-[24px] text-gray-400 font-[BR B] mb-[10px]">수정하기</h2>
           <h3 className="text-[40px] font-bold text-white mb-[40px] border-b border-white pb-[10px]">
-            {card.title}
+            {card?.name || "이름 없음"}
           </h3>
         </div>
 
-        {/* 메인 정보 */}
         <div className="flex justify-start gap-[20px] mb-[30px]">
           <img
-            src={card.imageUrl} 
-            alt={card.title}
+            src={card?.image_url || "/images/default-card.png"}
+            alt={card?.name}
             className="w-[380px] h-[260px] object-cover rounded"
           />
-          <div className="flex flex-col text-white items-start">
-            <div className="flex justify-between items-center mb-[36px] w-full">
-              <div className="flex items-center gap-[15px]">
-                <span
-                  style={{
-                    color: getRarityColor(selectedRarity),
-                    fontFamily: "Noto Sans KR",
-                    fontSize: "24px",
-                    fontWeight: 700,
-                  }}
-                >
-                  {selectedRarity}
-                </span>
-                <span className="text-gray-400">|</span>
-                <span
-                  style={{
-                    color: "#A4A4A4",
-                    fontFamily: "Noto Sans KR",
-                    fontSize: "24px",
-                    fontWeight: 700,
-                  }}
-                >
-                  {selectedCategory}
-                </span>
-              </div>
-              <div
-                style={{
-                  color: "#FFF",
-                  fontFamily: "Noto Sans KR",
-                  fontSize: "24px",
-                  fontWeight: 700,
-                  textDecorationLine: "underline",
-                }}
-              >
-                {card.author}
-              </div>
-            </div>
+          <div className="flex flex-col text-white items-start w-full">
+            <CardMeta
+              rarityText={cardGrade}
+              category={cardGenre}
+              author={authorName}
+              point={price}
+              variant="withAuthor"
+              sizeVariant="base"
+              className="mb-[30px]"
+            />
 
             <div className="w-full border-b border-gray-600 mb-[30px]" />
 
-            {/* 총 판매 수량 */}
             <div className="flex items-center mb-[20px]">
               <span className="font-bold text-[16px] mr-[108px]">총 판매 수량</span>
               <div className="flex items-center">
@@ -140,13 +138,12 @@ const CardDetailEdit = ({ isOpen, onClose, card }) => {
                   <button className="text-white text-[20px]" onClick={increaseQuantity}>+</button>
                 </div>
                 <div className="flex flex-col items-center justify-center ml-[10px] leading-tight">
-                  <span className="text-[20px]" style={{ color: "#FFF" }}>/ {card.remaining}</span>
-                  <span className="text-[12px]" style={{ color: "#DDD" }}>최대 {card.remaining}장</span>
+                  <span className="text-[20px]" style={{ color: "#FFF" }}>/ {listing.total_count}</span>
+                  <span className="text-[12px]" style={{ color: "#DDD" }}>최대 {listing.total_count}장</span>
                 </div>
               </div>
             </div>
 
-            {/* 장당 가격 */}
             <div className="flex items-center mb-[30px]">
               <span className="font-bold text-[16px] mr-[126px]">장당 가격</span>
               <div className="flex items-center">
@@ -161,10 +158,10 @@ const CardDetailEdit = ({ isOpen, onClose, card }) => {
           </div>
         </div>
 
-        {/* 교환 희망 정보 */}
         <div className="text-white mb-[30px] pt-[30px]">
           <h4 className="text-[20px] font-bold mb-[20px]">교환 희망 정보</h4>
           <div className="border-b-[2px] border-[#EEE] mb-[20px]" />
+
           <div className="flex gap-[30px] mb-[20px]">
             <div className="flex-1 flex flex-col">
               <label className="text-white font-bold mb-[8px]">등급</label>
@@ -174,10 +171,10 @@ const CardDetailEdit = ({ isOpen, onClose, card }) => {
                 onChange={(e) => setSelectedRarity(e.target.value)}
               >
                 <option value="" disabled>등급을 선택해 주세요</option>
-                <option value="COMMON">COMMON</option>
-                <option value="RARE">RARE</option>
-                <option value="SUPER RARE">SUPER RARE</option>
-                <option value="LEGENDARY">LEGENDARY</option>
+                <option value={GRADE.COMMON}>{GRADE.COMMON}</option>
+                <option value={GRADE.RARE}>{GRADE.RARE}</option>
+                <option value={GRADE.SUPER_RARE}>{GRADE.SUPER_RARE}</option>
+                <option value={GRADE.LEGENDARY}>{GRADE.LEGENDARY}</option>
               </select>
             </div>
 
@@ -189,10 +186,9 @@ const CardDetailEdit = ({ isOpen, onClose, card }) => {
                 onChange={(e) => setSelectedCategory(e.target.value)}
               >
                 <option value="" disabled>장르를 선택해 주세요</option>
-                <option value="풍경">풍경</option>
-                <option value="인물">인물</option>
-                <option value="동물">동물</option>
-                <option value="추상">추상</option>
+                {GENRES.map((g) => (
+                  <option key={g} value={g}>{g}</option>
+                ))}
               </select>
             </div>
           </div>
@@ -208,25 +204,9 @@ const CardDetailEdit = ({ isOpen, onClose, card }) => {
           </div>
         </div>
 
-        {/* 버튼 */}
         <div className="flex justify-end gap-[20px]">
-          <Button
-            text="취소하기"
-            width="400px"
-            height="60px"
-            backgroundColor="transparent"
-            color="#FFF"
-            border="1px solid #FFF"
-            onClick={onClose}
-          />
-          <Button
-            text="수정하기"
-            width="400px"
-            height="60px"
-            backgroundColor="#EFFF04"
-            color="#0F0F0F"
-            onClick={handleSave}
-          />
+          <Button text="취소하기" width="400px" height="60px" backgroundColor="transparent" color="#FFF" border="1px solid #FFF" onClick={onClose} />
+          <Button text={isPending ? "수정 중..." : "수정하기"} width="400px" height="60px" backgroundColor="#EFFF04" color="#0F0F0F" onClick={handleSave} disabled={isPending} />
         </div>
       </div>
     </>

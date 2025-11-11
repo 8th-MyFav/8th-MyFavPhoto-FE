@@ -9,13 +9,11 @@ export default function Tag({ type = "sale", size = "medium" }) {
       text: "판매 중",
       textColor: "text-white",
       bgColor: "bg-[#1C1C1C]",
-      borderColor: "border-[#1C1C1C]",
     },
     trade: {
       text: "교환 제시 대기 중",
       textColor: "text-[#EFFF04]",
       bgColor: "bg-[#1C1C1C]",
-      borderColor: "border-[#EFFF04]",
     },
   };
 
@@ -31,7 +29,8 @@ export default function Tag({ type = "sale", size = "medium" }) {
 
   return (
     <div
-      className={`inline-block font-semibold border ${s.textColor} ${s.bgColor} ${s.borderColor} ${sz}`}
+  className={`inline-block font-semibold border-none ${s.textColor} ${s.bgColor} ${sz}`}
+  style={{ border: "none" }}
     >
       {s.text}
     </div>

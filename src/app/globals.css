@@ -29,7 +29,6 @@
   --background: var(--color-white);
   --foreground: var(--color-black);
 
-  /* 폰트 변수 */
   --font-br: "BR B", sans-serif;
   --font-noto: "Noto Sans KR", sans-serif;
 }
@@ -46,10 +45,10 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-noto-sans-kr); /* 기본은 next/font Noto Sans KR */
+  font-family: var(--font-noto-sans-kr);
 }
 
-/* 입력 요소 포커스/자동완성 기본 배경색 제거 */
+/* 입력 포커스 등 공통 스타일 */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
@@ -64,20 +63,11 @@ select:-webkit-autofill:focus {
   transition: background-color 9999s ease-in-out 0s;
 }
 
-input:focus,
-textarea:focus,
-select:focus {
-  outline: none;
-  background: var(--color-black);
-  border-color: var(--color-gray-200);
-}
-
-/* Tailwind용 커스텀 속성 (theme inline) */
+/* Tailwind theme 변수만 정의 */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 
-  /* Tailwind v4 theme color tokens */
   --color-black: var(--color-black);
   --color-white: var(--color-white);
   --color-gray-100: var(--color-gray-100);
@@ -96,7 +86,6 @@ select:focus {
   --font-br: var(--font-br);
   --font-mono: monospace;
 
-  /* Tailwind v4 custom text sizes for project conventions (Noto) */
   --text-noto-3xl: 62px;
   --text-noto-2xl: 48px;
   --text-noto-xl: 40px;
@@ -110,42 +99,99 @@ select:focus {
   --text-noto-4xs: 12px;
   --text-noto-5xs: 10px;
 
-  /* BR font sizes (family applied via CSS rule) */
   --text-br-3xl: 62px;
   --text-br-2xl: 48px;
+  --text-br-base: 46px;
   --text-br-lg: 20px;
   --text-br-md: 18px;
   --text-br-sm: 16px;
 
-  /* 커스텀 border-radius (기본 스타일) */
   --radius-base: 2px;
 
-  /* Spacing tokens to mirror Tailwind config */
-  --spacing-container-mobile: 15px;
-  --spacing-container-tablet: 20px;
-  --spacing-container-desktop: 220px;
   --spacing-x-mobile: 15px;
   --spacing-x-tablet: 20px;
   --spacing-x-desktop: 220px;
+
+  --spacing-2xs: 10px;
+  --spacing-xs: 20px;
+  --spacing-sm: 30px;
+  --spacing-md: 40px;
+  --spacing-lg: 60px;
+  --spacing-xl: 80px;
+  --spacing-2xl: 90px;
+  --spacing-3xl: 100px;
+
+  --size-spacing-2xs: var(--spacing-2xs);
+  --size-spacing-xs: var(--spacing-xs);
+  --size-spacing-sm: var(--spacing-sm);
+  --size-spacing-md: var(--spacing-md);
+  --size-spacing-lg: var(--spacing-lg);
+  --size-spacing-xl: var(--spacing-xl);
+  --size-spacing-2xl: var(--spacing-2xl);
+  --size-spacing-3xl: var(--spacing-3xl);
+  --size-x-mobile: var(--spacing-x-mobile);
+  --size-x-tablet: var(--spacing-x-tablet);
+  --size-x-desktop: var(--spacing-x-desktop);
 }
 
-/* BR 폰트 크기 클래스에 폰트 패밀리 자동 적용 */
-.text-br-3xl,
-.text-br-2xl,
-.text-br-lg,
-.text-br-md,
-.text-br-sm {
+/* 여기에 따로 BR 폰트 전용 클래스 정의 */
+.text-br-3xl, /* 62px */
+.text-br-2xl, /* 48px */
+.text-br-base, /* 46px */
+.text-br-lg,  /* 20px */
+.text-br-md,  /* 18px */
+.text-br-sm   /* 16px */ {
   font-family: var(--font-br);
 }
 
-/* 숫자 입력 스피너 제거 (Chrome, Safari, Edge) */
+/* 숫자 입력 스피너 제거 */
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
-/* 숫자 입력 스피너 제거 (Firefox) */
 input[type="number"] {
   -moz-appearance: textfield;
+}
+
+/* NotificationIcon 스타일 */
+.notification-icon {
+  transition: all 0.2s ease;
+}
+
+.notification-icon .alarm-path {
+  fill: white !important;
+  transition: fill 0.2s ease;
+}
+
+.notification-icon:hover .alarm-path,
+button:hover .notification-icon .alarm-path {
+  fill: var(--color-main, #efff04) !important;
+}
+
+.notification-icon .badge-circle {
+  fill: #ff483d !important;
+}
+
+@theme {
+  /* Breakpoints - v4는 모바일 퍼스트 방식 사용 */
+  --breakpoint-mobile: 100px; /* 768px */
+  --breakpoint-tablet: 768px; /* 768px */
+  --breakpoint-desktop: 1200px; /* 1200px */
+}
+
+@layer utilities {
+  .page-wrapper {
+    @apply w-full min-w-[375px] max-w-[1480px] mx-auto px-4;
+  }
+
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
+  .scrollbar-none {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
 }

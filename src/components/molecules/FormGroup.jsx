@@ -36,11 +36,11 @@ const FormGroup = ({
       >
         <label
           htmlFor={id}
-          className={`text-white text-[18px] font-['Noto Sans KR'] font-[700] ${labelClassName}`}
+          className={`text-white text-noto-xs font-bold ${labelClassName}`}
         >
           {label}
         </label>
-        <div className="relative">
+        <div className="relative pt-2xs">
           <Input
             id={id}
             name={id}
@@ -58,20 +58,20 @@ const FormGroup = ({
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-[16px] top-1/2 -translate-y-1/2 text-[var(--color-gray-200)] hover:text-[var(--color-gray-200)] transition-colors text-[12px]"
+              className="absolute right-[16px] top-1/2 -translate-y-1/2 text-gray-200 hover:text-gray-200 transition-colors text-noto-4xs"
               aria-label={showPassword ? "비밀번호 숨기기" : "비밀번호 보기"}
             >
               {showPassword ? (
                 <img
                   src="/icons/visibilityOff.svg"
                   alt="숨기기"
-                  className="w-[20px] h-[20px]"
+                  className="w-xs h-xs"
                 />
               ) : (
                 <img
                   src="/icons/visibility.svg"
                   alt="보기"
-                  className="w-[20px] h-[20px]"
+                  className="w-xs h-xs"
                 />
               )}
             </button>
@@ -81,7 +81,7 @@ const FormGroup = ({
         {error && (
           <p
             id={errorId}
-            className={`absolute top-full left-0 pt-[10px] text-[16px] text-red-500 ${errorClassName}`}
+            className={`absolute top-full left-0 pt-[10px] text-noto-2xs text-red-500 ${errorClassName}`}
             aria-live="polite"
             role="alert"
           >

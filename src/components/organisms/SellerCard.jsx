@@ -13,41 +13,79 @@ const Card = ({
   total = 5,
   favoriteImg = "/images/favorite.svg",
   quantity = null, // Sell 모달 전용
+  tagType = "sale", // "sale" | "trade"
+  tagSize = "medium",
 }) => {
-  // 레어도 텍스트 스타일 결정
+  // 🧩 Tag 설정
+  const STATUS = {
+    sale: {
+      text: "판매 중",
+      textColor: "text-white",
+      bgColor: "bg-[#1C1C1C]/50", // 반투명 배경
+    },
+    trade: {
+      text: "교환 제시 대기 중",
+      textColor: "text-[#EFFF04]",
+      bgColor: "bg-[#1C1C1C]/50",
+
+    },
+  };
+
+  const SIZE = {
+    large: "text-[18px] px-4 py-2 rounded-md",
+    medium: "text-[16px] px-3 py-1.5 rounded-md",
+    small: "text-[13px] px-2 py-1 rounded-sm",
+  };
+
+  const tag = STATUS[tagType] || STATUS.sale;
+  const tagSizeClass = SIZE[tagSize] || SIZE.medium;
+
+  // 🧩 레어도 스타일
   let rarityText = rarityIcon.toUpperCase();
   let rarityStyle = {
-    color: "var(--main-main, #EFFF04)",
+    color: "#EFFF04",
     fontFamily: "Noto Sans KR",
     fontSize: "16px",
     fontWeight: 300,
   };
 
-  if (rarityText === "RARE") rarityStyle.color = "var(--blue-blue, #29C9F9)";
-  else if (rarityText === "SUPER RARE") rarityStyle.color = "var(--purple-purple, #A77EFF)";
-  else if (rarityText === "LEGENDARY") rarityStyle.color = "var(--pink-pink, #FF2A6A)";
+  if (rarityText === "RARE") rarityStyle.color = "#29C9F9";
+  else if (rarityText === "SUPER RARE") rarityStyle.color = "#A77EFF";
+  else if (rarityText === "LEGENDARY") rarityStyle.color = "#FF2A6A";
 
   return (
     <div
-      className="w-[400px] h-[600px] flex-shrink-0 flex flex-col items-center pt-[40px] rounded-[2px] border"
+      className="w-[400px] h-[600px] flex-shrink-0 flex flex-col items-center pt-[40px] rounded-[2px] relative"
       style={{
-        borderColor: "rgba(255, 255, 255, 0.10)",
         backgroundColor: "var(--color-gray-500)",
       }}
     >
-      {/* 상단 이미지 + Sold Out 처리 */}
+      {/* 상단 이미지 + SOLD OUT + Tag */}
       <div className="relative w-[360px] h-[270px]">
         <img
           src={topImage}
           alt="Top Image"
           className={`w-full h-full object-cover ${remaining === 0 ? "opacity-40" : ""}`}
         />
+
+        {/* SOLD OUT 이미지 */}
         {remaining === 0 && (
           <img
             src="/images/soldOut.svg"
             alt="Sold Out"
             className="absolute top-0 left-0 w-full h-full object-contain"
           />
+        )}
+
+        {/* 🔖 Tag — Sold Out일 땐 표시 안 함 */}
+        {remaining > 0 && (
+          <div className="absolute top-[10px] left-[10px]">
+            <div
+              className={`inline-block font-semibold ${tag.textColor} ${tag.bgColor} ${tagSizeClass}`}
+            >
+              {tag.text}
+            </div>
+          </div>
         )}
       </div>
 
@@ -65,7 +103,7 @@ const Card = ({
         {title}
       </h2>
 
-      {/* 레어도 영역 */}
+      {/* 레어도 + 카테고리 + 저자 */}
       <div className="w-[360px] flex justify-between items-center mt-[10px] h-[23px]">
         <div className="flex items-center gap-[10px] h-[23px]">
           <span style={rarityStyle}>{rarityText}</span>
@@ -99,10 +137,8 @@ const Card = ({
         </span>
         <div className="flex items-center">
           {quantity !== null ? (
-            // Sell 모달: 수량 그대로
             <span className="text-white text-[18px] font-normal">{quantity}</span>
           ) : (
-            // 마켓 페이지: remaining / total
             <>
               <span className="text-white text-[18px] font-normal">{remaining}</span>
               <span className="w-[5px]" />

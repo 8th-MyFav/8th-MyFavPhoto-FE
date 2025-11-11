@@ -1,12 +1,62 @@
 "use client";
 
-import React, { useState } from "react";
-import TradeCard from "@/components/organisms/tradeCard";
-import Modal from "@/components/molecules/modal";
-import CardDetailEditModal from "@/components/organisms/cardDetailEdit"; 
-const SellerDetailPage = () => {
+import React, { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import {
+  useMarketListingDetail,
+  useMarketDeleteListing,
+} from "@/api/marketListings";
+import {
+  useMarketTradeList,
+  useMarketTradeApprove,
+  useMarketTradeReject,
+} from "@/api/marketTrades";
+import Modal from "@/components/molecules/Modal";
+import CardDetailEditModal from "@/components/organisms/CardDetailEdit";
+import TradeCard from "@/components/organisms/TradeCard";
+import CardMeta from "@/components/molecules/CardMeta";
+import { PATHNAME } from "@/constants";
+
+export default function SellerDetailPage() {
+  const params = useParams();
+  const router = useRouter();
+  const listingId = parseInt(params.id, 10);
+
+  // ---------------- Hook 최상단 배치 ----------------
+  const { data: listing, isLoading, isError } = useMarketListingDetail(listingId);
+  const deleteListingMutation = useMarketDeleteListing();
+
+  // ---------------- 트레이드 관련 ----------------
+  const { data: tradeProposalsRaw = [], isLoading: isTradeLoading } =
+    useMarketTradeList(listing?.card?.id);
+  const tradeApproveMutation = useMarketTradeApprove();
+  const tradeRejectMutation = useMarketTradeReject();
+
+  // ---------------- TradeCard용 상태 ----------------
+  const [tradeProposals, setTradeProposals] = useState([]);
+
+  // tradeProposalsRaw가 바뀔 때 한 번만 세팅
+  useEffect(() => {
+    if (tradeProposalsRaw) {
+      const pendingProposals = tradeProposalsRaw
+        .filter((p) => p.trade_status === "PENDING")
+        .map((p) => ({
+          id: p.id,
+          title: p.offeredCard?.name ?? "제목 없음",
+          rarity: p.offeredCard?.grade ?? "COMMON",
+          category: p.offeredCard?.genre ?? "기타",
+          imageUrl: p.offeredCard?.image_url ?? "/images/sample.svg",
+          description: p.trade_content ?? p.offeredCard?.description ?? "설명 없음",
+          sellerName: p.requester?.nickname ?? `유저 ${p.requester_id}`,
+          price: p.offeredCard?.price ?? 0,
+        }));
+      setTradeProposals(pendingProposals);
+    }
+  }, [tradeProposalsRaw?.length]); // ✅ 배열 길이만 의존
+
+  // ---------------- 모달 상태 ----------------
   const [modalOpen, setModalOpen] = useState(false);
-  const [editModalOpen, setEditModalOpen] = useState(false); 
+  const [editModalOpen, setEditModalOpen] = useState(false);
   const [modalData, setModalData] = useState({
     title: "",
     content: "",
@@ -15,52 +65,45 @@ const SellerDetailPage = () => {
   });
   const [cursorStyle, setCursorStyle] = useState("default");
 
-  // --------- 카드 정보 하드코딩 ---------
+  // ---------------- 로딩/에러 처리 ----------------
+  if (isLoading) {
+    return (
+      <div className="text-white p-8 min-h-screen bg-[#111]">
+        카드 정보를 불러오는 중입니다...
+      </div>
+    );
+  }
+
+  if (isError || !listing) {
+    return (
+      <div className="text-white p-8 min-h-screen bg-[#111]">
+        카드를 불러올 수 없습니다.
+      </div>
+    );
+  }
+
+  // ---------------- 데이터 매핑 ----------------
   const card = {
-    title: "우리집 앞마당",
-    rarity: "LEGENDARY",
-    category: "풍경",
-    sellerName: "미쓰손",
-    description:
-      "우리집 앞마당 포토카드입니다. 우리집 앞마당 포토카드입니다. 우리집 앞마당 포토카드입니다.",
-    price: 4,
-    remaining: 2,
-    total: 5,
-    imageUrl: "/images/sample.svg",
-    desiredCard: {
-      rarity: "RARE",
-      category: "풍경",
-      description:
-        "푸릇푸릇한 여름 풍경, 눈 많이 내린 겨울 풍경 사진에 관심이 많습니다.",
-    },
+    id: listing.card?.id,
+    title: listing.card?.name ?? "제목 없음",
+    rarity: listing.card?.grade ?? "COMMON",
+    category: listing.card?.genre ?? "기타",
+    author: listing.card?.nickname ?? "익명",
+    content: listing.card?.description ?? "설명 없음",
+    topImage: listing.card?.image_url ?? "/images/sample.svg",
   };
 
-  // --------- 교환 제시 목록 하드코딩 ---------
-  const tradeProposals = [
-    {
-      id: 1,
-      title: "스페인 여행",
-      rarity: "COMMON",
-      category: "풍경",
-      price: "4",
-      sellerName: "프로 여행러",
-      description:
-        "스페인 여행 사진도 좋은데.. 우리집 앞마당 포토카드와 교환하고 싶습니다!",
-      imageUrl: "/images/sample.svg",
-    },
-    {
-      id: 2,
-      title: "겨울 바다",
-      rarity: "RARE",
-      category: "자연",
-      price: "6",
-      sellerName: "겨울수집가",
-      description: "눈 덮인 바다 풍경을 제 포토카드와 교환하고 싶습니다.",
-      imageUrl: "/images/sample.svg",
-    },
-  ];
+  const trade = {
+    id: listing.id,
+    tradeGrade: listing.trade_grade ?? "정보 없음",
+    tradeGenre: listing.trade_genre ?? "정보 없음",
+    tradeNote: listing.trade_note ?? "교환 희망 정보가 없습니다.",
+    price: listing.price ?? 0,
+    total: listing.total_count ?? 0,
+    remaining: listing.left_count ?? 0,
+  };
 
-  // --------- 모달 핸들러 ---------
+  // ---------------- 모달 핸들러 ----------------
   const openModal = ({ title, content, buttonText, onConfirm }) => {
     setModalData({ title, content, buttonText, onConfirm });
     setModalOpen(true);
@@ -70,15 +113,62 @@ const SellerDetailPage = () => {
   const openEditModal = () => setEditModalOpen(true);
   const closeEditModal = () => setEditModalOpen(false);
 
+  const handleStopSale = () => {
+    setCursorStyle("progress");
+    openModal({
+      title: "포토카드 판매 내리기",
+      content: "정말로 판매를 중단하시겠습니까?",
+      buttonText: "판매 내리기",
+      onConfirm: async () => {
+        closeModal();
+        try {
+          await deleteListingMutation.mutateAsync(card.id);
+          setCursorStyle("default");
+          openModal({
+            title: "판매 내리기 성공",
+            content: "포토카드 판매가 성공적으로 중단되었습니다.",
+            buttonText: "확인",
+            onConfirm: () => {
+              closeModal();
+              router.push(PATHNAME.MARKET);
+            },
+          });
+        } catch (err) {
+          setCursorStyle("default");
+          openModal({
+            title: "판매 내리기 실패",
+            content: "판매 중단에 실패했습니다. 다시 시도해주세요.",
+            buttonText: "확인",
+            onConfirm: closeModal,
+          });
+        }
+      },
+    });
+  };
+
+  // ---------------- 교환 승인/거절 ----------------
   const handleApprove = (proposal) => {
     setCursorStyle("progress");
     openModal({
       title: "교환 제시 승인",
       content: `[${proposal.rarity} | ${proposal.title}] 카드와의 교환을 승인하시겠습니까?`,
       buttonText: "승인하기",
-      onConfirm: () => {
+      onConfirm: async () => {
         closeModal();
-        setCursorStyle("default");
+        try {
+          await tradeApproveMutation.mutateAsync(proposal.id);
+          setCursorStyle("default");
+          // ✅ 승인 시 리스트에서 제거
+          setTradeProposals((prev) => prev.filter((p) => p.id !== proposal.id));
+        } catch (err) {
+          setCursorStyle("default");
+          openModal({
+            title: "승인 실패",
+            content: "교환 제시 승인에 실패했습니다.",
+            buttonText: "확인",
+            onConfirm: closeModal,
+          });
+        }
       },
     });
   };
@@ -89,324 +179,105 @@ const SellerDetailPage = () => {
       title: "교환 제시 거절",
       content: `[${proposal.rarity} | ${proposal.title}] 카드와의 교환을 거절하시겠습니까?`,
       buttonText: "거절하기",
-      onConfirm: () => {
+      onConfirm: async () => {
         closeModal();
-        setCursorStyle("default");
+        try {
+          await tradeRejectMutation.mutateAsync(proposal.id);
+          setCursorStyle("default");
+          // ✅ 거절 시 리스트에서 제거
+          setTradeProposals((prev) => prev.filter((p) => p.id !== proposal.id));
+        } catch (err) {
+          setCursorStyle("default");
+          openModal({
+            title: "거절 실패",
+            content: "교환 제시 거절에 실패했습니다.",
+            buttonText: "확인",
+            onConfirm: closeModal,
+          });
+        }
       },
     });
   };
 
-  const handleStopSale = () => {
-    setCursorStyle("progress");
-    openModal({
-      title: "포토카드 판매 내리기",
-      content: "정말로 판매를 중단하시겠습니까?",
-      buttonText: "판매 내리기",
-      onConfirm: () => {
-        closeModal();
-        setCursorStyle("default");
-      },
-    });
-  };
-
+  // ---------------- 렌더링 ----------------
   return (
     <div
       className="min-h-screen bg-[#0F0F0F] text-white flex flex-col items-center pb-[100px]"
-      style={{ fontFamily: "var(--font-noto)", cursor: cursorStyle }}
+      style={{ cursor: cursorStyle }}
     >
-      {/* 페이지 타이틀 */}
+      {/* 카드 정보 */}
       <section className="w-full max-w-[1200px] mt-[60px] mb-[60px] px-[20px]">
         <div className="flex flex-col">
-          <span
-            style={{
-              color: "var(--color-gray-300)",
-              fontFamily: "var(--font-br)",
-              fontSize: "24px",
-              fontWeight: 400,
-              letterSpacing: "-0.72px",
-            }}
-            className="mb-[10px]"
-          >
-            마켓플레이스
-          </span>
-          <h1
-            style={{
-              color: "var(--color-white)",
-              fontFamily: "var(--font-noto)",
-              fontSize: "40px",
-              fontWeight: 700,
-            }}
-            className="mb-[10px]"
-          >
-            {card.title}
-          </h1>
+          <span className="mb-[10px] text-gray-300 text-[24px]">마켓플레이스</span>
+          <h1 className="mb-[10px] text-[40px] font-bold">{card.title}</h1>
           <div className="w-full h-[1px] bg-white" />
         </div>
       </section>
 
       {/* 카드 상세 영역 */}
       <section className="w-full max-w-[1200px] flex flex-col lg:flex-row justify-between gap-[80px] px-[20px]">
-        {/* 왼쪽 이미지 */}
         <div className="w-full lg:w-[720px] h-[460px] mx-auto">
           <img
-            src={card.imageUrl}
+            src={card.topImage}
             alt={card.title}
             className="w-full h-full object-cover rounded-[4px]"
           />
         </div>
 
-        {/* 오른쪽 상세 */}
         <div className="flex flex-col justify-between w-full lg:w-[440px] h-auto lg:h-[600px] mx-auto">
           <div>
-            {/* 등급 | 카테고리 | 이름 */}
-            <div className="flex justify-between items-center mb-[15px]">
-              <div className="flex items-center gap-[10px]">
-                <span
-                  style={{
-                    color: "var(--color-pink)",
-                    fontFamily: "var(--font-noto)",
-                    fontSize: "24px",
-                    fontWeight: 700,
-                  }}
-                >
-                  {card.rarity}
-                </span>
-                <span
-                  style={{
-                    color: "var(--color-gray-300)",
-                    fontSize: "24px",
-                    fontWeight: 700,
-                  }}
-                >
-                  |
-                </span>
-                <span
-                  style={{
-                    color: "var(--color-gray-300)",
-                    fontFamily: "var(--font-noto)",
-                    fontSize: "24px",
-                    fontWeight: 700,
-                  }}
-                >
-                  {card.category}
-                </span>
-              </div>
-              <span
-                style={{
-                  color: "var(--color-white)",
-                  fontFamily: "var(--font-noto)",
-                  fontSize: "24px",
-                  fontWeight: 700,
-                }}
-                className="underline"
-              >
-                {card.sellerName}
-              </span>
-            </div>
-
-            {/* 선 */}
-            <div
-              style={{
-                width: "100%",
-                height: "1px",
-                marginBottom: "15px",
-                backgroundColor: "#5A5A5A",
-              }}
+            <CardMeta
+              rarityText={card.rarity}
+              category={card.category}
+              author={card.author}
+              variant="withAuthor"
+              sizeVariant="base"
+              className="mb-[30px]"
             />
+            <div className="w-full h-[1px] mb-[30px] bg-[#5A5A5A]" />
+            <p className="leading-normal mb-[15px]">{card.content}</p>
 
-            {/* 내용 */}
-            <p
-              style={{
-                color: "var(--color-white)",
-                fontFamily: "var(--font-noto)",
-                fontSize: "18px",
-                fontWeight: 400,
-              }}
-              className="leading-normal mb-[15px]"
-            >
-              {card.description}
-            </p>
-
-            {/* 가격 & 잔여 */}
             <div className="flex flex-col gap-[10px] mb-[30px]">
               <div className="flex justify-between">
-                <span
-                  style={{
-                    color: "var(--color-gray-300)",
-                    fontSize: "20px",
-                    fontWeight: 400,
-                  }}
-                >
-                  가격
-                </span>
-                <span
-                  style={{
-                    color: "var(--color-white)",
-                    fontSize: "24px",
-                    fontWeight: 700,
-                    textAlign: "right",
-                  }}
-                >
-                  {card.price} P
-                </span>
+                <span className="text-[20px] font-normal text-gray-300">가격</span>
+                <span className="text-[24px] font-bold text-white">{trade.price} P</span>
               </div>
               <div className="flex justify-between">
-                <span
-                  style={{
-                    color: "var(--color-gray-300)",
-                    fontSize: "20px",
-                    fontWeight: 400,
-                  }}
-                >
-                  잔여
-                </span>
+                <span className="text-[20px] font-normal text-gray-300">잔여</span>
                 <div className="flex items-end gap-[4px]">
-                  <span
-                    style={{
-                      color: "var(--color-white)",
-                      fontSize: "24px",
-                      fontWeight: 700,
-                    }}
-                  >
-                    {card.remaining}
-                  </span>
-                  <span
-                    style={{
-                      color: "var(--color-gray-300)",
-                      fontSize: "24px",
-                      fontWeight: 400,
-                    }}
-                  >
-                    / {card.total}
-                  </span>
+                  <span className="text-[24px] font-bold text-white">{trade.remaining}</span>
+                  <span className="text-[24px] font-normal text-gray-300">/ {trade.total}</span>
                 </div>
               </div>
             </div>
 
             {/* 교환 희망 정보 */}
             <div className="flex items-center gap-[10px] mb-[10px]">
-              <img
-                src="/icons/refresh.svg"
-                alt="refresh"
-                style={{ width: "28px", height: "28px" }}
-              />
-              <span
-                style={{
-                  color: "var(--color-white)",
-                  fontFamily: "var(--font-noto)",
-                  fontSize: "28px",
-                  fontWeight: 700,
-                }}
-              >
-                교환 희망 정보
-              </span>
+              <img src="/icons/refresh.svg" alt="refresh" className="w-[28px] h-[28px]" />
+              <span className="text-[28px] font-bold">교환 희망 정보</span>
             </div>
-
-            <div style={{ marginBottom: "10px" }} />
-            <div
-              style={{
-                width: "100%",
-                height: "2px",
-                backgroundColor: "#EEE",
-                marginBottom: "40px",
-              }}
+            <div className="w-full h-[2px] bg-[#EEE] mb-[40px]" />
+            <CardMeta
+              rarityText={trade.tradeGrade}
+              category={trade.tradeGenre}
+              variant="default"
+              sizeVariant="base"
+              className="mb-[30px]"
             />
-
-            <div className="flex items-center gap-[10px] mb-[15px]">
-              <span
-                style={{
-                  color: "var(--color-blue)",
-                  fontFamily: "var(--font-noto)",
-                  fontSize: "24px",
-                  fontWeight: 700,
-                }}
-              >
-                {card.desiredCard.rarity}
-              </span>
-              <span
-                style={{
-                  color: "var(--color-gray-300)",
-                  fontFamily: "var(--font-noto)",
-                  fontSize: "24px",
-                  fontWeight: 700,
-                }}
-              >
-                |
-              </span>
-              <span
-                style={{
-                  color: "var(--color-gray-300)",
-                  fontFamily: "var(--font-noto)",
-                  fontSize: "24px",
-                  fontWeight: 700,
-                }}
-              >
-                {card.desiredCard.category}
-              </span>
-            </div>
-
-            <div
-              style={{
-                width: "100%",
-                height: "1px",
-                backgroundColor: "#5A5A5A",
-                marginBottom: "15px",
-              }}
-            />
-
-            <p
-              style={{
-                color: "var(--color-white)",
-                fontFamily: "var(--font-noto)",
-                fontSize: "18px",
-                fontWeight: 400,
-              }}
-              className="leading-normal mb-[15px]"
-            >
-              {card.desiredCard.description}
-            </p>
+            <p className="leading-normal mb-[15px]">{trade.tradeNote}</p>
           </div>
 
           {/* 버튼 영역 */}
           <div className="flex flex-col gap-[20px] mt-[30px]">
             <button
-              onClick={openEditModal} // 수정 모달 열기
-              style={{
-                display: "flex",
-                width: "100%",
-                height: "80px",
-                justifyContent: "center",
-                alignItems: "center",
-                gap: "10px",
-                borderRadius: "2px",
-                background: "var(--color-main)",
-                color: "var(--color-black)",
-                fontFamily: "var(--font-noto)",
-                fontSize: "20px",
-                fontWeight: 700,
-                cursor: "pointer",
-              }}
+              onClick={openEditModal}
+              className="flex w-full h-[80px] justify-center items-center gap-[10px] rounded-[2px] bg-[var(--color-main)] text-[var(--color-black)] font-bold text-[20px]"
             >
               수정하기
             </button>
             <button
               onClick={handleStopSale}
-              style={{
-                display: "flex",
-                width: "100%",
-                height: "80px",
-                justifyContent: "center",
-                alignItems: "center",
-                gap: "10px",
-                borderRadius: "2px",
-                border: "1px solid var(--color-gray-100)",
-                background: "var(--color-black)",
-                color: "var(--color-white)",
-                fontFamily: "var(--font-noto)",
-                fontSize: "20px",
-                fontWeight: 500,
-                cursor: "pointer",
-              }}
+              className="flex w-full h-[80px] justify-center items-center gap-[10px] rounded-[2px] border border-[var(--color-gray-100)] bg-[var(--color-black)] text-[var(--color-white)] font-medium text-[20px]"
             >
               판매 내리기
             </button>
@@ -416,33 +287,29 @@ const SellerDetailPage = () => {
 
       {/* 교환 제시 목록 */}
       <section className="w-full max-w-[1200px] mt-[100px] px-[20px]">
-        <h2
-          style={{
-            color: "var(--color-white)",
-            fontFamily: "var(--font-noto)",
-            fontSize: "40px",
-            fontWeight: 700,
-            marginTop: "120px",
-          }}
-          className="mb-[15px]"
-        >
-          교환 제시 목록
-        </h2>
+        <h2 className="text-[40px] font-bold text-white mt-[120px] mb-[15px]">교환 제시 목록</h2>
         <div className="border-t border-white mb-[70px]" />
-
-        <div className="flex flex-col lg:flex-row gap-[40px] flex-wrap">
-          {tradeProposals.map((proposal) => (
-            <TradeCard
-              key={proposal.id}
-              proposal={proposal}
-              onApprove={() => handleApprove(proposal)}
-              onReject={() => handleReject(proposal)}
-            />
-          ))}
-        </div>
+        {isTradeLoading ? (
+          <div className="text-gray-400">교환 제시 목록을 불러오는 중입니다...</div>
+        ) : (
+          <div className="flex flex-col lg:flex-row gap-[40px] flex-wrap">
+            {tradeProposals.length === 0 ? (
+              <div className="text-gray-400">아직 제시한 교환 목록이 없습니다.</div>
+            ) : (
+              tradeProposals.map((proposal) => (
+                <TradeCard
+                  key={proposal.id}
+                  proposal={proposal}
+                  onApprove={handleApprove}
+                  onReject={handleReject}
+                />
+              ))
+            )}
+          </div>
+        )}
       </section>
 
-      {/* 일반 모달 */}
+      {/* 모달 */}
       {modalOpen && (
         <Modal
           title={modalData.title}
@@ -453,16 +320,14 @@ const SellerDetailPage = () => {
         />
       )}
 
-      {/* 카드 수정 모달 */}
+      {/* 수정 모달 */}
       {editModalOpen && (
         <CardDetailEditModal
           isOpen={editModalOpen}
           onClose={closeEditModal}
-          card={card}
+          listing={listing}
         />
       )}
     </div>
   );
-};
-
-export default SellerDetailPage;
+}

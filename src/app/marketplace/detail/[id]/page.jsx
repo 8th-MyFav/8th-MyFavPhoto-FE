@@ -2,176 +2,185 @@
 
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import Modal from "@/components/molecules/modal";
-import CardTradeModal from "@/components/organisms/cardTradeModal";
-import ExchangeModal from "@/components/organisms/exchangeModal";
-import TradeCard from "@/components/organisms/tradeCard";
+import {
+  useMarketListingDetail,
+} from "@/api/marketListings";
+import { useMarketPurchase } from "@/api/marketPurchase";
+import {
+  useMarketTradeList,
+  useMarketTradeCreate,
+  useMarketTradeApprove,
+  useMarketTradeReject,
+} from "@/api/marketTrades";
 
-// 더미 카드 데이터
-const cardDataServer = Array.from({ length: 30 }, (_, i) => ({
-  topImage: "/images/sample.svg",
-  title: `아름다운 풍경 ${i + 1}`,
-  rarity:
-    i % 4 === 0
-      ? "COMMON"
-      : i % 4 === 1
-      ? "RARE"
-      : i % 4 === 2
-      ? "SUPER RARE"
-      : "LEGENDARY",
-  category: i % 3 === 0 ? "풍경" : i % 3 === 1 ? "인물" : "동물",
-  author: `글쓴이 ${i + 1}`,
-  content: "포토카드 상세 설명입니다.",
-  price: (i + 1) * 10,
-  remaining: i % 3 === 0 ? 0 : 2,
-  total: 5,
-  exchangeInfo:
-    "푸릇푸릇한 여름 풍경, 눈 많이 내린 겨울 풍경 사진에 관심이 많습니다.",
-}));
+import Modal from "@/components/molecules/Modal";
+import CardTradeModal from "@/components/organisms/CardTradeModal";
+import ExchangeModal from "@/components/organisms/ExchangeModal";
+import CardMeta from "@/components/molecules/CardMeta";
+import TradeCard from "@/components/organisms/TradeCard"; // 구매자용 카드 컴포넌트
+import { PATHNAME } from "@/constants";
 
 export default function DetailPage() {
   const params = useParams();
   const router = useRouter();
-  const cardId = parseInt(params.id);
-  const card = cardDataServer[cardId];
+  const listingId = parseInt(params.id, 10);
 
+  // 현재 로그인 유저 ID (예시)
+  const currentUserId = 3;
+
+  // 상세 조회
+  const { data: listing, isLoading, isError } = useMarketListingDetail(listingId);
+
+  // 트레이드 목록 조회
+  const { data: tradeList = [], refetch: refetchTrades } = useMarketTradeList(listingId);
+
+  // 트레이드 관련 mutation
+  const { mutate: purchaseCard, isLoading: isPurchasing } = useMarketPurchase();
+  const { mutate: createTrade } = useMarketTradeCreate();
+  const { mutate: approveTrade } = useMarketTradeApprove();
+  const { mutate: rejectTrade } = useMarketTradeReject();
+
+  // 상태값
   const [count, setCount] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isTradeModalOpen, setIsTradeModalOpen] = useState(false);
   const [isExchangeModalOpen, setIsExchangeModalOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState(null);
-
-  // 취소 모달
+  const [tradeContent, setTradeContent] = useState("");
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [cancelTargetCard, setCancelTargetCard] = useState(null);
 
-  const total = card ? count * card.price : 0;
+  if (isLoading) return <div className="text-white p-8 min-h-screen bg-[#111]">포토카드 정보를 불러오는 중입니다...</div>;
+  if (isError || !listing) return <div className="text-white p-8 min-h-screen bg-[#111]">카드를 불러올 수 없습니다.</div>;
 
-  const decrease = () => count > 1 && setCount(count - 1);
-  const increase = () => count < card.remaining && setCount(count + 1);
-
-  if (!card)
-    return <div className="text-white p-8">카드를 찾을 수 없습니다.</div>;
-
-  // 등급 색상 설정
-  let rarityColor = "var(--color-main)";
-  if (card.rarity === "RARE") rarityColor = "var(--color-blue)";
-  else if (card.rarity === "SUPER RARE") rarityColor = "var(--color-purple)";
-  else if (card.rarity === "LEGENDARY") rarityColor = "var(--color-pink)";
-
-  // 구매 버튼 클릭 시 처리
-  const handlePurchase = () => {
-    setIsModalOpen(false);
-    const query = `?rarity=${card.rarity}&title=${encodeURIComponent(
-      card.title
-    )}&quantity=${count}`;
-    if (count <= card.remaining) {
-      router.push(`/marketplace/detail/${cardId}/success${query}`);
-    } else {
-      router.push(`/marketplace/detail/${cardId}/fail${query}`);
-    }
+  const trade = {
+    id: listing.id,
+    tradeGrade: listing.trade_grade,
+    tradeGenre: listing.trade_genre,
+    tradeNote: listing.trade_note,
+    price: listing.price,
+    total: listing.total_count,
+    remaining: listing.left_count,
   };
 
-  // TradeCard purchase 모드 취소 버튼 클릭
+  const photoCard = {
+    id: listing.card?.id,
+    title: listing.card?.name ?? "제목 없음",
+    rarity: listing.card?.grade ?? "COMMON",
+    category: listing.card?.genre ?? "기타",
+    author: listing.card?.nickname ?? "익명",
+    content: listing.card?.description ?? "설명 없음",
+    topImage: listing.card?.image_url ?? "/images/sample.svg",
+    creatorId: listing.card?.creator_id,
+  };
+
+  const total = count * (trade.price ?? 0);
+  const decrease = () => count > 1 && setCount(count - 1);
+  const increase = () => count < (trade.remaining ?? 0) && setCount(count + 1);
+
+  /** 구매 */
+  const handlePurchase = () => {
+    if (count > trade.remaining) {
+      alert("잔여 수량보다 많은 수량을 구매할 수 없습니다.");
+      return;
+    }
+
+    purchaseCard(
+      { tradePostId: listing.id, count },
+      {
+        onSuccess: () => {
+          setIsModalOpen(false);
+          const query = `?rarity=${photoCard.rarity}&title=${encodeURIComponent(photoCard.title)}&quantity=${count}`;
+          router.push(`${PATHNAME.MARKET_DETAIL_SUCCESS(trade.id)}${query}`);
+        },
+        onError: (err) => {
+          console.error("구매 실패:", err);
+          setIsModalOpen(false);
+          const query = `?rarity=${photoCard.rarity}&title=${encodeURIComponent(photoCard.title)}&quantity=${count}`;
+          router.push(`${PATHNAME.MARKET_DETAIL_FAIL(trade.id)}${query}`);
+        },
+      }
+    );
+  };
+
+  /** 트레이드 생성 */
+  const handleCreateTrade = (offeredCard) => {
+    createTrade(
+      { cardId: listing.id, offeredCardId: offeredCard.id, content: tradeContent },
+      {
+        onSuccess: () => {
+          setIsExchangeModalOpen(false);
+          refetchTrades();
+        },
+        onError: (err) => console.error("교환 제시 실패:", err),
+      }
+    );
+  };
+
+  /** 트레이드 승인/거절 (판매자용) */
+  const handleApprove = (tradeId) => approveTrade(tradeId, { onSuccess: () => refetchTrades() });
+  const handleReject = (tradeId) => rejectTrade(tradeId, { onSuccess: () => refetchTrades() });
+
+  /** 교환 제시 취소 (구매자용) */
   const handleCancelTradeCard = (targetCard) => {
     setCancelTargetCard(targetCard);
     setIsCancelModalOpen(true);
   };
-
-  // 취소 확인 버튼 클릭
   const handleConfirmCancel = () => {
     console.log("교환 제시 취소 완료:", cancelTargetCard);
     setIsCancelModalOpen(false);
     setCancelTargetCard(null);
-    // 실제 로직: 선택 카드 제거 등
+    // TODO: 취소 API 호출
   };
+
+  // 구매자 입장에서 본인이 제시한 진행 중(PENDING) 거래만 필터링
+  const myTrades = tradeList.filter(
+    (t) => t.requester_id === currentUserId && t.trade_status === "PENDING"
+  );
 
   return (
     <div className="bg-[#111] text-white min-h-screen pb-24">
       <div className="max-w-6xl mx-auto px-6 pt-16">
-        {/* 상단 타이틀 */}
+        {/* 상단 */}
         <div className="mb-8">
-          <div
-            style={{
-              color: "var(--color-gray-300)",
-              fontFamily: "var(--font-br)",
-              fontSize: "24px",
-              marginBottom: "60px",
-            }}
-          >
-            마켓플레이스
-          </div>
-
-          <h2
-            style={{
-              color: "var(--color-white)",
-              fontFamily: "var(--font-noto)",
-              fontSize: "40px",
-              fontWeight: 700,
-              marginBottom: "20px",
-            }}
-          >
-            {card.title}
-          </h2>
-          <hr
-            style={{
-              borderTop: "2px solid var(--color-gray-100)",
-              marginBottom: "70px",
-            }}
-          />
+          <div className="text-gray-400 text-2xl mb-[60px] font-br">마켓플레이스</div>
+          <h2 className="text-white text-4xl font-bold mb-5">{photoCard.title}</h2>
+          <hr className="border-t-2 border-gray-100 mb-[70px]" />
         </div>
 
-        {/* 카드 상세 정보 */}
+        {/* 카드 상세 */}
         <div className="flex flex-col md:flex-row gap-10 items-start">
           <div className="flex-1">
-            <img
-              src={card.topImage}
-              alt={card.title}
-              className="rounded-md object-cover w-full"
-            />
+            <img src={photoCard.topImage} alt={photoCard.title} className="rounded-md object-cover w-full" />
           </div>
 
           <div style={{ width: "440px" }}>
-            <div className="flex justify-between items-center mb-8">
-              <div className="flex gap-4 items-center">
-                <span style={{ color: rarityColor, fontWeight: 700 }}>
-                  {card.rarity}
-                </span>
-                <span style={{ color: "var(--color-gray-300)" }}>|</span>
-                <span style={{ color: "var(--color-gray-300)" }}>
-                  {card.category}
-                </span>
-              </div>
-              <span
-                style={{
-                  color: "var(--color-white)",
-                  textDecorationLine: "underline",
-                }}
-              >
-                {card.author}
-              </span>
-            </div>
-
+            <CardMeta
+              rarityText={photoCard.rarity}
+              category={photoCard.category}
+              author={photoCard.author}
+              variant="withAuthor"
+              sizeVariant="base"
+              className="mb-[30px]"
+            />
             <hr className="border-gray-700 mb-4" />
-            <p className="text-white mb-6">{card.content}</p>
+            <p className="text-white mb-6">{photoCard.content}</p>
             <hr className="border-gray-700 mb-4" />
 
             {/* 가격 및 수량 */}
             <div className="space-y-3 mb-6">
               <div className="flex justify-between">
                 <span className="text-gray-400">가격</span>
-                <span className="text-white font-bold">{card.price} P</span>
+                <span className="text-white font-bold">{trade.price} P</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-400">잔여</span>
                 <span>
-                  <span className="text-white font-bold">{card.remaining}</span>
-                  <span className="text-gray-400"> / {card.total}</span>
+                  <span className="text-white font-bold">{trade.remaining}</span>
+                  <span className="text-gray-400"> / {trade.total}</span>
                 </span>
               </div>
             </div>
-
-            <hr className="border-gray-700 mb-4" />
 
             {/* 구매 수량 */}
             <div className="flex justify-between items-center mb-6">
@@ -186,9 +195,7 @@ export default function DetailPage() {
             {/* 총 가격 */}
             <div className="flex justify-between items-center mb-10">
               <span className="text-white text-lg">총 가격</span>
-              <span className="text-white font-bold text-xl">
-                {total} P <span className="text-gray-400 text-lg">({count}장)</span>
-              </span>
+              <span className="text-white font-bold text-xl">{total} P <span className="text-gray-400 text-lg">({count}장)</span></span>
             </div>
 
             {/* 구매 버튼 */}
@@ -196,13 +203,14 @@ export default function DetailPage() {
               className="bg-[var(--color-main)] rounded-md w-full h-20 text-black font-bold cursor-pointer"
               style={{ marginBottom: "120px" }}
               onClick={() => setIsModalOpen(true)}
+              disabled={isPurchasing}
             >
-              포토카드 구매하기
+              {isPurchasing ? "구매 중..." : "포토카드 구매하기"}
             </button>
           </div>
         </div>
 
-        {/* 교환 희망 정보 */}
+        {/* 교환 희망 정보 + 트레이드 목록 */}
         <div className="mt-20">
           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-6 mb-[20px]">
             <h3 style={{ fontSize: "40px", fontWeight: 700 }}>교환 희망 정보</h3>
@@ -216,83 +224,47 @@ export default function DetailPage() {
           </div>
 
           <hr className="border-white mb-[60px]" />
-
-          <p
-            style={{
-              color: "var(--color-white)",
-              fontFamily: "var(--font-noto)",
-              fontSize: "24px",
-              fontWeight: 700,
-              marginTop: "60px",
-            }}
-          >
-            {card.exchangeInfo}
+          <CardMeta
+            rarityText={trade.tradeGrade || "정보 없음"}
+            category={trade.tradeGenre || "정보 없음"}
+            variant="default"
+            sizeVariant="base"
+            className="mb-[30px]"
+          />
+          <p style={{ color: "var(--color-white)", fontSize: "18px", marginTop: "20px", marginBottom: "120px" }}>
+            {trade.tradeNote || "교환 희망 정보가 없습니다."}
           </p>
 
-          <div
-            className="flex items-center"
-            style={{
-              gap: "15px",
-              marginTop: "20px",
-              marginBottom: "120px",
-            }}
-          >
-            <span style={{ color: rarityColor, fontWeight: 700 }}>
-              {card.rarity}
-            </span>
-            <span style={{ color: "var(--color-gray-400)", fontWeight: 700 }}>
-              |
-            </span>
-            <span style={{ color: "var(--color-gray-300)", fontWeight: 700 }}>
-              {card.category}
-            </span>
-          </div>
-
-          {/* 내가 제시한 교환 목록 */}
-          <h3
-            style={{
-              color: "var(--white-white, #FFF)",
-              fontFamily: "Noto Sans KR",
-              fontSize: "40px",
-              fontStyle: "normal",
-              fontWeight: 700,
-              lineHeight: "normal",
-              marginBottom: "20px",
-            }}
-          >
-            내가 제시한 교환 목록
-          </h3>
-          <hr
-            style={{
-              border: "none",
-              borderTop: "2px solid var(--gray-gray100, #EEE)",
-              marginBottom: "70px",
-            }}
-          />
-
-          <div className="flex flex-col md:flex-row gap-6">
-            {cardDataServer.slice(0, 2).map((dummyCard, index) => (
-              <TradeCard
-                key={index}
-                proposal={{
-                  id: index,
-                  imageUrl: dummyCard.topImage,
-                  title: dummyCard.title,
-                  rarity: dummyCard.rarity,
-                  category: dummyCard.category,
-                  price: dummyCard.price,
-                  description: dummyCard.content,
-                  sellerName: dummyCard.author,
-                }}
-                mode="purchase"
-                onCancel={() => handleCancelTradeCard(dummyCard)}
-              />
-            ))}
-          </div>
+          {/* 구매자 입장: 내가 제시한 진행 중 교환 목록 */}
+          <h3 className="text-white text-4xl font-bold mb-5">내가 제시한 교환 목록</h3>
+          <hr className="border-t-2 border-gray-100 mb-[20px]" />
+          {myTrades.length === 0 ? (
+            <div className="text-gray-400">아직 제시한 교환 목록이 없습니다.</div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {myTrades.map((t) => (
+                <TradeCard
+                  key={t.id}
+                  proposal={{
+                    title: t.offeredCard.name,
+                    description: t.offeredCard.description,
+                    rarity: t.offeredCard.grade,
+                    category: t.offeredCard.genre,
+                    price: t.offeredCard.price,
+                    sellerName: t.requester.nickname,
+                    imageUrl: t.offeredCard.image_url ?? "/images/sample.svg",
+                    id: t.id,
+                  }}
+                  mode="purchase"
+                  onCancel={handleCancelTradeCard}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
-      {/* 모달 */}
+      {/* 모달들 */}
       {isTradeModalOpen && (
         <CardTradeModal
           isOpen={isTradeModalOpen}
@@ -305,25 +277,29 @@ export default function DetailPage() {
         />
       )}
 
-      {isExchangeModalOpen && (
+      {isExchangeModalOpen && selectedCard && (
         <ExchangeModal
           selectedCard={selectedCard}
-          targetCard={card}
+          tradePostId={trade.id}
+          targetCard={photoCard}
           onClose={() => setIsExchangeModalOpen(false)}
+          onSubmit={(content) => {
+            setTradeContent(content);
+            handleCreateTrade(selectedCard);
+          }}
         />
       )}
 
       {isModalOpen && (
         <Modal
           title="포토카드 구매"
-          content={`[${card.rarity} | ${card.title}] ${count}장을 구매하시겠습니까?`}
+          content={`[${photoCard.rarity} | ${photoCard.title}] ${count}장을 구매하시겠습니까?`}
           buttonText="구매하기"
           onClose={() => setIsModalOpen(false)}
           onButtonClick={handlePurchase}
         />
       )}
 
-      {/* 취소 확인 모달 */}
       {isCancelModalOpen && cancelTargetCard && (
         <Modal
           title="교환 제시 취소"

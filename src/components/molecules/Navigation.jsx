@@ -2,61 +2,53 @@
 
 import { useAuth } from "@/contexts/AuthContext";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import NotificationButton from "./notificationButton";
 import { PATHNAME } from "@/constants";
+import ProfileModal from "./profile";
+import { usePoints } from "@/api/pointAPI";
 
 const Navigation = () => {
   const { isAuthenticated, loading, user, logout } = useAuth();
-  const [points, setPoints] = useState(0);
+  const { data: points } = usePoints();
+  const [showProfile, setShowProfile] = useState(false);
+  const triggerRef = useRef(null);
 
-  // 포인트 상태 변경 디버깅
+  // ✅ 로그인 시 포인트 보조 fetch (React Query 외 안전장치)
   useEffect(() => {
-    console.log("포인트 상태 변경:", points);
-  }, [points]);
+    if (isAuthenticated && !loading) {
+      const fetchPoints = async () => {
+        try {
+          const token = localStorage.getItem("accessToken");
+          if (!token) return;
 
-  useEffect(
-    function () {
-      // 로그인된 경우에만 포인트 데이터를 불러옴
-      if (isAuthenticated && !loading) {
-        const fetchPoints = async () => {
-          try {
-            const token = localStorage.getItem("accessToken");
-            if (!token) return;
-
-            const res = await fetch(
-              `${process.env.NEXT_PUBLIC_API_URL}/users/points`,
-              {
-                headers: { Authorization: `Bearer ${token}` },
-              }
-            );
-
-            if (res.ok) {
-              const data = await res.json();
-              setPoints(Number(data?.acc_point) || 0);
+          const res = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/users/points`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
             }
-          } catch (error) {
-            console.error("포인트 불러오기 실패:", error);
+          );
+
+          if (!res.ok) return;
+          const data = await res.json();
+
+          // react-query에서 이미 데이터가 있다면 덮어쓰지 않음
+          if (!points) {
+            console.log("보조 fetch로 포인트 데이터 갱신:", data);
           }
-        };
-        fetchPoints();
-      }
-    },
-    [isAuthenticated, loading]
-  );
+        } catch (err) {
+          console.error("포인트 보조 fetch 실패:", err);
+        }
+      };
+      fetchPoints();
+    }
+  }, [isAuthenticated, loading, points]);
 
-  console.log("isAuthenticated", isAuthenticated);
-  console.log("loading", loading);
-
-  if (loading) {
-    // 아직 로그인 여부가 판단이 안된 상태
-    return <div>로딩중...</div>;
-  }
+  if (loading) return <div>로딩중...</div>;
 
   if (!isAuthenticated) {
-    // 로그인 안 된 경우
     return (
-      <nav className="flex gap-[30px] text-gray-200 text-noto-3xs font-bold">
+      <nav className="flex gap-sm text-gray-200 text-noto-3xs font-bold">
         <Link className="cursor-pointer no-underline" href={PATHNAME.LOGIN}>
           로그인
         </Link>
@@ -69,14 +61,36 @@ const Navigation = () => {
 
   return (
     <div className="relative">
-      <nav className="flex justify-center items-center gap-[30px] text-gray-200 text-noto-3x ">
-        <p className="font-br font-bold">{points} P</p>
+      <nav className="flex items-center justify-center gap-[30px] text-gray-200 text-noto-3x">
+        <p className="font-br font-bold">{points?.acc_point ?? 0} P</p>
         <NotificationButton />
-        <p className="self-center font-br">{user.nickname}</p>
+
+        {/* 프로필 토글 + 모달 */}
+        <div className="relative">
+          <button
+            ref={triggerRef}
+            onClick={() => setShowProfile((prev) => !prev)}
+            className="cursor-pointer bg-transparent p-0 text-left font-br hover:text-main"
+            aria-haspopup="dialog"
+            aria-expanded={showProfile}
+          >
+            {user?.nickname}
+          </button>
+
+          <ProfileModal
+            show={showProfile}
+            name={user?.nickname}
+            point={points?.acc_point ?? 0}
+            onClose={() => setShowProfile(false)}
+            triggerRef={triggerRef}
+          />
+        </div>
+
         <p className="flex justify-center self-start">|</p>
+
         <button
           onClick={logout}
-          className="flex justify-center self-start text-gray-400 text-noto-3x font-bold cursor-pointer bg-transparent border-none p-0"
+          className="flex justify-center self-start cursor-pointer bg-transparent p-0 text-gray-400 text-noto-3x font-bold"
         >
           로그아웃
         </button>
