@@ -6,7 +6,7 @@ import React, { useMemo, useState } from "react";
 import NotificationButton from "./NotificationButton";
 import { PAGE_TITLE, PATHNAME } from "@/constants";
 import Image from "next/image";
-import ProfileModal from "./Profile";
+import MobileProfileDrawer from "./MobileProfileDrawer";
 import { usePoints } from "@/api/pointAPI";
 import { usePathname } from "next/navigation";
 
@@ -71,7 +71,7 @@ const MobileNavigation = () => {
           <div className="relative">
             <button
               onClick={() => setIsMenuOpen((prev) => !prev)}
-              className="flex items-center justify-center rounded border p-2"
+              className="flex items-center justify-center rounded p-2 bg-transparent"
               aria-label="메뉴 열기"
             >
               <img
@@ -145,7 +145,7 @@ const MobileNavigation = () => {
             <>
               <button
                 onClick={() => setShowProfile((prev) => !prev)}
-                className="flex items-center justify-center rounded border"
+                className="flex items-center justify-center rounded bg-transparent"
                 aria-label="프로필 열기"
               >
                 <img
@@ -154,10 +154,11 @@ const MobileNavigation = () => {
                   className="h-5 w-5"
                 />
               </button>
-              <ProfileModal
+              <MobileProfileDrawer
                 show={showProfile}
                 name={user.nickname}
                 point={points?.acc_point}
+                onClose={() => setShowProfile(false)}
               />
             </>
           )}
