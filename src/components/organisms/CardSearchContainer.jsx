@@ -51,7 +51,7 @@ const CardSearchContainer = ({
   };
 
   return (
-    <div className="page-wrapper">
+    <div className="page-wrapper px-4 tablet:px-8 desktop:px-16">
       {/* 검색 + 필터 + 정렬 */}
       <div
         className={`flex justify-between items-center ${
@@ -101,33 +101,33 @@ const CardSearchContainer = ({
         {showSortDropdown && <SortDropdown onChange={onSortOrderChange} />}
       </div>
 
-      {/* 카드 리스트 */}
+      {/* 카드 리스트: mobile/tablet = 2열, desktop = 3열 */}
       {cards.length > 0 ? (
-        <div className={cardGridClass}>
-          {cards.map((card, index) => {
-            const alignmentClasses = [
-              "justify-self-start",
-              "justify-self-center",
-              "justify-self-end",
-            ];
-            const alignmentClass = alignmentClasses[index % 3];
-            const clickableClass =
-              onCardClick || card?.id ? "cursor-pointer" : "";
-
-            return (
-              <div
-                key={card.id ? `${card.id}-${index}` : `card-${index}`}
-                ref={index === cards.length - 1 ? lastCardRef : null}
-                onClick={() => handleCardClick(card)}
-                className={`${alignmentClass} ${clickableClass}`.trim()}
-              >
+        <div
+          className={`
+            grid gap-y-6 gap-x-6 mt-8
+            mobile:grid-cols-2    /* 모바일: 2열 (요구: 2x8) */
+            tablet:grid-cols-2    /* 태블릿: 2열 */
+            desktop:grid-cols-3   /* 데스크탑: 3열 */
+            justify-items-stretch
+          `}
+        >
+          {cards.map((card, index) => (
+            <div
+              key={card.id ? `${card.id}-${index}` : `card-${index}`}
+              ref={index === cards.length - 1 ? lastCardRef : null}
+              onClick={() => handleCardClick(card)}
+              className="w-full cursor-pointer" /* 칼럼폭에 맞게 카드가 줄어들도록 핵심: w-full */
+            >
+              <div className="flex justify-center">
+                {/* Card 내부는 w-full을 기준으로 스케일 됨 */}
                 <Card {...card} />
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
       ) : (
-        <div className="flex items-center justify-center min-h-[calc(100vh-300px)] text-center text-gray-300 text-noto-xs">
+        <div className="flex items-center justify-center min-h-[calc(100vh-300px)] text-center text-gray-300 text-noto-xs mt-8">
           {emptyMessage}
         </div>
       )}
