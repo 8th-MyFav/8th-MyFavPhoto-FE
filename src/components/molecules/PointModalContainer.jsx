@@ -20,7 +20,7 @@ const PointModalContainer = () => {
   useEffect(() => {
     if (!points) return;
 
-    // 없는 경우(한 번도 뽑지 않았거나 서버 필드 없음)는 즉시 가능 상태로 처리
+    // 아직 한 번도 포인트를 받지 않은 경우 즉시 가능
     if (!points.lastRandomPointAt) {
       setTimeLeft(0);
       return;
@@ -33,11 +33,17 @@ const PointModalContainer = () => {
     setTimeLeft(remaining);
   }, [points]);
 
-  // 로그인 직후(or 페이지 진입 직후) 1회 모달 자동 오픈
+  // ✅ 페이지 진입 시 쿨타임이 0일 때만 자동으로 모달 열기
   useEffect(() => {
     if (!points) return;
+
+    if (timeLeft > 0 && !isConfirmed) {
+      setIsOpen(false);
+      return;
+    }
+
     setIsOpen(true);
-  }, [points]);
+  }, [timeLeft, isConfirmed]);
 
   // 1초씩 감소 타이머
   useEffect(() => {
@@ -46,11 +52,10 @@ const PointModalContainer = () => {
     return () => clearInterval(timer);
   }, [timeLeft]);
 
-  // 쿨타임이 끝나는 순간 자동 재오픈 (이미 열려있어도 무해)
+  // 쿨타임이 끝나는 순간 자동 재오픈
   useEffect(() => {
     if (timeLeft === 0) {
       setIsOpen(true);
-      // 재시도 시 이전 선택/확정 상태는 초기화
       setSelectedBox(null);
       setIsConfirmed(false);
     }
@@ -65,17 +70,12 @@ const PointModalContainer = () => {
     if (isCooldown) return; // 쿨타임 중 방지
     if (selectedBox === null || isPending) return;
 
-    const randomPoint = Math.floor(Math.random() * 91) + 10; // 10~100
+    const randomPoint = Math.floor(Math.random() * 91) + 10; // 10~100 랜덤 포인트
     gainPoints(randomPoint, {
       onSuccess: () => {
         setEarned(randomPoint);
         setIsConfirmed(true);
-        // 모달은 닫지 않습니다. 닫으면 '획득 화면'을 못 봄
-        // setIsOpen(false);  <-- 제거
-        // 서버 포인트 갱신
         queryClient.invalidateQueries({ queryKey: ["points"] });
-        // 다음 쿨타임 1시간 가동(서버 시간이 반영되기 전 UX 안정화)
-        setTimeLeft(3600);
       },
     });
   };
@@ -90,7 +90,7 @@ const PointModalContainer = () => {
 
   return (
     <>
-      {/* 선택사항: 하단 알림 */}
+      {/* 남은 쿨타임 표시 */}
       {timeLeft > 0 && (
         <div className="fixed bottom-10 right-10 text-white text-sm opacity-70">
           다음 포인트까지 {minutes}분 {seconds}초
@@ -99,7 +99,13 @@ const PointModalContainer = () => {
 
       <PointModal
         isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
+        onClose={() => {
+          if (isConfirmed) {
+            setTimeLeft(3600); // ✅ 닫을 때 쿨타임 시작
+          }
+          setIsOpen(false);
+          setIsConfirmed(false);
+        }}
         isConfirmed={isConfirmed}
         selectedBox={selectedBox}
         setSelectedBox={setSelectedBox}
@@ -108,7 +114,7 @@ const PointModalContainer = () => {
         isPending={isPending}
         minutes={minutes}
         seconds={seconds}
-        isCooldown={isCooldown} // ⬅️ 추가: 쿨타임 상태 전달
+        isCooldown={isCooldown}
         boxImages={boxImages}
       />
     </>

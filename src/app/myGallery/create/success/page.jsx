@@ -1,8 +1,8 @@
 import React from "react";
-import CreatePhotoFailPage from "../fail/createFail";
+import CreatePhotoSuccessPage from "./createSuccess";
 
 const createSuccess = () => {
-  return <CreatePhotoFailPage />;
+  return <CreatePhotoSuccessPage />;
 };
 
 export default createSuccess;

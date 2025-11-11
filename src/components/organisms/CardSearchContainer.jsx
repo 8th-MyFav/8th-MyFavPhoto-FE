@@ -54,19 +54,33 @@ const CardSearchContainer = ({
     <div className="page-wrapper px-4 tablet:px-8 desktop:px-16">
       {/* 검색 + 필터 + 정렬 */}
       <div
-        className={`flex justify-between items-center ${
+        className={`flex flex-col desktop:flex-row justify-between items-center ${
           showSortDropdown ? "mt-5" : "mt-xs"
         } w-full`}
       >
-        <div className="flex flex-col tablet:flex-row items-center w-full tablet:w-auto tablet:items-center">
-          <div className="w-full tablet:w-auto tablet:mr-lg">
+        {/* 검색 및 드롭다운 묶음 */}
+        <div className="flex flex-col w-full desktop:flex-row desktop:items-center">
+          {/* ✅ 검색창: 모바일/태블릿에서는 전체폭 */}
+          <div className="w-full desktop:w-auto">
             <SearchMolecule
               onSearch={onSearchChange}
               onSearchSubmit={onSearchSubmit || onSearchChange}
             />
           </div>
-          <div className="hidden tablet:hidden desktop:flex gap-[45px]">
+
+          {/* ✅ 드롭다운: 모바일/태블릿에서는 검색창 아래 한 줄에 표시 */}
+          <div
+            className="
+              w-full mt-4
+              flex flex-nowrap overflow-x-auto
+              gap-3
+              tablet:gap-4
+              desktop:flex desktop:flex-nowrap desktop:overflow-visible desktop:mt-0 desktop:gap-[45px]
+              ml-0 desktop:ml-30
+            "
+          >
             <Dropdown
+            className="text-[9px] tablet:text-[14px] desktop:text-[16px] leading-tight"
               placeholder="등급"
               enableReset
               resetLabel="전체 등급"
@@ -80,6 +94,7 @@ const CardSearchContainer = ({
               onChange={onRarityChange}
             />
             <Dropdown
+            className="text-[9px] tablet:text-[14px] desktop:text-[16px] leading-tight"
               placeholder="장르"
               enableReset
               resetLabel="전체 장르"
@@ -89,6 +104,7 @@ const CardSearchContainer = ({
             />
             {showSaleTypeFilter && (
               <Dropdown
+              className="text-[9px] tablet:text-[14px] desktop:text-[16px] leading-tight"
                 placeholder="판매형태"
                 enableReset
                 resetLabel="전체 판매형태"
@@ -99,6 +115,7 @@ const CardSearchContainer = ({
             )}
             {showStatusFilter && (
               <Dropdown
+              className="text-[9px] tablet:text-[14px] desktop:text-[16px] leading-tight"
                 placeholder="매진여부"
                 enableReset
                 resetLabel="전체 매진여부"

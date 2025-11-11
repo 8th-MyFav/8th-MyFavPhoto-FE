@@ -76,15 +76,25 @@ export default function SellerPage() {
   }, [selectedStatus]);
 
   // API 데이터 호출
- const { data, isFetching, error: queryError, refetch } = useMySaleList({
-   page,
-   pageSize: PAGE_SIZE,
-   grade: selectedRarity,
-   genre: selectedCategory,
-   keyword: debouncedSearchText,
-   saleType: selectedSaleType,
-   isSoldOut: selectedStatus === "매진" ? true : selectedStatus === "판매중" ? false : undefined,
- });
+  const {
+    data,
+    isFetching,
+    error: queryError,
+    refetch,
+  } = useMySaleList({
+    page,
+    pageSize: PAGE_SIZE,
+    grade: selectedRarity,
+    genre: selectedCategory,
+    keyword: debouncedSearchText,
+    saleType: selectedSaleType,
+    isSoldOut:
+      selectedStatus === "매진"
+        ? true
+        : selectedStatus === "판매중"
+        ? false
+        : undefined,
+  });
 
   // 에러 처리
   useEffect(() => {
@@ -107,19 +117,36 @@ export default function SellerPage() {
   const ownedItems = data?.list || [];
   const totalCount = data?.totalCount || 0;
 
-const filteredItems = ownedItems.filter((item) => {
-  const status = (item.status || item.state || item.saleStatus || "").toUpperCase();
-  const available = item.available ?? item.count ?? item.quantity ?? 0;
+  const DEFAULT_GRADE_COUNTS = useMemo(
+    () => ({
+      COMMON: 0,
+      RARE: 0,
+      SUPER_RARE: 0,
+      LEGENDARY: 0,
+    }),
+    []
+  );
 
-  // 판매중 상태를 여러 케이스로 커버
-  const onSaleStatuses = ["판매중", "ON_SALE", "SELLING", "AVAILABLE"];
-  const isTradePending = ["교환 제시 대기중", "TRADE_PENDING"].includes(item.status);
+  const filteredItems = ownedItems.filter((item) => {
+    const status = (
+      item.status ||
+      item.state ||
+      item.saleStatus ||
+      ""
+    ).toUpperCase();
+    const available = item.available ?? item.count ?? item.quantity ?? 0;
 
-  if (onSaleStatuses.includes(status)) return true;
-  if (isTradePending) return true;
-  if (available > 0) return true; // 재고가 1 이상이면 표시
-  return false;
-});
+    // 판매중 상태를 여러 케이스로 커버
+    const onSaleStatuses = ["판매중", "ON_SALE", "SELLING", "AVAILABLE"];
+    const isTradePending = ["교환 제시 대기중", "TRADE_PENDING"].includes(
+      item.status
+    );
+
+    if (onSaleStatuses.includes(status)) return true;
+    if (isTradePending) return true;
+    if (available > 0) return true; // 재고가 1 이상이면 표시
+    return false;
+  });
 
   // 디버깅: 페이지네이션 정보 확인 및 API 응답 필드 확인
   useEffect(() => {
@@ -166,18 +193,49 @@ const filteredItems = ownedItems.filter((item) => {
     }
   }, [page, totalCount, ownedItems]);
 
+  const totalGradeCounts = useMemo(() => {
+    return ownedItems.reduce(
+      (acc, item) => {
+        const grade = String(item.grade || "").toUpperCase();
+        if (grade in acc) {
+          acc[grade] += 1;
+        }
+        return acc;
+      },
+      { ...DEFAULT_GRADE_COUNTS }
+    );
+  }, [ownedItems, DEFAULT_GRADE_COUNTS]);
 
-  // ✅ 필터된 카드 기준으로 등급별 카운트 재계산
-  const gradeCounts = useMemo(() => {
-    return {
-      COMMON: filteredItems.filter((item) => item.grade === "COMMON").length,
-      RARE: filteredItems.filter((item) => item.grade === "RARE").length,
-      SUPER_RARE: filteredItems.filter((item) => item.grade === "SUPER_RARE").length,
-      LEGENDARY: filteredItems.filter((item) => item.grade === "LEGENDARY").length,
-    };
-  }, [filteredItems]);
+  const [summaryGradeCounts, setSummaryGradeCounts] = useState({
+    ...DEFAULT_GRADE_COUNTS,
+  });
+  const [summaryTotalCount, setSummaryTotalCount] = useState(0);
 
-    // 디버깅: 페이지네이션 정보 확인
+  useEffect(() => {
+    const isBaseView =
+      !selectedRarity &&
+      !selectedCategory &&
+      !selectedStatus &&
+      !selectedSaleType &&
+      !debouncedSearchText &&
+      page === 1;
+
+    if (isBaseView) {
+      setSummaryGradeCounts(totalGradeCounts);
+      setSummaryTotalCount(totalCount);
+    }
+  }, [
+    totalGradeCounts,
+    totalCount,
+    selectedRarity,
+    selectedCategory,
+    selectedStatus,
+    selectedSaleType,
+    debouncedSearchText,
+    page,
+  ]);
+
+  // 디버깅: 페이지네이션 정보 확인
   useEffect(() => {
     console.log("🟡 Page State:", {
       currentPage: page,
@@ -202,25 +260,25 @@ const filteredItems = ownedItems.filter((item) => {
   };
 
   // 카드 데이터 정규화
-const normalizedCards = useMemo(() => {
-  return ownedItems.map((item) => {
-    const grade = String(item.grade || "").toUpperCase();
-    
-    return {
-      topImage: item.image_url || "/images/sample.svg",
-      title: item.name || "포토카드",
-      rarityIcon: grade === "SUPER_RARE" ? "SUPER RARE" : grade,
-      category: item.genre || "",
-      author: user?.nickname || "",
-      price: item.price || 0,
-      remaining: item.available ?? 0,
-      total: item.total_issued ?? 0,
-      favoriteImg: "/images/favorite.svg",
-      createdAt: item.createdAt,
-      showTag: true,
-    };
-  });
-}, [ownedItems, user?.nickname]);
+  const normalizedCards = useMemo(() => {
+    return ownedItems.map((item) => {
+      const grade = String(item.grade || "").toUpperCase();
+
+      return {
+        topImage: item.image_url || "/images/sample.svg",
+        title: item.name || "포토카드",
+        rarityIcon: grade === "SUPER_RARE" ? "SUPER RARE" : grade,
+        category: item.genre || "",
+        author: user?.nickname || "",
+        price: item.price || 0,
+        remaining: item.available ?? 0,
+        total: item.total_issued ?? 0,
+        favoriteImg: "/images/favorite.svg",
+        createdAt: item.createdAt,
+        showTag: true,
+      };
+    });
+  }, [ownedItems, user?.nickname]);
 
   // 정렬
   const sortedCards = useMemo(() => {
@@ -235,7 +293,7 @@ const normalizedCards = useMemo(() => {
   }, [normalizedCards, sortOrder]);
 
   // 로딩 상태
- // 에러 상태 (에러가 있어도 이전 데이터가 있으면 표시)
+  // 에러 상태 (에러가 있어도 이전 데이터가 있으면 표시)
   const hasData = filteredItems.length > 0;
 
   return (
@@ -246,8 +304,8 @@ const normalizedCards = useMemo(() => {
           title="나의 판매 포토카드"
           showPhotoCardSummary={true}
           ownerName={user?.nickname || ""}
-          totalCount={filteredItems.length}
-          gradeCounts={gradeCounts}
+          totalCount={summaryTotalCount}
+          gradeCounts={summaryGradeCounts}
           showButton={false}
         />
         {/* 에러 메시지 표시 (데이터가 있을 때는 상단에 표시) */}
@@ -291,42 +349,42 @@ const normalizedCards = useMemo(() => {
             </button>
           </div>
         ) : (
-        <div className="relative">
-          <CardSearchContainer
-            searchText={searchText}
-            selectedRarity={selectedRarity}
-            selectedCategory={selectedCategory}
-            selectedStatus={selectedStatus}
-            sortOrder={sortOrder}
-            showStatusFilter={true}
-            showSortDropdown={false}
-            showSaleTypeFilter={true}
-            selectedSaleType={selectedSaleType}
-            onSaleTypeChange={setSelectedSaleType}
-            categoryOptions={GENRE_OPTIONS}
-            onSearchChange={setSearchText}
-            onSearchSubmit={handleSearchSubmit}
-            onRarityChange={setSelectedRarity}
-            onCategoryChange={setSelectedCategory}
-            onStatusChange={setSelectedStatus}
-            onSortOrderChange={setSortOrder}
-            cards={sortedCards.map((card) => ({
-              ...card,
-              showRemainingAsFraction: true,
-            }))}
-            cardGridClass="grid grid-cols-3 gap-x-xl gap-y-xl my-3xl"
-            emptyMessage="판매 중인 카드가 없습니다."
-            showPagination={true}
-            paginationComponent={
-              <Pagination
-                page={page}
-                pageSize={PAGE_SIZE}
-                totalCount={totalCount}
-                onChange={setPage}
-              />
-            }
-          />
-      </div>
+          <div className="relative">
+            <CardSearchContainer
+              searchText={searchText}
+              selectedRarity={selectedRarity}
+              selectedCategory={selectedCategory}
+              selectedStatus={selectedStatus}
+              sortOrder={sortOrder}
+              showStatusFilter={true}
+              showSortDropdown={false}
+              showSaleTypeFilter={true}
+              selectedSaleType={selectedSaleType}
+              onSaleTypeChange={setSelectedSaleType}
+              categoryOptions={GENRE_OPTIONS}
+              onSearchChange={setSearchText}
+              onSearchSubmit={handleSearchSubmit}
+              onRarityChange={setSelectedRarity}
+              onCategoryChange={setSelectedCategory}
+              onStatusChange={setSelectedStatus}
+              onSortOrderChange={setSortOrder}
+              cards={sortedCards.map((card) => ({
+                ...card,
+                showRemainingAsFraction: true,
+              }))}
+              cardGridClass="grid grid-cols-3 gap-x-xl gap-y-xl my-3xl"
+              emptyMessage="판매 중인 카드가 없습니다."
+              showPagination={true}
+              paginationComponent={
+                <Pagination
+                  page={page}
+                  pageSize={PAGE_SIZE}
+                  totalCount={totalCount}
+                  onChange={setPage}
+                />
+              }
+            />
+          </div>
         )}
       </div>
     </div>
