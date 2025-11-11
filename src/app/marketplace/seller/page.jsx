@@ -312,7 +312,7 @@ const normalizedCards = useMemo(() => {
             onSortOrderChange={setSortOrder}
             cards={sortedCards.map((card) => ({
               ...card,
-              showRemainingAsFraction: true,
+              quantity: card.remaining,
             }))}
             cardGridClass="grid grid-cols-3 gap-x-xl gap-y-xl my-3xl"
             emptyMessage="판매 중인 카드가 없습니다."

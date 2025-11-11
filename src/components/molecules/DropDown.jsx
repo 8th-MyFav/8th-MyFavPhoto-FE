@@ -128,6 +128,7 @@ const Dropdown = ({
         <ul
           className="absolute left-0 z-10 flex flex-col"
           style={{
+            zIndex: 9999,
             width: optionListWidth === "100%" ? "100%" : optionListWidth,
             maxWidth,
             borderRadius: "2px",
