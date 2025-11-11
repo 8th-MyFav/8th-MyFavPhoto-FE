@@ -126,8 +126,6 @@ export default function MyGalleryPage() {
         `${item.genre || ""} ${item.grade || ""} 카드`.trim() || // 장르 + 등급 조합
         "포토카드";
 
-      // 디버깅: 각 카드의 모든 필드 확인 (필요시 활성화)
-
       // count는 보유 개수
       const totalCountValue =
         item.count !== undefined

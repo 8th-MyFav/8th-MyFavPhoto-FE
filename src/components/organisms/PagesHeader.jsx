@@ -89,7 +89,7 @@ const PagesHeader = ({
       <div className="mb-xs desktop:pt-lg tablet:pt-md pt-xs">
         <div className="flex justify-between items-center w-full desktop:border-b-[2px] tablet:border-b-[2px] border-gray-100 pb-xs">
           {/* 왼쪽 텍스트 */}
-          <div className="hidden tablet:flex flex-1 items-center text-white tracking-[-2px] font-br tablet:text-[48px] desktop:text-[62px]">
+          <div className="hidden tablet:flex flex-1 items-center text-white tracking-[-2px] font-br tablet:text-[40px] desktop:text-[62px]">
             {displayTitle}
           </div>
 
@@ -97,7 +97,7 @@ const PagesHeader = ({
           {showButton && displayButtonText && displayButtonOnClick && (
             <>
               <div className="hidden tablet:flex flex-shrink-0 ml-auto justify-end">
-                <div className="tablet:w-[280px] desktop:w-[440px]">
+                <div className="tablet:w-[205px] desktop:w-[440px]">
                   <Button
                     text={displayButtonText}
                     width="100%"

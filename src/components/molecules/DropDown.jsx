@@ -73,7 +73,9 @@ const Dropdown = ({
       }`}
       ref={dropdownRef}
       style={{
+        display: "inline-block",
         width,
+        maxWidth,
         height,
         backgroundColor: "var(--black-black, #0F0F0F)",
         padding,
@@ -129,11 +131,13 @@ const Dropdown = ({
             width: optionListWidth === "100%" ? "100%" : optionListWidth,
             maxWidth,
             borderRadius: "2px",
-            border: "1px solid #DDD",
-            background: "#0F0F0F",
+            border: "1px solid var(--gray-gray200, #DDD)",
+            background: "var(--black-black, #0F0F0F)",
             maxHeight: "200px",
             overflowY: "auto",
-            padding: "8px 0",
+            marginTop: optionListMarginTop,
+            padding: optionListPadding,
+            gap: "10px",
             ...customStyles.optionList,
           }}
         >
@@ -153,6 +157,9 @@ const Dropdown = ({
                   selectedValue === (resetLabel ?? placeholder) ? 600 : 400,
                 textAlign: "left",
                 whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                display: "inline-block",
                 ...customStyles.option,
                 ...(selectedValue === (resetLabel ?? placeholder)
                   ? customStyles.selectedOption
@@ -208,64 +215,51 @@ const Dropdown = ({
 
 export default Dropdown;
 
-const SORT_DROPDOWN_OPTIONS = [
-  { label: "낮은 가격순", value: "낮은 가격순" },
-  { label: "높은 가격순", value: "높은 가격순" },
-  { label: "최신순", value: "최신순" },
-];
-
 export const SortDropdown = ({
-  onChange = () => {},
-  value,
-  defaultValue = SORT_DROPDOWN_OPTIONS[0].label,
+  options = ["낮은 가격순", "높은 가격순", "최신순"],
+  placeholder = "낮은 가격순",
   customStyles = {},
-  ...props
+  ...rest
 }) => {
+  const mergedCustomStyles = {
+    container: {
+      border: "1px solid #FFF",
+      padding: "13px 20px",
+      ...customStyles.container,
+    },
+    select: {
+      width: "100%",
+      justifyContent: "space-between",
+      ...customStyles.select,
+    },
+    text: {
+      width: "100%",
+      ...customStyles.text,
+    },
+    arrow: {
+      marginLeft: "12px",
+      ...customStyles.arrow,
+    },
+    optionList: {
+      width: "180px",
+      padding: "10px 24px",
+      ...customStyles.optionList,
+    },
+    option: {
+      ...customStyles.option,
+    },
+  };
+
   return (
     <Dropdown
-      options={SORT_DROPDOWN_OPTIONS}
+      options={options}
+      placeholder={placeholder}
       width="180px"
-      height="40px"
-      padding="10px 16px"
-      arrowSpacing="justify-content"
-      onChange={onChange}
-      value={value}
-      defaultValue={defaultValue}
-      customStyles={{
-        container: {
-          backgroundColor: "#161616",
-          border: "1px solid #2b2b2b",
-          ...customStyles.container,
-        },
-        select: {
-          gap: "8px",
-          ...customStyles.select,
-        },
-        text: {
-          fontSize: "14px",
-          fontWeight: 500,
-          ...customStyles.text,
-        },
-        arrow: {
-          filter: "invert(1)",
-          ...customStyles.arrow,
-        },
-        optionList: {
-          background: "#161616",
-          borderColor: "#2b2b2b",
-          ...customStyles.optionList,
-        },
-        option: {
-          padding: "10px 16px",
-          width: "100%",
-          ...customStyles.option,
-        },
-        selectedOption: {
-          color: "#efff04",
-          ...customStyles.selectedOption,
-        },
-      }}
-      {...props}
+      height="50px"
+      padding="13px 20px"
+      maxWidth="180px"
+      customStyles={mergedCustomStyles}
+      {...rest}
     />
   );
 };

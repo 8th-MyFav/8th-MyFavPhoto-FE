@@ -58,14 +58,14 @@ const CardSearchContainer = ({
           showSortDropdown ? "mt-5" : "mt-xs"
         } w-full`}
       >
-        <div className="flex items-center">
-          <div className="mr-lg">
+        <div className="flex flex-col tablet:flex-row items-center w-full tablet:w-auto tablet:items-center">
+          <div className="w-full tablet:w-auto tablet:mr-lg">
             <SearchMolecule
               onSearch={onSearchChange}
               onSearchSubmit={onSearchSubmit || onSearchChange}
             />
           </div>
-         <div className="flex gap-[45px]">
+          <div className="hidden tablet:hidden desktop:flex gap-[45px]">
             <Dropdown
               placeholder="등급"
               enableReset
@@ -110,7 +110,11 @@ const CardSearchContainer = ({
           </div>
         </div>
 
-        {showSortDropdown && <SortDropdown onChange={onSortOrderChange} />}
+        {showSortDropdown && (
+          <div className="hidden tablet:hidden desktop:block">
+            <SortDropdown onChange={onSortOrderChange} />
+          </div>
+        )}
       </div>
 
       {/* 카드 리스트: mobile/tablet = 2열, desktop = 3열 */}
