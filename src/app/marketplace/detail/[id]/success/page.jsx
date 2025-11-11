@@ -12,14 +12,18 @@ export default function PurchaseSuccessPage() {
   const quantity = searchParams.get("quantity");
 
   return (
-    <ActionResultPage
-      type="구매"
-      result="성공"
-      rarity={rarity}
-      title={title}
-      quantity={quantity}
-      buttonText="마이갤러리에서 확인하기"
-      buttonAction={() => router.push(PATHNAME.MYGAL)}
-    />
+    <div className="bg-black m-auto">
+      <div className="bg-black min-h-screen flex items-center justify-center">
+        <ActionResultPage
+          type="구매"
+          result="성공"
+          rarity={rarity}
+          title={title}
+          quantity={quantity}
+          buttonText="마이갤러리에서 확인하기"
+          buttonAction={() => router.push(PATHNAME.MYGAL)}
+        />
+      </div>
+    </div>
   );
 }

@@ -1,95 +1,133 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 
 const Dropdown = ({
   options = [],
-  width = "520px",
-  height = "60px",
-  placeholder = "선택해주세요",
+  width = "fit-content",
+  height = "24px",
+  placeholder = "선택",
+  padding = "8px",
+  maxWidth = "300px",
+  optionListMarginTop = "18px",
+  optionListPadding = "10px 12px",
+  optionListWidth = "fit-content",
+  arrowSpacing = "12px",
+  enableReset = false,
+  resetLabel = "전체",
+  resetValue = "",
   customStyles = {},
   onChange = () => {},
+  value,
+  defaultValue,
+  disabled = false,
 }) => {
-  const [selected, setSelected] = useState("");
+  const isControlled = value !== undefined;
+  const [internalSelected, setInternalSelected] = useState(defaultValue ?? "");
+  const selectedValue = isControlled ? value : internalSelected;
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
-  //  외부 클릭 시 닫기
+  // 외부 클릭 시 닫기
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         setIsOpen(false);
       }
     };
+
     if (isOpen) document.addEventListener("mousedown", handleClickOutside);
+
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen]);
 
-  //  선택 시 동작
-  const handleSelect = (opt) => {
-    setSelected(opt);
+  useEffect(() => {
+    if (disabled) {
+      setIsOpen(false);
+    }
+  }, [disabled]);
+
+  useEffect(() => {
+    if (!isControlled && defaultValue !== undefined) {
+      setInternalSelected(defaultValue);
+    }
+  }, [defaultValue, isControlled]);
+
+  const handleSelect = (displayValue, payloadValue = displayValue) => {
+    if (disabled) return;
+    if (!isControlled) {
+      setInternalSelected(displayValue);
+    }
     setIsOpen(false);
-    onChange(opt);
+    onChange(payloadValue);
   };
+
+  const computedArrowSpacing =
+    arrowSpacing === "justify-content" ? "auto" : arrowSpacing;
+
+  const renderResetOption = enableReset && !disabled;
 
   return (
     <div
+      className={`relative rounded-[2px] overflow-visible ${
+        disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer"
+      }`}
       ref={dropdownRef}
-      className="relative cursor-pointer select-none"
       style={{
         width,
         height,
-        border: "1px solid #DDD",
-        borderRadius: "2px",
-        backgroundColor: "#0F0F0F",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: "0 20px",
+        backgroundColor: "var(--black-black, #0F0F0F)",
+        padding,
+        userSelect: "none",
         ...customStyles.container,
       }}
     >
-      {/* 선택 텍스트 */}
-      <span
-        onClick={() => setIsOpen((prev) => !prev)}
-        style={{
-          color: selected ? "#FFF" : "#DDD",
-          fontSize: "15px",
-          fontFamily: "Noto Sans KR",
-          fontWeight: selected ? 600 : 400,
-          letterSpacing: "-0.3px",
-          textAlign: "left",
-          width: "100%",
-          userSelect: "none",
-          ...customStyles.text,
+      {/* 선택 영역 */}
+      <div
+        className="flex items-center justify-between h-full"
+        onClick={() => {
+          if (disabled) return;
+          setIsOpen((prev) => !prev);
         }}
+        style={{ width: "100%", ...customStyles.select }}
       >
-        {selected || placeholder}
-      </span>
-
-      {/* 화살표 */}
-      <img
-        src="/images/arrowDown.svg"
-        alt="arrow"
-        onClick={() => setIsOpen((prev) => !prev)}
-        style={{
-          width: "20px",
-          height: "20px",
-          transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
-          transition: "transform 0.2s ease",
-          flexShrink: 0,
-          marginLeft: "8px",
-          ...customStyles.arrow,
-        }}
-      />
+        <span
+          style={{
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            color: selectedValue ? "#FFF" : "var(--gray-gray200, #DDD)",
+            fontFamily: "Noto Sans KR",
+            fontSize: "15px",
+            fontWeight: selectedValue ? 600 : 700,
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            ...customStyles.text,
+          }}
+        >
+          {selectedValue || placeholder}
+        </span>
+        <img
+          src="/images/arrowDown.svg"
+          alt="arrow"
+          style={{
+            width: "24px",
+            height: "24px",
+            transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+            transition: "transform 0.2s ease",
+            marginLeft: computedArrowSpacing,
+            ...customStyles.arrow,
+          }}
+        />
+      </div>
 
       {/* 옵션 리스트 */}
       {isOpen && (
         <ul
           className="absolute left-0 z-10 flex flex-col"
           style={{
-            top: "100%",
-            marginTop: "8px",
-            width: "100%",
+            width: optionListWidth === "100%" ? "100%" : optionListWidth,
+            maxWidth,
             borderRadius: "2px",
             border: "1px solid #DDD",
             background: "#0F0F0F",
@@ -99,25 +137,69 @@ const Dropdown = ({
             ...customStyles.optionList,
           }}
         >
-          {options.map((opt, index) => (
+          {renderResetOption && (
             <li
-              key={index}
-              onClick={() => handleSelect(opt)}
-              className="hover:opacity-80"
+              key="reset-option"
+              className="cursor-pointer hover:opacity-80"
+              onClick={() =>
+                handleSelect(resetLabel ?? placeholder, resetValue)
+              }
               style={{
-                padding: "8px 20px",
-                color: "#FFF",
-                fontSize: "15px",
+                width: optionListWidth === "100%" ? "100%" : "auto",
+                color: "var(--white-white, #FFF)",
                 fontFamily: "Noto Sans KR",
-                fontWeight: 400,
+                fontSize: "15px",
+                fontWeight:
+                  selectedValue === (resetLabel ?? placeholder) ? 600 : 400,
                 textAlign: "left",
                 whiteSpace: "nowrap",
                 ...customStyles.option,
+                ...(selectedValue === (resetLabel ?? placeholder)
+                  ? customStyles.selectedOption
+                  : {}),
               }}
             >
-              {opt}
+              {resetLabel ?? placeholder}
             </li>
-          ))}
+          )}
+          {options.map((opt, index) => {
+            const isObjectOption = typeof opt === "object" && opt !== null;
+            const optionLabel = isObjectOption
+              ? opt.label ?? String(opt.value ?? opt.display ?? "")
+              : opt;
+            const optionValue = isObjectOption
+              ? opt.value ?? opt.label ?? opt.display ?? optionLabel
+              : opt;
+            const isSelected = selectedValue === optionLabel;
+
+            return (
+              <li
+                key={
+                  isObjectOption
+                    ? optionValue ?? optionLabel ?? index
+                    : opt ?? index
+                }
+                className="cursor-pointer hover:opacity-80"
+                onClick={() => handleSelect(optionLabel, optionValue)}
+                style={{
+                  width: optionListWidth === "100%" ? "100%" : "auto",
+                  color: "var(--white-white, #FFF)",
+                  fontFamily: "Noto Sans KR",
+                  fontSize: "15px",
+                  fontWeight: isSelected ? 600 : 400,
+                  textAlign: "left",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  display: "inline-block",
+                  ...customStyles.option,
+                  ...(isSelected ? customStyles.selectedOption : {}),
+                }}
+              >
+                {optionLabel}
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>
