@@ -1,12 +1,8 @@
-import React, { Suspense } from "react";
+import React from "react";
 import SellSuccessPage from "./successPage";
 
 const sellSuccess = () => {
-  return (
-    <Suspense fallback={<div>로딩 중...</div>}>
-      <SellSuccessPage />
-    </Suspense>
-  );
+  return <SellSuccessPage />;
 };
 
 export default sellSuccess;

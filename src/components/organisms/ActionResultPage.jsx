@@ -10,11 +10,13 @@ const ActionResultPage = ({
   title,
   quantity = 1,
   buttonText = "마켓 플레이스로 돌아가기",
-  buttonAction, // 버튼 클릭 시 함수
+  // buttonAction, // 버튼 클릭 시 함수
   closeAction, // 닫기 버튼 클릭 시 함수
   highlightColor = "#EFFF04", // 성공일 때 강조 색
+  pathAction, // 버튼 클릭 시 이동 위치
 }) => {
   const router = useRouter();
+  const pathname = pathAction ? pathAction : PATHNAME.MARKET;
 
   return (
     <div className="bg-black min-h-[668px] text-white flex flex-col items-center justify-center relative px-4">
@@ -49,7 +51,7 @@ const ActionResultPage = ({
       )}
 
       <button
-        onClick={buttonAction || (() => router.push(PATHNAME.MARKET))}
+        onClick={() => router.push(pathname)}
         className="border border-white px-8 py-3 hover:bg-white hover:text-black transition cursor-pointer"
         style={{ whiteSpace: "nowrap" }}
       >

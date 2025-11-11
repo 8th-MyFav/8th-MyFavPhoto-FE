@@ -113,14 +113,26 @@ const CreatePhotoPage = () => {
     // 에러가 존재하거나 값이 비었으면 중단
     if (Object.values(errors).some((msg) => msg) || !isFormComplete) return;
 
-    const cardData = {
-      name: photoName,
-      grade,
-      genre,
-      price: Number(price),
-      total_issued: Number(quantity),
-      description,
-    };
+    const cardData = new FormData();
+
+    cardData.append("name", photoName);
+    cardData.append("grade", grade);
+    cardData.append("genre", genre);
+    cardData.append("price", Number(price));
+    cardData.append("total_issued", Number(quantity));
+    cardData.append("description", description);
+    // 이미지 파일 추가
+    cardData.append("file", photo); // 여기서 photo는 File 객체
+
+    console.log("cardData=> ", cardData);
+    // const cardData = {
+    //   name: photoName,
+    //   grade,
+    //   genre,
+    //   price: Number(price),
+    //   total_issued: Number(quantity),
+    //   description,
+    // };
 
     createCards(cardData, {
       onSuccess: () => {
