@@ -128,40 +128,24 @@ const MobileNavigation = () => {
     <div className="flex w-full items-center">
       <div className="flex flex-1 justify-start">
         <div className="relative">
-          {shouldUseTitle ? (
-            <button
-              onClick={() => history.back()}
-              className="flex items-center justify-center"
-              aria-label="뒤로 가기"
-            >
-              <Image
-                src="/icons/headerArrow.svg"
-                alt="뒤로가기"
-                width={11}
-                height={18}
-              />
-            </button>
-          ) : (
-            <>
-              <button
-                onClick={() => setShowProfile((prev) => !prev)}
-                className="flex items-center justify-center rounded bg-transparent"
-                aria-label="프로필 열기"
-              >
-                <img
-                  src="/icons/hamburgerMenuIcon.svg"
-                  alt="Hamburger menu"
-                  className="h-5 w-5"
-                />
-              </button>
-              <MobileProfileDrawer
-                show={showProfile}
-                name={user.nickname}
-                point={points?.acc_point}
-                onClose={() => setShowProfile(false)}
-              />
-            </>
-          )}
+          <button
+            onClick={() => setShowProfile((prev) => !prev)}
+            className="flex items-center justify-center rounded bg-transparent"
+            aria-label="프로필 열기"
+          >
+            <Image
+              src="/icons/headerArrow.svg"
+              alt="프로필 열기"
+              width={11}
+              height={18}
+            />
+          </button>
+          <MobileProfileDrawer
+            show={showProfile}
+            name={user.nickname}
+            point={points?.acc_point}
+            onClose={() => setShowProfile(false)}
+          />
         </div>
       </div>
 

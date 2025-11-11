@@ -16,6 +16,14 @@ const Dropdown = ({
   resetLabel = "전체",
   resetValue = "",
   containerBorder,
+  selectedTextColor = "#FFF",
+  placeholderTextColor = "var(--gray-gray200, #DDD)",
+  optionTextColor = "var(--white-white, #FFF)",
+  selectedOptionTextColor,
+  selectedFontWeight = 600,
+  placeholderFontWeight = 700,
+  optionFontWeight = 400,
+  selectedOptionFontWeight = 600,
   customStyles = {},
   onChange = () => {},
   value,
@@ -99,10 +107,12 @@ const Dropdown = ({
             flex: 1,
             display: "flex",
             alignItems: "center",
-            color: selectedValue ? "#FFF" : "var(--gray-gray200, #DDD)",
+            color: selectedValue ? selectedTextColor : placeholderTextColor,
             fontFamily: "Noto Sans KR",
             fontSize: "15px",
-            fontWeight: selectedValue ? 600 : 700,
+            fontWeight: selectedValue
+              ? selectedFontWeight
+              : placeholderFontWeight,
             whiteSpace: "nowrap",
             overflow: "hidden",
             textOverflow: "ellipsis",
@@ -152,11 +162,13 @@ const Dropdown = ({
               }
               style={{
                 width: optionListWidth === "100%" ? "100%" : "auto",
-                color: "var(--white-white, #FFF)",
+                color: selectedOptionTextColor ?? optionTextColor,
                 fontFamily: "Noto Sans KR",
                 fontSize: "15px",
                 fontWeight:
-                  selectedValue === (resetLabel ?? placeholder) ? 600 : 400,
+                  selectedValue === (resetLabel ?? placeholder)
+                    ? selectedOptionFontWeight
+                    : optionFontWeight,
                 textAlign: "left",
                 whiteSpace: "nowrap",
                 overflow: "hidden",
@@ -192,10 +204,14 @@ const Dropdown = ({
                 onClick={() => handleSelect(optionLabel, optionValue)}
                 style={{
                   width: optionListWidth === "100%" ? "100%" : "auto",
-                  color: "var(--white-white, #FFF)",
+                  color: isSelected
+                    ? selectedOptionTextColor ?? optionTextColor
+                    : optionTextColor,
                   fontFamily: "Noto Sans KR",
                   fontSize: "15px",
-                  fontWeight: isSelected ? 600 : 400,
+                  fontWeight: isSelected
+                    ? selectedOptionFontWeight
+                    : optionFontWeight,
                   textAlign: "left",
                   whiteSpace: "nowrap",
                   overflow: "hidden",
