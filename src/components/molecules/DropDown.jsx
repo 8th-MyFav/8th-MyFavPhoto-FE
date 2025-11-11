@@ -20,6 +20,7 @@ const Dropdown = ({
   value,
   defaultValue,
   disabled = false,
+  className = "", // ← 추가: Tailwind / custom CSS 클래스 전달용
 }) => {
   const isControlled = value !== undefined;
   const [internalSelected, setInternalSelected] = useState(defaultValue ?? "");
@@ -27,7 +28,6 @@ const Dropdown = ({
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
-  // 외부 클릭 시 닫기
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -68,9 +68,7 @@ const Dropdown = ({
 
   return (
     <div
-      className={`relative rounded-[2px] overflow-visible ${
-        disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer"
-      }`}
+      className={`relative rounded-[2px] overflow-visible ${disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer"}`}
       ref={dropdownRef}
       style={{
         display: "inline-block",
@@ -93,17 +91,13 @@ const Dropdown = ({
         style={{ width: "100%", ...customStyles.select }}
       >
         <span
+          // className으로 텍스트 크기/스타일을 부모에서 조절 가능하게 함
+          className={`overflow-hidden whitespace-nowrap text-ellipsis flex items-center ${className}`}
           style={{
             flex: 1,
-            display: "flex",
-            alignItems: "center",
             color: selectedValue ? "#FFF" : "var(--gray-gray200, #DDD)",
             fontFamily: "Noto Sans KR",
-            fontSize: "15px",
             fontWeight: selectedValue ? 600 : 700,
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
             ...customStyles.text,
           }}
         >
@@ -145,7 +139,7 @@ const Dropdown = ({
           {renderResetOption && (
             <li
               key="reset-option"
-              className="cursor-pointer hover:opacity-80"
+              className={`cursor-pointer hover:opacity-80 ${className}`}
               onClick={() =>
                 handleSelect(resetLabel ?? placeholder, resetValue)
               }
@@ -153,7 +147,6 @@ const Dropdown = ({
                 width: optionListWidth === "100%" ? "100%" : "auto",
                 color: "var(--white-white, #FFF)",
                 fontFamily: "Noto Sans KR",
-                fontSize: "15px",
                 fontWeight:
                   selectedValue === (resetLabel ?? placeholder) ? 600 : 400,
                 textAlign: "left",
@@ -187,13 +180,12 @@ const Dropdown = ({
                     ? optionValue ?? optionLabel ?? index
                     : opt ?? index
                 }
-                className="cursor-pointer hover:opacity-80"
+                className={`cursor-pointer hover:opacity-80 ${className}`}
                 onClick={() => handleSelect(optionLabel, optionValue)}
                 style={{
                   width: optionListWidth === "100%" ? "100%" : "auto",
                   color: "var(--white-white, #FFF)",
                   fontFamily: "Noto Sans KR",
-                  fontSize: "15px",
                   fontWeight: isSelected ? 600 : 400,
                   textAlign: "left",
                   whiteSpace: "nowrap",
@@ -216,10 +208,12 @@ const Dropdown = ({
 
 export default Dropdown;
 
+/* SortDropdown unchanged except you may pass className through if needed */
 export const SortDropdown = ({
   options = ["낮은 가격순", "높은 가격순", "최신순"],
   placeholder = "낮은 가격순",
   customStyles = {},
+  className = "",
   ...rest
 }) => {
   const mergedCustomStyles = {
@@ -260,6 +254,7 @@ export const SortDropdown = ({
       padding="13px 20px"
       maxWidth="180px"
       customStyles={mergedCustomStyles}
+      className={className}
       {...rest}
     />
   );
