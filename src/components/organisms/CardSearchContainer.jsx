@@ -65,9 +65,12 @@ const CardSearchContainer = ({
               onSearchSubmit={onSearchSubmit || onSearchChange}
             />
           </div>
-          <div className="flex gap-[45px]">
+         <div className="flex gap-[45px]">
             <Dropdown
               placeholder="등급"
+              enableReset
+              resetLabel="전체 등급"
+              resetValue=""
               options={[
                 GRADE.COMMON,
                 GRADE.RARE,
@@ -78,19 +81,28 @@ const CardSearchContainer = ({
             />
             <Dropdown
               placeholder="장르"
+              enableReset
+              resetLabel="전체 장르"
+              resetValue=""
               options={categoryOptions}
               onChange={onCategoryChange}
             />
             {showSaleTypeFilter && (
               <Dropdown
                 placeholder="판매형태"
+                enableReset
+                resetLabel="전체 판매형태"
+                resetValue=""
                 options={["판매", "교환"]}
-                onChange={onSaleTypeChange} // ✅ 수정됨
+                onChange={onSaleTypeChange}
               />
             )}
             {showStatusFilter && (
               <Dropdown
                 placeholder="매진여부"
+                enableReset
+                resetLabel="전체 매진여부"
+                resetValue=""
                 options={["판매중", "매진"]}
                 onChange={onStatusChange}
               />

@@ -1,15 +1,11 @@
 "use client";
 import ActionResultPage from "@/components/organisms/ActionResultPage";
 import { PATHNAME } from "@/constants";
-import { useSearchParams, useRouter } from "next/navigation";
 
-export default function SellSuccessPage() {
-  const searchParams = useSearchParams();
-  const router = useRouter();
-
-  const rarity = searchParams?.get("rarity");
-  const title = searchParams?.get("title");
-  const quantity = searchParams?.get("quantity");
+export default function SellSuccessPage({ searchParams }) {
+  const rarity = searchParams?.rarity || "";
+  const title = searchParams?.title || "";
+  const quantity = searchParams?.quantity || "";
 
   return (
     <div className="bg-black m-auto">
@@ -21,7 +17,7 @@ export default function SellSuccessPage() {
           title={title}
           quantity={quantity}
           buttonText="나의 판매 포토카드에서 확인하기"
-          buttonAction={() => router.push(PATHNAME.MPSELLER)}
+          pathAction={PATHNAME.MPSELLER}
         />
       </div>
     </div>

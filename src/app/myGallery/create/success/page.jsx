@@ -1,26 +1,8 @@
-"use client";
+import React from "react";
+import CreatePhotoFailPage from "../fail/createFail";
 
-import ActionResultPage from "@/components/organisms/ActionResultPage";
-import { useSearchParams, useRouter } from "next/navigation";
-import { PATHNAME } from "@/constants";
+const createSuccess = () => {
+  return <CreatePhotoFailPage />;
+};
 
-export default function CreatePhotoSuccessPage() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
-  const rarity = searchParams.get("rarity");
-  const title = searchParams.get("title");
-  const quantity = searchParams.get("quantity");
-
-  return (
-    <ActionResultPage
-      type="포토카드 생성"
-      result="성공"
-      rarity={rarity}
-      title={title}
-      quantity={quantity}
-      buttonText="마이 갤러리로 돌아가기"
-      buttonAction={() => router.push(PATHNAME.MYGAL)}
-    />
-  );
-}
+export default createSuccess;

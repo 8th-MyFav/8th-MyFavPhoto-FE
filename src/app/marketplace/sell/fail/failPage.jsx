@@ -1,12 +1,9 @@
-"use client";
 import ActionResultPage from "@/components/organisms/ActionResultPage";
-import { useSearchParams } from "next/navigation";
 
-export default function SellFailPage() {
-  const searchParams = useSearchParams();
-  const rarity = searchParams?.get("rarity");
-  const title = searchParams?.get("title");
-  const quantity = searchParams?.get("quantity");
+export default function SellFailPage({ searchParams }) {
+  const rarity = searchParams?.rarity || "";
+  const title = searchParams?.title || "";
+  const quantity = searchParams?.quantity || "";
 
   return (
     <div className="bg-black m-auto">
