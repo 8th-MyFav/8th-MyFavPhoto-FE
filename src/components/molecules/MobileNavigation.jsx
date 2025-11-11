@@ -3,10 +3,10 @@
 import { useAuth } from "@/contexts/AuthContext";
 import Link from "next/link";
 import React, { useMemo, useState } from "react";
-import NotificationButton from "./notificationButton";
+import NotificationButton from "./NotificationButton";
 import { PAGE_TITLE, PATHNAME } from "@/constants";
 import Image from "next/image";
-import ProfileModal from "./profile";
+import ProfileModal from "./Profile";
 import { usePoints } from "@/api/pointAPI";
 import { usePathname } from "next/navigation";
 

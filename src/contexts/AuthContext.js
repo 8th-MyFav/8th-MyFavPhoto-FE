@@ -44,7 +44,6 @@ export function AuthProvider({ children }) {
         setUser(null);
       }
     } catch (error) {
-      console.error("사용자 정보를 가져오는데 실패했습니다:", error);
       localStorage.removeItem("accessToken");
       setUser(null);
     } finally {
@@ -70,7 +69,6 @@ export function AuthProvider({ children }) {
       }
       return false;
     } catch (error) {
-      console.error("토큰 갱신에 실패했습니다:", error);
       return false;
     }
   };
@@ -103,7 +101,6 @@ export function AuthProvider({ children }) {
         };
       }
     } catch (error) {
-      console.error("로그인 오류:", error);
       // alert(error);
       return { success: false, message: "로그인 중 오류가 발생했습니다." };
     }
@@ -137,7 +134,6 @@ export function AuthProvider({ children }) {
         };
       }
     } catch (error) {
-      console.error("회원가입 오류:", error);
       return { success: false, message: "회원가입 중 오류가 발생했습니다." };
     }
   };
