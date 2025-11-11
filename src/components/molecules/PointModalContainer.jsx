@@ -43,7 +43,7 @@ const PointModalContainer = () => {
     }
 
     setIsOpen(true);
-  }, [points, timeLeft]);
+  }, [timeLeft]);
 
   // 1초씩 감소 타이머
   useEffect(() => {
