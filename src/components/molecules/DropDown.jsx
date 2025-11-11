@@ -15,6 +15,7 @@ const Dropdown = ({
   enableReset = false,
   resetLabel = "전체",
   resetValue = "",
+  containerBorder,
   customStyles = {},
   onChange = () => {},
   value,
@@ -79,6 +80,7 @@ const Dropdown = ({
         padding,
         userSelect: "none",
         ...customStyles.container,
+        ...(containerBorder ? { border: containerBorder } : {}),
       }}
     >
       {/* 선택 영역 */}
