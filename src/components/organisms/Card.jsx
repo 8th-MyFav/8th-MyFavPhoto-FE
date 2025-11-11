@@ -38,16 +38,20 @@ const Card = ({
         w-full max-w-[440px]
         mobile:max-w-[calc(50vw-24px)]
         tablet:max-w-[340px]
-        aspect-[3/4]
-        flex flex-col items-center
-        rounded-[8px] border box-border overflow-visible
+        flex-shrink-0
+        flex flex-col
+        rounded-[2px] border box-border overflow-hidden
       `}
-      style={{ borderColor: "rgba(255,255,255,0.10)", backgroundColor: "var(--color-gray-500)" }}
+      style={{ 
+        borderColor: "rgba(255,255,255,0.10)", 
+        backgroundColor: "var(--color-gray-500)",
+        aspectRatio: "440/600"
+      }}
     >
-      {/* 이미지(가로 기준으로 비율 유지) */}
-      <div className="w-full relative aspect-[4/3]">
+      {/* 이미지 영역 */}
+      <div className="relative w-full" style={{ height: "50%", paddingLeft: "9%", paddingRight: "9%", paddingTop: "9%" }}>
         {showTag && (
-          <div className="absolute top-2 left-2 z-10">
+          <div className="absolute z-10" style={{ top: "16%", left: "10%" }}>
             <Tag type={tagType} size="small" />
           </div>
         )}
@@ -55,29 +59,30 @@ const Card = ({
         <img
           src={topImage}
           alt={title}
-          className={`w-full h-full object-cover ${isSoldOut ? "opacity-40" : ""}`}
+          className={`w-full h-full object-cover rounded-[2px] ${isSoldOut ? "opacity-40" : ""}`}
         />
 
         {isSoldOut && (
           <img
             src="/images/soldOut.svg"
             alt="sold out"
-            className="absolute inset-0 w-full h-full object-contain pointer-events-none"
+            className="absolute w-full h-full object-contain pointer-events-none"
+            style={{ top: 0, left: 0 }}
           />
         )}
       </div>
 
-      {/* 본문 (이미지 아래, 가변 높이) */}
-      <div className="w-[92%] mt-3 flex flex-col justify-between flex-1">
-        {/* 제목: 반응형 폰트 */}
+      {/* 본문 영역 */}
+      <div className="flex-1 flex flex-col" style={{ paddingLeft: "9.09%", paddingRight: "9.09%", paddingTop: "3.33%" }}>
+        {/* 제목 */}
         <h3
-          className="truncate text-white font-bold mobile:text-[14px] tablet:text-[16px] desktop:text-[18px] leading-tight"
+          className="truncate text-white font-bold desktop:text-[18px] tablet:text-[16px] mobile:text-[14px] leading-tight"
           title={title}
         >
           {title}
         </h3>
 
-        {/* 메타: CardMeta에 반응형 폰트 클래스 전달 (sizeVariant 활용 가능) */}
+        {/* 메타 정보 */}
         <div className="mt-2">
           <CardMeta
             rarityText={rarityText}
@@ -94,31 +99,37 @@ const Card = ({
         </div>
 
         {/* 구분선 */}
-        <div className="w-full mt-3" style={{ borderTop: "1px solid var(--color-gray-400)" }} />
+        <div className="w-full desktop:mt-4 tablet:mt-3 mobile:mt-2" style={{ borderTop: "1px solid var(--color-gray-400)" }} />
 
-        {/* 가격 / 잔여: 반응형 텍스트 */}
-        <div className="flex justify-between items-center mt-3">
-          <div className="text-gray-300 mobile:text-[12px] tablet:text-[14px] desktop:text-[16px]">
+        {/* 가격 정보 */}
+        <div className="flex justify-between items-center desktop:mt-4 tablet:mt-3 mobile:mt-2">
+          <div className="text-gray-300 desktop:text-[16px] tablet:text-[13px] mobile:text-[10px]">
             가격
           </div>
-          <div className="text-white mobile:text-[13px] tablet:text-[15px] desktop:text-[16px]">
+          <div className="text-white desktop:text-[16px] tablet:text-[14px] mobile:text-[11px]">
             {price} P
           </div>
         </div>
 
-        <div className="flex justify-between items-center mt-2">
-          <div className="text-gray-300 mobile:text-[12px] tablet:text-[14px] desktop:text-[16px]">
+        {/* 잔여/수량 정보 */}
+        <div className="flex justify-between items-center desktop:mt-2 tablet:mt-2 mobile:mt-1">
+          <div className="text-gray-300 desktop:text-[16px] tablet:text-[13px] mobile:text-[10px]">
             {quantity !== null ? "수량" : "잔여"}
           </div>
-          <div className="text-white mobile:text-[13px] tablet:text-[15px] desktop:text-[16px]">
+          <div className="text-white desktop:text-[16px] tablet:text-[14px] mobile:text-[11px]">
             {quantity !== null ? quantity : `${remaining} / ${total}`}
           </div>
         </div>
+      </div>
 
-        {/* favorite 아이콘 */}
-        <div className="mt-3 mb-2">
-          <img src={favoriteImg} alt="favorite" className="w-[72px] sm:w-[80px] object-contain" />
-        </div>
+      {/* 하단 로고: 상하 padding 6.67% (600px 기준 40px), 중앙 정렬 */}
+      <div className="flex justify-center items-center" style={{ paddingTop: "10%", paddingBottom: "10%" }}>
+        <img 
+          src={favoriteImg} 
+          alt="favorite" 
+          className="object-contain"
+          style={{ width: "20%" }}
+        />
       </div>
     </article>
   );
