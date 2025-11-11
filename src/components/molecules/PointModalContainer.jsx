@@ -37,13 +37,13 @@ const PointModalContainer = () => {
   useEffect(() => {
     if (!points) return;
 
-    if (timeLeft > 0) {
+    if (timeLeft > 0 && !isConfirmed) {
       setIsOpen(false);
       return;
     }
 
     setIsOpen(true);
-  }, [timeLeft]);
+  }, [timeLeft, isConfirmed]);
 
   // 1초씩 감소 타이머
   useEffect(() => {
@@ -76,7 +76,6 @@ const PointModalContainer = () => {
         setEarned(randomPoint);
         setIsConfirmed(true);
         queryClient.invalidateQueries({ queryKey: ["points"] });
-        setTimeLeft(3600); // 다음 쿨타임 1시간
       },
     });
   };
@@ -100,7 +99,13 @@ const PointModalContainer = () => {
 
       <PointModal
         isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
+        onClose={() => {
+          if (isConfirmed) {
+            setTimeLeft(3600); // ✅ 닫을 때 쿨타임 시작
+          }
+          setIsOpen(false);
+          setIsConfirmed(false);
+        }}
         isConfirmed={isConfirmed}
         selectedBox={selectedBox}
         setSelectedBox={setSelectedBox}
