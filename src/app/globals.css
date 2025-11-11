@@ -26,19 +26,11 @@
   --color-pink: #ff2a6a;
   --color-main: #efff04;
 
-  --background: var(--color-white);
-  --foreground: var(--color-black);
+  --background: var(--color-black);
+  --foreground: var(--color-white);
 
   --font-br: "BR B", sans-serif;
   --font-noto: "Noto Sans KR", sans-serif;
-}
-
-/* 다크 모드 지원 */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: var(--color-black);
-    --foreground: var(--color-white);
-  }
 }
 
 /* 기본 body 스타일 */
