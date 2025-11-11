@@ -207,6 +207,11 @@ const CreatePhotoPage = () => {
               <label className="text-[16px] mb-[8px]">등급</label>
               <Dropdown
                 placeholder="등급을 선택해주세요"
+                width="100%"
+                maxWidth="520px"
+                optionListWidth="100%"
+                arrowSpacing="justify-content"
+                optionListMarginTop="25px"
                 options={[
                   GRADE.COMMON,
                   GRADE.RARE,
@@ -229,6 +234,11 @@ const CreatePhotoPage = () => {
               <label className="text-[16px] mb-[8px]">장르</label>
               <Dropdown
                 placeholder="장르를 선택해주세요"
+                width="100%"
+                maxWidth="520px"
+                optionListWidth="100%"
+                arrowSpacing="justify-content"
+                optionListMarginTop="25px"
                 options={[
                   GENRE.KPOP,
                   GENRE.KBO,
