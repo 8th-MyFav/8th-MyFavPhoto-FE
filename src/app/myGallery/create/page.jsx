@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Button from "@/components/atoms/Button";
 import Dropdown from "@/components/molecules/DropDown";
@@ -22,11 +22,58 @@ const CreatePhotoPage = () => {
   const [isDragOver, setIsDragOver] = useState(false);
   const { mutate: createCards, isPending } = useCreateCard();
 
+  //  모든 입력 필드가 채워졌는지 체크
+  const isFormComplete =
+    photoName.trim() &&
+    grade &&
+    genre &&
+    price.trim() &&
+    quantity.trim() &&
+    description.trim() &&
+    photo;
+
+  //  blur 시 각 필드 유효성 검사
+  const validateField = (name, value) => {
+    let message = "";
+
+    switch (name) {
+      case "photoName":
+        if (!value.trim()) message = "포토카드 이름을 입력해주세요.";
+        break;
+      case "grade":
+        if (!value) message = "등급을 선택해주세요.";
+        break;
+      case "genre":
+        if (!value) message = "장르를 선택해주세요.";
+        break;
+      case "price":
+        if (!value.trim()) message = "가격을 입력해주세요.";
+        break;
+      case "quantity":
+        const num = Number(value);
+        if (!value.trim()) message = "총 발행량을 입력해주세요.";
+        else if (num < 1) message = "총 발행량은 1장 이상이어야 합니다.";
+        else if (num > 10) message = "총 발행량은 10장 이하로 선택 가능합니다.";
+        break;
+      case "photo":
+        if (!photo) message = "사진을 업로드해주세요.";
+        break;
+      case "description":
+        if (!value.trim()) message = "설명을 입력해주세요.";
+        break;
+      default:
+        break;
+    }
+
+    setErrors((prev) => ({ ...prev, [name]: message }));
+  };
+
+  //  사진 업로드 핸들러
   const handlePhotoUpload = (e) => {
     const file = e.target.files?.[0];
     if (file) {
       setPhoto(file);
-      if (errors.photo) setErrors((prev) => ({ ...prev, photo: "" }));
+      setErrors((prev) => ({ ...prev, photo: "" }));
     }
   };
 
@@ -46,54 +93,26 @@ const CreatePhotoPage = () => {
     const file = e.dataTransfer.files?.[0];
     if (file) {
       setPhoto(file);
-      if (errors.photo) setErrors((prev) => ({ ...prev, photo: "" }));
+      setErrors((prev) => ({ ...prev, photo: "" }));
     }
   };
 
+  //  제출
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const newErrors = {};
-    if (!photoName.trim())
-      newErrors.photoName = "포토카드 이름을 입력해주세요.";
-    if (!grade) newErrors.grade = "등급을 선택해주세요.";
-    if (!genre) newErrors.genre = "장르를 선택해주세요.";
-    if (!price.trim()) newErrors.price = "가격을 입력해주세요.";
-    if (!quantity.trim()) newErrors.quantity = "총 발행량을 입력해주세요.";
+    // blur 검증 수행
+    validateField("photoName", photoName);
+    validateField("grade", grade);
+    validateField("genre", genre);
+    validateField("price", price);
+    validateField("quantity", quantity);
+    validateField("photo", photo);
+    validateField("description", description);
 
-    const quantityNum = Number(quantity);
-    if (quantity && (!Number.isFinite(quantityNum) || quantityNum < 1)) {
-      newErrors.quantity = "총 발행량을 입력해주세요.";
-    } else if (quantityNum > 10) {
-      newErrors.quantity = "총 발행량은 10장 이하로 선택 가능합니다.";
-    }
+    // 에러가 존재하거나 값이 비었으면 중단
+    if (Object.values(errors).some((msg) => msg) || !isFormComplete) return;
 
-    setErrors(newErrors);
-
-    // ❌ 필드 누락 시 실패 페이지로 이동
-    if (Object.keys(newErrors).length > 0) {
-      router.push(
-        buildUrlWithParams(PATHNAME.CREATE_FAIL, {
-          rarity: grade,
-          title: photoName,
-          quantity,
-        })
-      );
-      return;
-    }
-
-    // ✅ 이미지 파일 → base64로 변환
-    let base64Image = null;
-    if (photo) {
-      base64Image = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(photo);
-      });
-    }
-
-    // ✅ JSON body 형태로 전송
     const cardData = {
       name: photoName,
       grade,
@@ -101,15 +120,11 @@ const CreatePhotoPage = () => {
       price: Number(price),
       total_issued: Number(quantity),
       description,
-      //image: base64Image, // 백엔드에서 이미지 URL 대신 base64 받는 경우
     };
-
-    console.log("📤 전송 데이터:", cardData);
 
     createCards(cardData, {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["myCards"] });
-
         router.push(
           buildUrlWithParams(PATHNAME.CREATE_SUCCESS, {
             rarity: grade,
@@ -118,8 +133,7 @@ const CreatePhotoPage = () => {
           })
         );
       },
-      onError: (error) => {
-        console.error("카드 생성 실패:", error);
+      onError: () => {
         router.push(
           buildUrlWithParams(PATHNAME.CREATE_FAIL, {
             rarity: grade,
@@ -163,7 +177,12 @@ const CreatePhotoPage = () => {
               <input
                 type="text"
                 value={photoName}
-                onChange={(e) => setPhotoName(e.target.value)}
+                onChange={(e) => {
+                  setPhotoName(e.target.value);
+                  if (errors.photoName)
+                    setErrors((prev) => ({ ...prev, photoName: "" }));
+                }}
+                onBlur={() => validateField("photoName", photoName)}
                 placeholder="포토카드 이름을 입력해주세요"
                 className="w-[520px] h-[60px] px-[20px] py-[18px] rounded-[2px] border border-[#DDD] bg-[#0F0F0F] text-white outline-none placeholder:text-[#A4A4A4]"
               />
@@ -175,24 +194,20 @@ const CreatePhotoPage = () => {
             {/* 등급 */}
             <div className="flex flex-col">
               <label className="text-[16px] mb-[8px]">등급</label>
-              <div className="flex w-[520px] h-[60px] items-center justify-between rounded-[2px] border border-[#DDD] bg-[#0F0F0F] px-[20px] text-white">
-                <p className="text-[#A4A4A4] text-[16px]">
-                  {grade || "등급을 선택해주세요"}
-                </p>
-                <Dropdown
-                  options={[
-                    GRADE.COMMON,
-                    GRADE.RARE,
-                    GRADE.SUPER_RARE,
-                    GRADE.LEGENDARY,
-                  ]}
-                  onChange={(opt) => {
-                    setGrade(opt);
-                    if (errors.grade)
-                      setErrors((prev) => ({ ...prev, grade: "" }));
-                  }}
-                />
-              </div>
+              <Dropdown
+                placeholder="등급을 선택해주세요"
+                options={[
+                  GRADE.COMMON,
+                  GRADE.RARE,
+                  GRADE.SUPER_RARE,
+                  GRADE.LEGENDARY,
+                ]}
+                onChange={(opt) => {
+                  setGrade(opt);
+                  if (errors.grade)
+                    setErrors((prev) => ({ ...prev, grade: "" }));
+                }}
+              />
               {errors.grade && (
                 <p className="text-red-500 text-sm mt-2">{errors.grade}</p>
               )}
@@ -201,25 +216,21 @@ const CreatePhotoPage = () => {
             {/* 장르 */}
             <div className="flex flex-col">
               <label className="text-[16px] mb-[8px]">장르</label>
-              <div className="flex w-[520px] h-[60px] items-center justify-between rounded-[2px] border border-[#DDD] bg-[#0F0F0F] px-[20px] text-white">
-                <p className="text-[#A4A4A4] text-[16px]">
-                  {genre || "장르를 선택해주세요"}
-                </p>
-                <Dropdown
-                  options={[
-                    GENRE.KPOP,
-                    GENRE.KBO,
-                    GENRE.ESPORTS,
-                    GENRE.ANIMATION,
-                    GENRE.ACTOR,
-                  ]}
-                  onChange={(opt) => {
-                    setGenre(opt);
-                    if (errors.genre)
-                      setErrors((prev) => ({ ...prev, genre: "" }));
-                  }}
-                />
-              </div>
+              <Dropdown
+                placeholder="장르를 선택해주세요"
+                options={[
+                  GENRE.KPOP,
+                  GENRE.KBO,
+                  GENRE.ESPORTS,
+                  GENRE.ANIMATION,
+                  GENRE.ACTOR,
+                ]}
+                onChange={(opt) => {
+                  setGenre(opt);
+                  if (errors.genre)
+                    setErrors((prev) => ({ ...prev, genre: "" }));
+                }}
+              />
               {errors.genre && (
                 <p className="text-red-500 text-sm mt-2">{errors.genre}</p>
               )}
@@ -231,7 +242,12 @@ const CreatePhotoPage = () => {
               <input
                 type="number"
                 value={price}
-                onChange={(e) => setPrice(e.target.value)}
+                onChange={(e) => {
+                  setPrice(e.target.value);
+                  if (errors.price)
+                    setErrors((prev) => ({ ...prev, price: "" }));
+                }}
+                onBlur={() => validateField("price", price)}
                 onWheel={(e) => e.target.blur()}
                 placeholder="가격을 입력해주세요"
                 className="w-[520px] h-[60px] px-[20px] py-[18px] rounded-[2px] border border-[#DDD] bg-[#0F0F0F] text-white outline-none placeholder:text-[#A4A4A4]"
@@ -247,7 +263,12 @@ const CreatePhotoPage = () => {
               <input
                 type="number"
                 value={quantity}
-                onChange={(e) => setQuantity(e.target.value)}
+                onChange={(e) => {
+                  setQuantity(e.target.value);
+                  if (errors.quantity)
+                    setErrors((prev) => ({ ...prev, quantity: "" }));
+                }}
+                onBlur={() => validateField("quantity", quantity)}
                 onWheel={(e) => e.target.blur()}
                 min="1"
                 max="10"
@@ -275,6 +296,7 @@ const CreatePhotoPage = () => {
                     type="file"
                     accept="image/*"
                     onChange={handlePhotoUpload}
+                    onBlur={() => validateField("photo", photo)}
                     className="hidden"
                     id="photoUpload"
                   />
@@ -312,8 +334,18 @@ const CreatePhotoPage = () => {
                 className="w-[520px] min-h-[150px] px-[20px] py-[18px] rounded-[2px] border border-[#DDD] bg-[#0F0F0F] text-white outline-none resize-none placeholder:text-[#A4A4A4]"
                 placeholder="포토카드에 대한 설명을 입력해주세요"
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                onChange={(e) => {
+                  setDescription(e.target.value);
+                  if (errors.description)
+                    setErrors((prev) => ({ ...prev, description: "" }));
+                }}
+                onBlur={() => validateField("description", description)}
               />
+              {errors.description && (
+                <p className="text-red-500 text-sm mt-2">
+                  {errors.description}
+                </p>
+              )}
             </div>
 
             {/* 생성하기 버튼 */}
@@ -322,11 +354,13 @@ const CreatePhotoPage = () => {
                 text={isPending ? "생성 중..." : "생성하기"}
                 width="520px"
                 height="60px"
-                backgroundColor={isPending ? "#5A5A5A" : "var(--color-main)"}
+                backgroundColor={
+                  isFormComplete && !isPending ? "var(--color-main)" : "#5A5A5A"
+                }
                 color="var(--color-black)"
                 fontSize="18px"
                 type="submit"
-                disabled={isPending}
+                disabled={!isFormComplete || isPending}
               />
             </div>
           </div>

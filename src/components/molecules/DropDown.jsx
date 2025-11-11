@@ -1,21 +1,30 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 const Dropdown = ({
   options = [],
-  width = "fit-content",
-  height = "24px",
-  placeholder = "선택",
-  padding = "8px",
-  maxWidth = "300px",
-  optionListMarginTop = "18px",
-  optionListPadding = "10px 12px",
+  width = "520px",
+  height = "60px",
+  placeholder = "선택해주세요",
   customStyles = {},
   onChange = () => {},
 }) => {
   const [selected, setSelected] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
+  //  외부 클릭 시 닫기
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
+    };
+    if (isOpen) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isOpen]);
+
+  //  선택 시 동작
   const handleSelect = (opt) => {
     setSelected(opt);
     setIsOpen(false);
@@ -24,83 +33,85 @@ const Dropdown = ({
 
   return (
     <div
-      className="relative rounded-[2px] cursor-pointer overflow-visible"
+      ref={dropdownRef}
+      className="relative cursor-pointer select-none"
       style={{
-        display: "inline-block",
         width,
-        maxWidth,
         height,
-        backgroundColor: "var(--black-black, #0F0F0F)",
-        padding,
+        border: "1px solid #DDD",
+        borderRadius: "2px",
+        backgroundColor: "#0F0F0F",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "0 20px",
         ...customStyles.container,
       }}
     >
-      {/* 선택 영역 */}
-      <div
-        className="flex items-center justify-between h-full"
-        onClick={() => setIsOpen(!isOpen)}
-        style={{ width: "fit-content", ...customStyles.select }}
+      {/* 선택 텍스트 */}
+      <span
+        onClick={() => setIsOpen((prev) => !prev)}
+        style={{
+          color: selected ? "#FFF" : "#DDD",
+          fontSize: "15px",
+          fontFamily: "Noto Sans KR",
+          fontWeight: selected ? 600 : 400,
+          letterSpacing: "-0.3px",
+          textAlign: "left",
+          width: "100%",
+          userSelect: "none",
+          ...customStyles.text,
+        }}
       >
-        <span
-          style={{
-            color: "var(--gray-gray200, #DDD)",
-            fontFamily: "Noto Sans KR",
-            fontSize: "15px",
-            fontWeight: 700,
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            display: "inline-block",
-            ...customStyles.text,
-          }}
-        >
-          {selected || placeholder}
-        </span>
-        <img
-          src="/images/arrowDown.svg"
-          alt="arrow"
-          style={{
-            width: "24px",
-            height: "24px",
-            transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
-            transition: "transform 0.2s ease",
-            ...customStyles.arrow,
-          }}
-        />
-      </div>
+        {selected || placeholder}
+      </span>
+
+      {/* 화살표 */}
+      <img
+        src="/images/arrowDown.svg"
+        alt="arrow"
+        onClick={() => setIsOpen((prev) => !prev)}
+        style={{
+          width: "20px",
+          height: "20px",
+          transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+          transition: "transform 0.2s ease",
+          flexShrink: 0,
+          marginLeft: "8px",
+          ...customStyles.arrow,
+        }}
+      />
 
       {/* 옵션 리스트 */}
       {isOpen && (
         <ul
           className="absolute left-0 z-10 flex flex-col"
           style={{
-            width: "fit-content",
-            maxWidth,
+            top: "100%",
+            marginTop: "8px",
+            width: "100%",
             borderRadius: "2px",
-            border: "1px solid var(--gray-gray200, #DDD)",
-            background: "var(--black-black, #0F0F0F)",
+            border: "1px solid #DDD",
+            background: "#0F0F0F",
             maxHeight: "200px",
             overflowY: "auto",
-            marginTop: optionListMarginTop,
-            padding: optionListPadding,
-            gap: "10px",
+            padding: "8px 0",
             ...customStyles.optionList,
           }}
         >
           {options.map((opt, index) => (
             <li
               key={index}
-              className="cursor-pointer hover:opacity-80"
               onClick={() => handleSelect(opt)}
+              className="hover:opacity-80"
               style={{
-                color: "var(--white-white, #FFF)",
-                fontFamily: "Noto Sans KR",
+                padding: "8px 20px",
+                color: "#FFF",
                 fontSize: "15px",
+                fontFamily: "Noto Sans KR",
                 fontWeight: 400,
+                textAlign: "left",
                 whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                display: "inline-block",
                 ...customStyles.option,
               }}
             >
@@ -114,52 +125,3 @@ const Dropdown = ({
 };
 
 export default Dropdown;
-
-export const SortDropdown = ({
-  options = ["낮은 가격순", "높은 가격순", "최신순"],
-  placeholder = "낮은 가격순",
-  customStyles = {},
-  ...rest
-}) => {
-  const mergedCustomStyles = {
-    container: {
-      border: "1px solid #FFF",
-      padding: "13px 20px",
-      ...customStyles.container,
-    },
-    select: {
-      width: "100%",
-      justifyContent: "space-between",
-      ...customStyles.select,
-    },
-    text: {
-      width: "100%",
-      ...customStyles.text,
-    },
-    arrow: {
-      marginLeft: "12px",
-      ...customStyles.arrow,
-    },
-    optionList: {
-      width: "180px",
-      padding: "10px 24px",
-      ...customStyles.optionList,
-    },
-    option: {
-      ...customStyles.option,
-    },
-  };
-
-  return (
-    <Dropdown
-      options={options}
-      placeholder={placeholder}
-      width="180px"
-      height="50px"
-      padding="13px 20px"
-      maxWidth="180px"
-      customStyles={mergedCustomStyles}
-      {...rest}
-    />
-  );
-};
