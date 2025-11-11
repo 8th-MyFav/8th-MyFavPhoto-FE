@@ -207,3 +207,65 @@ const Dropdown = ({
 };
 
 export default Dropdown;
+
+const SORT_DROPDOWN_OPTIONS = [
+  { label: "낮은 가격순", value: "낮은 가격순" },
+  { label: "높은 가격순", value: "높은 가격순" },
+  { label: "최신순", value: "최신순" },
+];
+
+export const SortDropdown = ({
+  onChange = () => {},
+  value,
+  defaultValue = SORT_DROPDOWN_OPTIONS[0].label,
+  customStyles = {},
+  ...props
+}) => {
+  return (
+    <Dropdown
+      options={SORT_DROPDOWN_OPTIONS}
+      width="180px"
+      height="40px"
+      padding="10px 16px"
+      arrowSpacing="justify-content"
+      onChange={onChange}
+      value={value}
+      defaultValue={defaultValue}
+      customStyles={{
+        container: {
+          backgroundColor: "#161616",
+          border: "1px solid #2b2b2b",
+          ...customStyles.container,
+        },
+        select: {
+          gap: "8px",
+          ...customStyles.select,
+        },
+        text: {
+          fontSize: "14px",
+          fontWeight: 500,
+          ...customStyles.text,
+        },
+        arrow: {
+          filter: "invert(1)",
+          ...customStyles.arrow,
+        },
+        optionList: {
+          background: "#161616",
+          borderColor: "#2b2b2b",
+          ...customStyles.optionList,
+        },
+        option: {
+          padding: "10px 16px",
+          width: "100%",
+          ...customStyles.option,
+        },
+        selectedOption: {
+          color: "#efff04",
+          ...customStyles.selectedOption,
+        },
+      }}
+      {...props}
+    />
+  );
+};
