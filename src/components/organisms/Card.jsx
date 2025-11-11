@@ -2,7 +2,7 @@
 
 import React from "react";
 import CardMeta from "@/components/molecules/CardMeta";
-import Tag from "@/components/atoms/tag";
+import Tag from "../atoms/Tag";
 
 const Card = ({
   topImage = "/images/sample.svg",
@@ -51,7 +51,7 @@ const Card = ({
       {/* 이미지 영역 */}
       <div className="relative w-full" style={{ height: "50%", paddingLeft: "9%", paddingRight: "9%", paddingTop: "9%" }}>
         {showTag && (
-          <div className="absolute z-10" style={{ top: "16%", left: "10%" }}>
+          <div className="absolute z-10" style={{ top: "15%", left: "10%" }}>
             <Tag type={tagType} size="small" />
           </div>
         )}
